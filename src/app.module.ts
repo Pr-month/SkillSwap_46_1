@@ -17,8 +17,9 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET, // временно берём напрямую из env
-      signOptions: { 
-        expiresIn: process.env.JWT_EXPIRES_IN || '1d' as any, // аналогично временное решение
+      signOptions: {
+         // @ts-expect-error: process.env возвращает string, а ms ожидает строгий Strin
+        expiresIn: process.env.JWT_EXPIRES_IN || '1d', // аналогично временное решение
       },
     }),
     UsersModule, 
