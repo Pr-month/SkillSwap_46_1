@@ -34,28 +34,19 @@ describe('User entity', () => {
     ).toMatchObject({ enum: UserGender });
     expect(
       columns.find(({ propertyName }) => propertyName === 'password')?.options,
-    ).toMatchObject({ select: false });
+    ).not.toHaveProperty('select');
     expect(
       columns.find(({ propertyName }) => propertyName === 'refreshToken')
         ?.options,
-    ).toMatchObject({ select: false });
+    ).not.toHaveProperty('select');
   });
 
-  it('describes skill and category relations', () => {
+  it('does not register relations before related entities are implemented', () => {
     const relations = getMetadataArgsStorage().relations.filter(
       ({ target }) => target === User,
     );
 
-    expect(
-      relations.map(({ propertyName, relationType }) => [
-        propertyName,
-        relationType,
-      ]),
-    ).toEqual([
-      ['skills', 'one-to-many'],
-      ['wantToLearn', 'many-to-many'],
-      ['favoriteSkills', 'many-to-many'],
-    ]);
+    expect(relations).toEqual([]);
   });
 
   it('does not serialize password and refresh token', () => {

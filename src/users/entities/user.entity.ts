@@ -1,13 +1,5 @@
 import { Exclude } from 'class-transformer';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  Relation,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { UserGender, UserRole } from '../enums/user.enums';
 
 @Entity('users')
@@ -22,7 +14,7 @@ export class User {
   email: string;
 
   @Exclude()
-  @Column({ type: 'varchar', length: 255, select: false })
+  @Column({ type: 'varchar', length: 255 })
   password: string;
 
   @Column({ type: 'text', nullable: true })
@@ -40,21 +32,21 @@ export class User {
   @Column({ type: 'varchar', length: 1000, nullable: true })
   avatar: string | null;
 
-  @OneToMany('Skill', 'owner')
-  skills: Relation<object>[];
+  // @OneToMany('Skill', 'owner')
+  // skills: Relation<Skill>[];
 
-  @ManyToMany('Category')
-  @JoinTable({ name: 'user_want_to_learn' })
-  wantToLearn: Relation<object>[];
+  // @ManyToMany('Category')
+  // @JoinTable({ name: 'user_want_to_learn' })
+  // wantToLearn: Relation<Category>[];
 
-  @ManyToMany('Skill')
-  @JoinTable({ name: 'user_favorite_skills' })
-  favoriteSkills: Relation<object>[];
+  // @ManyToMany('Skill')
+  // @JoinTable({ name: 'user_favorite_skills' })
+  // favoriteSkills: Relation<Skill>[];
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
   @Exclude()
-  @Column({ type: 'varchar', length: 500, nullable: true, select: false })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   refreshToken: string | null;
 }
