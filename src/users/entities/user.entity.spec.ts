@@ -1,5 +1,6 @@
 import { instanceToPlain } from 'class-transformer';
 import { getMetadataArgsStorage } from 'typeorm';
+
 import { UserGender, UserRole } from '../enums/user.enums';
 import { User } from './user.entity';
 
@@ -41,12 +42,16 @@ describe('User entity', () => {
     ).not.toHaveProperty('select');
   });
 
-  it('does not register relations before related entities are implemented', () => {
+  it('registers only the implemented favorites relation', () => {
     const relations = getMetadataArgsStorage().relations.filter(
       ({ target }) => target === User,
     );
 
-    expect(relations).toEqual([]);
+    expect(relations).toHaveLength(1);
+    expect(relations[0]).toMatchObject({
+      propertyName: 'favorites',
+      relationType: 'one-to-many',
+    });
   });
 
   it('does not serialize password and refresh token', () => {

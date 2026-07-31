@@ -1,5 +1,7 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Favorite } from '../../skills/entities/favorite.entity';
 import { UserGender, UserRole } from '../enums/user.enums';
 
 @Entity('users')
@@ -31,6 +33,9 @@ export class User {
 
   @Column({ type: 'varchar', length: 1000, nullable: true })
   avatar: string | null;
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  favorites: Favorite[];
 
   // @OneToMany('Skill', 'owner')
   // skills: Relation<Skill>[];
