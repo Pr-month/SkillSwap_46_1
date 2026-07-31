@@ -79,5 +79,11 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['src/**/entities/*.entity.ts', 'src/**/entities/*.ts'],
+      rules: {
+        '@typescript-eslint/naming-convention': 'off',
+      },
+    },
   ],
 };

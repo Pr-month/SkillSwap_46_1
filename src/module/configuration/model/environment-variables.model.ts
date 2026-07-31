@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { EnvKey } from '../const';
 import {IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, Max, Min} from "class-validator";
 import {Transform} from "class-transformer";
