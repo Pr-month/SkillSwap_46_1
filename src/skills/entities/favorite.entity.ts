@@ -15,6 +15,7 @@ import { Skill } from './skills.entity';
 @Entity('favorites')
 @Unique(['userId', 'skillId'])
 @Index(['userId'])
+@Index(['skillId'])
 export class Favorite {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
