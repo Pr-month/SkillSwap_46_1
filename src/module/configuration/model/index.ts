@@ -1,1 +1,1 @@
-export * from './environment-variables.model'
+export * from './environment-variables.model';

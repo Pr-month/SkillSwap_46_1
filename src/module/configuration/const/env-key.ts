@@ -11,5 +11,5 @@ export enum EnvKey {
   DatabasePassword = 'DB_PASSWORD',
   DatabaseName = 'DB_NAME',
   DatabaseSynchronize = 'DB_SYNCHRONIZE',
-  LoggerType = 'LOGGER_TYPE'
+  LoggerType = 'LOGGER_TYPE',
 }
