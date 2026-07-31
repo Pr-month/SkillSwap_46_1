@@ -1,25 +1,18 @@
-import { EnvKey } from '../module/configuration/const';
+import { ConfigurationService } from '../module/configuration/configuration.service';
 import { dbConfig } from './db.config';
 
 describe('dbConfig', () => {
-  const originalEnv = process.env;
+  it('creates PostgreSQL options from ConfigurationService getters', () => {
+    const configurationService = {
+      databaseHost: 'database',
+      databasePort: 5433,
+      databaseUsername: 'skill_swap',
+      databasePassword: 'secret',
+      databaseName: 'skill_swap_test',
+      databaseSynchronize: true,
+    } as ConfigurationService;
 
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it('creates PostgreSQL options from environment variables', () => {
-    process.env = {
-      ...originalEnv,
-      [EnvKey.DatabaseHost]: 'database',
-      [EnvKey.DatabasePort]: '5433',
-      [EnvKey.DatabaseUsername]: 'skill_swap',
-      [EnvKey.DatabasePassword]: 'secret',
-      [EnvKey.DatabaseName]: 'skill_swap_test',
-      [EnvKey.DatabaseSynchronize]: 'true',
-    };
-
-    expect(dbConfig()).toMatchObject({
+    expect(dbConfig(configurationService)).toMatchObject({
       type: 'postgres',
       host: 'database',
       port: 5433,
@@ -27,30 +20,6 @@ describe('dbConfig', () => {
       password: 'secret',
       database: 'skill_swap_test',
       synchronize: true,
-    });
-  });
-
-  it('uses safe local defaults when database variables are absent', () => {
-    process.env = { ...originalEnv };
-    for (const key of [
-      EnvKey.DatabaseHost,
-      EnvKey.DatabasePort,
-      EnvKey.DatabaseUsername,
-      EnvKey.DatabasePassword,
-      EnvKey.DatabaseName,
-      EnvKey.DatabaseSynchronize,
-    ]) {
-      delete process.env[key];
-    }
-
-    expect(dbConfig()).toMatchObject({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'skillswap',
-      synchronize: false,
     });
   });
 });
