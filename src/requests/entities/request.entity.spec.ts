@@ -41,7 +41,28 @@ describe('Request entity', () => {
       expect.arrayContaining([
         expect.objectContaining({
           relationType: 'many-to-one',
-          options: expect.objectContaining({ nullable: false }),
+          options: expect.objectContaining({
+            nullable: false,
+            onDelete: 'CASCADE',
+          }),
+        }),
+      ]),
+    );
+    expect(
+      relations.every(({ options }) => options.onDelete === 'CASCADE'),
+    ).toBe(true);
+  });
+
+  it('indexes requests by status', () => {
+    const indices = getMetadataArgsStorage().indices.filter(
+      ({ target }) => target === Request,
+    );
+
+    expect(indices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'IDX_requests_status',
+          columns: ['status'],
         }),
       ]),
     );

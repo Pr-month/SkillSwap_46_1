@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { User } from '../../users/entities/user.entity';
 import { RequestStatus } from '../enums/request-status.enum';
 
 @Entity('requests')
+@Index('IDX_requests_status', ['status'])
 export class Request {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -19,11 +21,11 @@ export class Request {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'senderId' })
   sender: User;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'receiverId' })
   receiver: User;
 
@@ -34,11 +36,11 @@ export class Request {
   })
   status: RequestStatus;
 
-  @ManyToOne(() => Skill, { nullable: false })
+  @ManyToOne(() => Skill, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'offeredSkillId' })
   offeredSkill: Skill;
 
-  @ManyToOne(() => Skill, { nullable: false })
+  @ManyToOne(() => Skill, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'requestedSkillId' })
   requestedSkill: Skill;
 
