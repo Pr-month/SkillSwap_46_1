@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { ConfigurationService } from './module/configuration/configuration.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
@@ -14,6 +15,11 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  
+  const configService = app.get(ConfigurationService);
+
+  const port = configService.port || 8080;
+
+  app.listen(port);
 }
 bootstrap();

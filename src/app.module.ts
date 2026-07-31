@@ -10,6 +10,9 @@ import { ConfigurationModule } from './module/configuration/configuration.module
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
 import { UsersModule } from './users/users.module';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { jwtConfigFactory } from './config/jwt.config';
+
 
 @Module({
   imports: [
@@ -18,6 +21,21 @@ import { UsersModule } from './users/users.module';
       validate,
       isGlobal: true,
     }),
+     JwtModule.registerAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => {
+        const jwtConfig = jwtConfigFactory(configService); 
+        
+        return {
+          global: true,
+          secret: jwtConfig.accessSecret,
+          signOptions: {
+            expiresIn: jwtConfig.accessExpiresIn as JwtSignOptions['expiresIn'],
+          },
+        };
+      },
+     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
