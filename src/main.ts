@@ -1,8 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { configuration, TConfig } from './app.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
+  const config = app.get<TConfig>(configuration.KEY);
+  await app.listen(config.port);
 }
 bootstrap();
