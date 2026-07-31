@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { dbConfig } from './config/db.config';
 import { ConfigurationModule } from './module/configuration/configuration.module';
+import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
 import { UsersModule } from './users/users.module';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { jwtConfigFactory } from './config/jwt.config';
-import { ConfigurationService } from './module/configuration/configuration.service';
 
 
 @Module({
@@ -33,6 +35,11 @@ import { ConfigurationService } from './module/configuration/configuration.servi
           },
         };
       },
+     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: dbConfig,
     }),
     UsersModule,
     AuthModule,
