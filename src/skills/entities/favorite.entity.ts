@@ -1,8 +1,16 @@
-import { Entity, Unique, Index, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Unique,
+  Index,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 import { User } from '../../users/entities/user.entity';
 import { Skill } from './skills.entity';
-
 
 @Entity('favorites')
 @Unique(['userId', 'skillId'])
