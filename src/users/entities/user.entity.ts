@@ -3,6 +3,8 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Favorite } from '../../skills/entities/favorite.entity';
 import { UserGender, UserRole } from '../enums/user.enums';
+import { Skill } from '../../skills/entities/skills.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity('users')
 export class User {
@@ -37,16 +39,16 @@ export class User {
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   favorites: Favorite[];
 
-  // @OneToMany('Skill', 'owner')
-  // skills: Relation<Skill>[];
+  @OneToMany('Skill', 'owner')
+  skills: Relation<Skill>[];
 
-  // @ManyToMany('Category')
-  // @JoinTable({ name: 'user_want_to_learn' })
-  // wantToLearn: Relation<Category>[];
+  @ManyToMany('Category')
+  @JoinTable({ name: 'user_want_to_learn' })
+  wantToLearn: Relation<Category>[];
 
-  // @ManyToMany('Skill')
-  // @JoinTable({ name: 'user_favorite_skills' })
-  // favoriteSkills: Relation<Skill>[];
+  @ManyToMany('Skill')
+  @JoinTable({ name: 'user_favorite_skills' })
+  favoriteSkills: Relation<Skill>[];
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
