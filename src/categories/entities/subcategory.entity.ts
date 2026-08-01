@@ -1,3 +1,4 @@
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import {
   Column,
   Entity,
@@ -7,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+
 import { Category } from './category.entity';
 
 @Entity('subcategories')
