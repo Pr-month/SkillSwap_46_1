@@ -1,11 +1,49 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { dbConfig } from './config/db.config';
+import { ConfigurationModule } from './module/configuration/configuration.module';
+import { ConfigurationService } from './module/configuration/configuration.service';
+import { validate } from './module/configuration/validation/env.validation';
+import { UsersModule } from './users/users.module';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { jwtConfigFactory } from './config/jwt.config';
+
 
 @Module({
-  imports: [UsersModule, AuthModule],
+  imports: [
+    ConfigurationModule,
+    ConfigModule.forRoot({
+      validate,
+      isGlobal: true,
+    }),
+     JwtModule.registerAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => {
+        const jwtConfig = jwtConfigFactory(configService); 
+        
+        return {
+          global: true,
+          secret: jwtConfig.accessSecret,
+          signOptions: {
+            expiresIn: jwtConfig.accessExpiresIn as JwtSignOptions['expiresIn'],
+          },
+        };
+      },
+     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: dbConfig,
+    }),
+    UsersModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
