@@ -16,7 +16,6 @@ export class Subcategory {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Index()
   @Column({ type: 'varchar', length: 255 })
   @IsString()
   @IsNotEmpty()
