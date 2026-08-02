@@ -6,38 +6,57 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { RegisterDto, RegisterResponseDto } from './dto/register.dto';
+import { BusinessException } from '../common/errors/business.exception';
+import { exceptionCodes } from '../common/errors/error-codes';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Регистрация нового пользователя' })
+  @ApiResponse({ status: 201, type: RegisterResponseDto })
+  async register(@Body() registerDto: RegisterDto) {
+    try {
+      return await this.authService.register(registerDto);
+    } catch (error) {
+      if (error instanceof BusinessException) {
+        throw error;
+      }
+      throw new BusinessException(
+        exceptionCodes.common.internal,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('check-user')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Проверка существования пользователя по email' })
+  async checkUser(@Body() loginDto: LoginDto) {
+    return this.authService.checkUser(loginDto.email);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Вход в систему' })
+  @ApiResponse({ status: 200, type: LoginResponseDto })
+  async login(@Request() req, @Body() _: LoginDto) {
+    // @Body() _: LoginDto нужно только для Swagger-документации
+    return this.authService.login(req.user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+
+  
 }
