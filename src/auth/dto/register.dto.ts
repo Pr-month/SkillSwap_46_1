@@ -1,12 +1,21 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsDateString, IsEnum, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsDateString,
+  IsEnum,
+  IsUrl,
+} from 'class-validator';
+
 import { UserProfileResponse } from '../../users/dto/create-user.dto';
 import { UserGender } from '../../users/enums/user.enums';
 
 export class RegisterDto {
   @ApiProperty({
     example: 'user@example.com',
-    description: 'Email пользователя'
+    description: 'Email пользователя',
   })
   @IsEmail()
   email: string;
@@ -14,7 +23,7 @@ export class RegisterDto {
   @ApiProperty({
     example: 'password123',
     minLength: 6,
-    description: 'Пароль'
+    description: 'Пароль',
   })
   @IsString()
   @MinLength(6)
@@ -22,14 +31,14 @@ export class RegisterDto {
 
   @ApiProperty({
     example: 'Иван Петров',
-    description: 'Полное имя'
+    description: 'Полное имя',
   })
   @IsString()
   name: string;
 
   @ApiProperty({
     example: '1990-01-01',
-    description: 'Дата рождения в формате YYYY-MM-DD'
+    description: 'Дата рождения в формате YYYY-MM-DD',
   })
   @IsDateString()
   birthdate: string;
@@ -37,7 +46,7 @@ export class RegisterDto {
   @ApiPropertyOptional({
     enum: UserGender,
     default: UserGender.OTHER,
-    description: 'Пол'
+    description: 'Пол',
   })
   @IsEnum(UserGender)
   @IsOptional()
@@ -45,19 +54,22 @@ export class RegisterDto {
 
   @ApiProperty({
     example: 'Москва',
-    description: 'Город'
+    description: 'Город',
   })
   @IsString()
   city: string;
 
   @ApiProperty({
     example: 'https://example.com/avatar.jpg',
-    description: 'URL аватара'
+    description: 'URL аватара',
   })
   @IsUrl()
   avatar: string;
 
-  @ApiPropertyOptional({ example: 'О себе...', description: 'Краткая информация' })
+  @ApiPropertyOptional({
+    example: 'О себе...',
+    description: 'Краткая информация',
+  })
   @IsString()
   @IsOptional()
   about?: string;
@@ -67,19 +79,19 @@ export class RegisterDto {
 export class RegisterResponseDto {
   @ApiProperty({
     example: true,
-    description: 'Статус ответа'
+    description: 'Статус ответа',
   })
   status: boolean;
 
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-    description: 'JWT токен доступа'
+    description: 'JWT токен доступа',
   })
   access_token: string;
 
   @ApiProperty({
     description: 'Профиль пользователя',
-    type: UserProfileResponse
+    type: UserProfileResponse,
   })
   user: UserProfileResponse;
 }

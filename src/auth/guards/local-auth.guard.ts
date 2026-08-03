@@ -1,19 +1,29 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext, status?: any) {
+  handleRequest<TUser = unknown>(
+    err: Error | null,
+    user: TUser | false,
+    _info: unknown, // Добавлено нижнее подчеркивание, так как не используется
+    _context: ExecutionContext,
+    _status?: unknown,
+  ): TUser {
     if (err || !user) {
-      console.log('Local Auth Guard - Error:', err);
-      console.log('Local Auth Guard - Info:', info);
-      
-      throw err || new UnauthorizedException({
-        code: 'app:unauthorized',
-        message: 'Неверный email или пароль',
-        timestamp: new Date().toISOString()
-      });
+      throw (
+        err ||
+        new UnauthorizedException({
+          code: 'app:unauthorized',
+          message: 'Неверный email или пароль',
+          timestamp: new Date().toISOString(),
+        })
+      );
     }
-    return user;
+    return user as TUser;
   }
 }

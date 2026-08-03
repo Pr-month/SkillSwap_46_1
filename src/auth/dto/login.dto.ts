@@ -1,5 +1,6 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength } from 'class-validator';
+
 import { UserProfileResponse } from '../../users/dto/create-user.dto';
 
 export class LoginDto {
@@ -24,19 +25,19 @@ export class LoginDto {
 export class LoginResponseDto {
   @ApiProperty({
     example: true,
-    description: 'Статус ответа'
+    description: 'Статус ответа',
   })
   status: boolean;
 
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-    description: 'JWT токен доступа'
+    description: 'JWT токен доступа',
   })
   access_token: string;
 
   @ApiProperty({
     description: 'Профиль пользователя',
-    type: UserProfileResponse
+    type: UserProfileResponse,
   })
   user: UserProfileResponse;
 }

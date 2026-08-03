@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { UserGender } from '../users/enums/user.enums';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: AuthService;
 
   const mockAuthService = {
     register: jest.fn(),
@@ -33,7 +33,6 @@ describe('AuthController', () => {
       .compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService);
 
     jest.clearAllMocks();
   });
@@ -77,14 +76,18 @@ describe('AuthController', () => {
       );
       mockAuthService.register.mockRejectedValue(error);
 
-      await expect(controller.register(registerDto)).rejects.toThrow(BusinessException);
+      await expect(controller.register(registerDto)).rejects.toThrow(
+        BusinessException,
+      );
       await expect(controller.register(registerDto)).rejects.toThrow(error);
     });
 
     it('should wrap unknown error in BusinessException', async () => {
       mockAuthService.register.mockRejectedValue(new Error('DB error'));
 
-      await expect(controller.register(registerDto)).rejects.toThrow(BusinessException);
+      await expect(controller.register(registerDto)).rejects.toThrow(
+        BusinessException,
+      );
     });
   });
 
@@ -100,7 +103,9 @@ describe('AuthController', () => {
       const result = await controller.checkUser(loginDto);
 
       expect(result).toEqual({ exists: true, email: 'test@example.com' });
-      expect(mockAuthService.checkUser).toHaveBeenCalledWith('test@example.com');
+      expect(mockAuthService.checkUser).toHaveBeenCalledWith(
+        'test@example.com',
+      );
     });
 
     it('should return exists: false if user does not exist', async () => {
@@ -131,7 +136,10 @@ describe('AuthController', () => {
       mockAuthService.login.mockResolvedValue(loginResponse);
 
       const mockRequest = { user: mockUser };
-      const result = await controller.login(mockRequest as any, {} as any);
+      const result = await controller.login(
+        mockRequest as unknown as Request,
+        {} as LoginDto,
+      );
 
       expect(result).toEqual(loginResponse);
       expect(mockAuthService.login).toHaveBeenCalledWith(mockUser);

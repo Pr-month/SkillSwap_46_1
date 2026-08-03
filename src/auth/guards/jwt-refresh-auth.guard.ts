@@ -1,14 +1,27 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest<TUser = unknown>(
+    err: Error | null,
+    user: TUser | false,
+    info: unknown,
+    _context: ExecutionContext,
+    _status?: unknown,
+  ): TUser {
     if (err || !user) {
-      const errorMessage = info?.message || 'Недействительный или отсутствующий токен обновления';
+      const errorMessage =
+        (info && typeof info === 'object' && 'message' in info
+          ? (info as { message: string }).message
+          : undefined) || 'Недействительный или отсутствующий токен обновления';
+
       throw new UnauthorizedException(errorMessage);
     }
-    
-    return user;
+    return user as TUser;
   }
 }

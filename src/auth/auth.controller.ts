@@ -7,13 +7,14 @@ import {
   Patch,
   Post,
   Request,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
-
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { AuthService } from './auth.service';
+import { RequestWithUser } from './auth.types';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto, RegisterResponseDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
@@ -54,11 +55,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход в систему' })
   @ApiResponse({ status: 200, type: LoginResponseDto })
-  async login(@Request() req, @Body() _: LoginDto) {
+  async login(@Request() req: RequestWithUser, @Body() _loginDto: LoginDto) {
+    void _loginDto;
     return this.authService.login(req.user);
   }
 
-   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
   async getProfile(@Request() req) {
@@ -97,5 +99,5 @@ export class AuthController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  } 
+  }
 }

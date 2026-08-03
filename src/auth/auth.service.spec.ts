@@ -1,20 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 
-import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { ConfigurationService } from '../module/configuration/configuration.service';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
+import { ConfigurationService } from '../module/configuration/configuration.service';
 import { UserGender, UserRole } from '../users/enums/user.enums';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
-  let configService: ConfigurationService;
 
   const mockUsersService = {
     findByEmail: jest.fn(),
@@ -52,9 +49,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    usersService = module.get<UsersService>(UsersService);
-    jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigurationService>(ConfigurationService);
 
     jest.clearAllMocks();
   });
@@ -104,7 +98,9 @@ describe('AuthService', () => {
       expect(result.refresh_token).toBe('refresh-token');
       expect(result.user.email).toBe('test@example.com');
 
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
       expect(mockUsersService.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -114,14 +110,19 @@ describe('AuthService', () => {
           role: UserRole.USER,
         }),
       );
-      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith('user-id', 'refresh-token');
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'refresh-token',
+      );
     });
 
     it('should throw BusinessException if user already exists', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      await expect(service.register(registerDto)).rejects.toThrow(BusinessException);
-      
+      await expect(service.register(registerDto)).rejects.toThrow(
+        BusinessException,
+      );
+
       await expect(service.register(registerDto)).rejects.toThrow(
         new BusinessException(exceptionCodes.users.alreadyExists, 409),
       );
@@ -140,7 +141,9 @@ describe('AuthService', () => {
         exists: true,
         email: 'test@example.com',
       });
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
     });
 
     it('should return exists: false if user does not exist', async () => {
@@ -168,7 +171,10 @@ describe('AuthService', () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
-      const result = await service.validateUser('test@example.com', 'password123');
+      const result = await service.validateUser(
+        'test@example.com',
+        'password123',
+      );
 
       expect(result).toBeDefined();
       expect(result.id).toBe('user-id');
@@ -180,7 +186,10 @@ describe('AuthService', () => {
     it('should return null if user does not exist', async () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
 
-      const result = await service.validateUser('unknown@example.com', 'password123');
+      const result = await service.validateUser(
+        'unknown@example.com',
+        'password123',
+      );
 
       expect(result).toBeNull();
     });
@@ -189,7 +198,10 @@ describe('AuthService', () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
-      const result = await service.validateUser('test@example.com', 'wrong-password');
+      const result = await service.validateUser(
+        'test@example.com',
+        'wrong-password',
+      );
 
       expect(result).toBeNull();
     });
@@ -217,7 +229,10 @@ describe('AuthService', () => {
       expect(result.user).toEqual(mockUser);
 
       expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
-      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith('user-id', 'refresh-token');
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'refresh-token',
+      );
     });
   });
 
@@ -252,8 +267,10 @@ describe('AuthService', () => {
     it('should throw BusinessException if user not found', async () => {
       mockUsersService.findById.mockResolvedValue(null);
 
-      await expect(service.getProfile('invalid-id')).rejects.toThrow(BusinessException);
-      
+      await expect(service.getProfile('invalid-id')).rejects.toThrow(
+        BusinessException,
+      );
+
       await expect(service.getProfile('invalid-id')).rejects.toThrow(
         new BusinessException(exceptionCodes.users.notFound, 404),
       );
@@ -272,7 +289,9 @@ describe('AuthService', () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-new-password' as never);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValue('hashed-new-password' as never);
       mockUsersService.updatePassword.mockResolvedValue(undefined);
     });
 
@@ -285,17 +304,22 @@ describe('AuthService', () => {
       expect(result.message).toBe('Пароль успешно обновлен');
 
       expect(bcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
-      expect(mockUsersService.updatePassword).toHaveBeenCalledWith('user-id', 'hashed-new-password');
+      expect(mockUsersService.updatePassword).toHaveBeenCalledWith(
+        'user-id',
+        'hashed-new-password',
+      );
     });
 
     it('should throw BusinessException if user not found', async () => {
       mockUsersService.findById.mockResolvedValue(null);
 
-      await expect(service.updatePassword('invalid-id', updatePasswordDto)).rejects.toThrow(
-        BusinessException,
-      );
-      
-      await expect(service.updatePassword('invalid-id', updatePasswordDto)).rejects.toThrow(
+      await expect(
+        service.updatePassword('invalid-id', updatePasswordDto),
+      ).rejects.toThrow(BusinessException);
+
+      await expect(
+        service.updatePassword('invalid-id', updatePasswordDto),
+      ).rejects.toThrow(
         new BusinessException(exceptionCodes.users.notFound, 404),
       );
 
@@ -325,22 +349,32 @@ describe('AuthService', () => {
       expect(result.access_token).toBe('new-access-token');
       expect(result.refresh_token).toBe('new-refresh-token');
 
-      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith('user-id', 'new-refresh-token');
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'new-refresh-token',
+      );
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
       mockUsersService.findById.mockResolvedValue(null);
 
-      await expect(service.refreshTokens('invalid-id')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens('invalid-id')).rejects.toThrow(
+        UnauthorizedException,
+      );
       await expect(service.refreshTokens('invalid-id')).rejects.toThrow(
         'Недействительный токен обновления',
       );
     });
 
     it('should throw UnauthorizedException if user has no refresh token', async () => {
-      mockUsersService.findById.mockResolvedValue({ ...mockUser, refreshToken: null });
+      mockUsersService.findById.mockResolvedValue({
+        ...mockUser,
+        refreshToken: null,
+      });
 
-      await expect(service.refreshTokens('user-id')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens('user-id')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

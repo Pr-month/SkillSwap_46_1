@@ -4,11 +4,12 @@ import * as bcrypt from 'bcrypt';
 
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
+import { ConfigurationService } from '../module/configuration/configuration.service';
+import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ConfigurationService } from '../module/configuration/configuration.service';
 
 @Injectable()
 export class AuthService {
@@ -18,19 +19,15 @@ export class AuthService {
     private readonly configService: ConfigurationService,
   ) {}
 
-
   async register(registerDto: RegisterDto) {
     const existingUser = await this.usersService.findByEmail(registerDto.email);
     if (existingUser) {
-      throw new BusinessException(
-        exceptionCodes.users.alreadyExists,
-        409,
-      );
+      throw new BusinessException(exceptionCodes.users.alreadyExists, 409);
     }
 
-     const hashedPassword = await bcrypt.hash(
-      registerDto.password, 
-      this.configService.hashSalt 
+    const hashedPassword = await bcrypt.hash(
+      registerDto.password,
+      this.configService.hashSalt,
     );
 
     const newUser = await this.usersService.create({
@@ -48,7 +45,6 @@ export class AuthService {
 
     await this.usersService.updateRefreshToken(newUser.id, tokens.refreshToken);
 
-
     return {
       status: true,
       access_token: tokens.accessToken,
@@ -65,50 +61,51 @@ export class AuthService {
     };
   }
 
-  
   async checkUser(email: string) {
     const user = await this.usersService.findByEmail(email);
     return {
       exists: !!user,
-      email: email,
+      email,
     };
   }
 
-
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Omit<User, 'password' | 'refreshToken'> | null> {
     const user = await this.usersService.findByEmail(email);
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, refreshToken, ...result } = user;
+      const {
+        password: _password,
+        refreshToken: _refreshToken,
+        ...result
+      } = user;
+      void _password;
+      void _refreshToken;
       return result;
     }
 
     return null;
   }
 
-
-  async login(user: any) {
+  async login(user: Omit<User, 'password' | 'refreshToken'>) {
     const tokens = await this.generateTokens(user.id, user.email);
-
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
       status: true,
       access_token: tokens.accessToken,
       refresh_token: tokens.refreshToken,
-      user: user,
+      user,
     };
   }
 
-
   async getProfile(userId: string) {
     const user = await this.usersService.findById(userId);
-    
+
     if (!user) {
-      throw new BusinessException(
-        exceptionCodes.users.notFound,
-        404,
-      );
+      throw new BusinessException(exceptionCodes.users.notFound, 404);
     }
 
     return {
@@ -128,20 +125,16 @@ export class AuthService {
     };
   }
 
-
   async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
     const user = await this.usersService.findById(userId);
-    
+
     if (!user) {
-      throw new BusinessException(
-        exceptionCodes.users.notFound,
-        404,
-      );
+      throw new BusinessException(exceptionCodes.users.notFound, 404);
     }
 
     const hashedPassword = await bcrypt.hash(
-      updatePasswordDto.newPassword, 
-      this.configService.hashSalt
+      updatePasswordDto.newPassword,
+      this.configService.hashSalt,
     );
 
     await this.usersService.updatePassword(userId, hashedPassword);
@@ -152,10 +145,9 @@ export class AuthService {
     };
   }
 
- 
   async refreshTokens(userId: string) {
     const user = await this.usersService.findById(userId);
-    
+
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Недействительный токен обновления');
     }
@@ -171,7 +163,6 @@ export class AuthService {
     };
   }
 
-  
   private async generateTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
