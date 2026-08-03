@@ -9,7 +9,7 @@ import {
   IsUrl,
 } from 'class-validator';
 
-import { UserProfileResponse } from '../../users/dto/create-user.dto';
+import { UserProfileResponse } from '../../users/dto/user-profile.response';
 import { UserGender } from '../../users/enums/user.enums';
 
 export class RegisterDto {

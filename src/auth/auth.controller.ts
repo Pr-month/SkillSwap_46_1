@@ -7,16 +7,16 @@ import {
   Patch,
   Post,
   Request,
+  Response,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
+import { Response as ExpressResponse } from 'express';
 
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
 import { AuthService } from './auth.service';
 import { RequestWithUser } from './auth.types';
-import { LoginDto, LoginResponseDto } from './dto/login.dto';
-import { RegisterDto, RegisterResponseDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -28,53 +28,42 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Регистрация нового пользователя' })
-  @ApiResponse({ status: 201, type: RegisterResponseDto })
-  async register(@Body() registerDto: RegisterDto) {
-    try {
-      return await this.authService.register(registerDto);
-    } catch (error) {
-      if (error instanceof BusinessException) {
-        throw error;
-      }
-      throw new BusinessException(
-        exceptionCodes.common.internal,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Post('check-user')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Проверка существования пользователя по email' })
-  async checkUser(@Body() loginDto: LoginDto) {
-    return this.authService.checkUser(loginDto.email);
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    return this.authService.register(registerDto, res);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход в систему' })
-  @ApiResponse({ status: 200, type: LoginResponseDto })
-  async login(@Request() req: RequestWithUser, @Body() _loginDto: LoginDto) {
+  async login(
+    @Request() req: RequestWithUser,
+    @Response({ passthrough: true }) res: ExpressResponse,
+    @Body() _loginDto: LoginDto,
+  ) {
     void _loginDto;
-    return this.authService.login(req.user);
+    return this.authService.login(req.user, res);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Выход из системы (очистка токенов)' })
+  async logout(
+    @Request() req: RequestWithUser,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    return this.authService.logout(req.user.id, res);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
-  async getProfile(@Request() req) {
-    try {
-      return await this.authService.getProfile(req.user.id);
-    } catch (error) {
-      if (error instanceof BusinessException) {
-        throw error;
-      }
-      throw new BusinessException(
-        exceptionCodes.common.internal,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  async getProfile(@Request() req: RequestWithUser) {
+    return this.authService.getProfile(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -82,22 +71,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Смена пароля' })
   async updatePassword(
-    @Request() req,
+    @Request() req: RequestWithUser,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    try {
-      return await this.authService.updatePassword(
-        req.user.id,
-        updatePasswordDto,
-      );
-    } catch (error) {
-      if (error instanceof BusinessException) {
-        throw error;
-      }
-      throw new BusinessException(
-        exceptionCodes.common.internal,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return this.authService.updatePassword(req.user.id, updatePasswordDto);
   }
 }
