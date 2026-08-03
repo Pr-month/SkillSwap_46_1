@@ -1,4 +1,3 @@
-import { IsNotEmpty, IsString } from 'class-validator';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Subcategory } from './subcategory.entity';
@@ -9,8 +8,6 @@ export class Category {
   id!: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
-  @IsString()
-  @IsNotEmpty()
   name!: string;
 
   @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
