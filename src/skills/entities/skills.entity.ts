@@ -1,10 +1,27 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  IsArray,
+  isArray,
+  IsOptional,
+  isString,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-import { Favorite } from './favorite.entity';
-import { User } from '../../users/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
-import { IsArray, isArray, IsOptional, isString, IsString, IsUUID } from 'class-validator';
 import { Subcategory } from '../../categories/entities/subcategory.entity';
+import { User } from '../../users/entities/user.entity';
+import { Favorite } from './favorite.entity';
 
 @Entity('skill')
 export class Skill {
@@ -12,16 +29,16 @@ export class Skill {
   id: string;
 
   @IsString()
-  @Column({type: 'varchar', length: 100, nullable: false})
+  @Column({ type: 'varchar', length: 100, nullable: false })
   title: string;
-  
+
   @IsString()
-  @Column({type: 'varchar', length: 1000, nullable: false})
+  @Column({ type: 'varchar', length: 1000, nullable: false })
   description: string;
-  
+
   @IsArray()
   @IsOptional()
-  @Column({type: 'text', array: true, nullable: true})
+  @Column({ type: 'text', array: true, nullable: true })
   images: string[];
 
   @Index()
@@ -36,7 +53,6 @@ export class Skill {
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  
   @Index()
   @Column({ name: 'subcategory_id', type: 'uuid', nullable: true })
   @IsUUID()
@@ -54,13 +70,13 @@ export class Skill {
   ownerId: string;
 
   @ManyToOne(() => User, (user) => user.skills)
-  @JoinColumn({name: 'owner_id'})
+  @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @CreateDateColumn({name: 'created_at'})
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
-  
-  @UpdateDateColumn({name: 'updated_at'})
+
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @OneToMany(() => Favorite, (favorite) => favorite.skill)

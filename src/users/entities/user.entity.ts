@@ -1,10 +1,10 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Favorite } from '../../skills/entities/favorite.entity';
-import { UserGender, UserRole } from '../enums/user.enums';
-import { Skill } from '../../skills/entities/skills.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { Favorite } from '../../skills/entities/favorite.entity';
+import { Skill } from '../../skills/entities/skills.entity';
+import { UserGender, UserRole } from '../enums/user.enums';
 
 @Entity('users')
 export class User {

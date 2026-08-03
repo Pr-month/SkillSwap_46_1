@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+
 import { SubcategoriesService } from './subcategories.service';
 
 @Controller('subcategories')
