@@ -1,43 +1,103 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
+  HttpCode,
+  HttpStatus,
   Patch,
-  Param,
-  Delete,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+import { BusinessException } from '../common/errors/business.exception';
+import { exceptionCodes } from '../common/errors/error-codes';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RequestWithUser } from './auth.types';
+import { LoginDto, LoginResponseDto } from './dto/login.dto';
+import { RegisterDto, RegisterResponseDto } from './dto/register.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Регистрация нового пользователя' })
+  @ApiResponse({ status: 201, type: RegisterResponseDto })
+  async register(@Body() registerDto: RegisterDto) {
+    try {
+      return await this.authService.register(registerDto);
+    } catch (error) {
+      if (error instanceof BusinessException) {
+        throw error;
+      }
+      throw new BusinessException(
+        exceptionCodes.common.internal,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('check-user')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Проверка существования пользователя по email' })
+  async checkUser(@Body() loginDto: LoginDto) {
+    return this.authService.checkUser(loginDto.email);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Вход в систему' })
+  @ApiResponse({ status: 200, type: LoginResponseDto })
+  async login(@Request() req: RequestWithUser, @Body() _loginDto: LoginDto) {
+    void _loginDto;
+    return this.authService.login(req.user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
+  async getProfile(@Request() req) {
+    try {
+      return await this.authService.getProfile(req.user.id);
+    } catch (error) {
+      if (error instanceof BusinessException) {
+        throw error;
+      }
+      throw new BusinessException(
+        exceptionCodes.common.internal,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Patch('password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Смена пароля' })
+  async updatePassword(
+    @Request() req,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    try {
+      return await this.authService.updatePassword(
+        req.user.id,
+        updatePasswordDto,
+      );
+    } catch (error) {
+      if (error instanceof BusinessException) {
+        throw error;
+      }
+      throw new BusinessException(
+        exceptionCodes.common.internal,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

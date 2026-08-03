@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ConfigurationService } from './module/configuration/configuration.service';
@@ -20,7 +21,7 @@ async function bootstrap() {
     }),
   );
 
-    const swaggerConfig = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('SkillSwap API')
     .setDescription('API для платформы обмена навыками SkillSwap')
     .setVersion('1.0')
@@ -36,6 +37,5 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`Application is running on: ${await app.getUrl()}`);
-
 }
 bootstrap();
