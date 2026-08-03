@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
+import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
 import { ConfigurationModule } from './module/configuration/configuration.module';
@@ -42,6 +44,8 @@ import { UsersModule } from './users/users.module';
     }),
     UsersModule,
     AuthModule,
+    CategoriesModule,
+    SubcategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
