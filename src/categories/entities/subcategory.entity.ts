@@ -18,13 +18,10 @@ export class Subcategory {
   id!: string;
 
   @Column({ type: 'varchar', length: 255 })
-  @IsString()
-  @IsNotEmpty()
   name!: string;
 
   @Index()
   @Column({ name: 'category_id', type: 'uuid' })
-  @IsUUID()
   categoryId!: string;
 
   @ManyToOne(() => Category, (category) => category.subcategories, {
