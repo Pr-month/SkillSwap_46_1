@@ -25,6 +25,7 @@ async function bootstrap() {
     .setTitle('SkillSwap API')
     .setDescription('API для платформы обмена навыками SkillSwap')
     .setVersion('1.0')
+    .addCookieAuth('accessToken', undefined, 'accessToken')
     .build();
 
   const documentFactory = () =>
