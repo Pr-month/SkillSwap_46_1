@@ -10,6 +10,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
+import { FavoritesModule } from './favorites/favorites.module';
 import { ConfigurationModule } from './module/configuration/configuration.module';
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
@@ -46,6 +47,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     CategoriesModule,
     SubcategoriesModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
