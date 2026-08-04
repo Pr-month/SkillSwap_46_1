@@ -13,6 +13,7 @@ import { jwtConfigFactory } from './config/jwt.config';
 import { ConfigurationModule } from './module/configuration/configuration.module';
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
+import { RequestsModule } from './requests/requests.module';
 import { SkillsModule } from './skills/skills.module';
 import { UsersModule } from './users/users.module';
 
@@ -48,6 +49,7 @@ import { UsersModule } from './users/users.module';
     CategoriesModule,
     SubcategoriesModule,
     SkillsModule,
+    RequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -14,6 +14,8 @@ import { RequestStatus } from '../enums/request-status.enum';
 
 @Entity('requests')
 @Index('IDX_requests_status', ['status'])
+@Index('IDX_requests_sender_status', ['sender', 'status'])
+@Index('IDX_requests_receiver_status', ['receiver', 'status'])
 export class Request {
   @PrimaryGeneratedColumn('uuid')
   id: string;
