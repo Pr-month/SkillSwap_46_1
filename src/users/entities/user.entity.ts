@@ -47,14 +47,14 @@ export class User {
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   favorites: Favorite[];
 
-  @OneToMany('Skill', 'owner')
+  @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Relation<Skill>[];
 
-  @ManyToMany('Category')
+  @ManyToMany(() => Category)
   @JoinTable({ name: 'user_want_to_learn' })
   wantToLearn: Relation<Category>[];
 
-  @ManyToMany('Skill')
+  @ManyToMany(() => Skill)
   @JoinTable({ name: 'user_favorite_skills' })
   favoriteSkills: Relation<Skill>[];
 

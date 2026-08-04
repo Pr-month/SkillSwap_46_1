@@ -32,7 +32,7 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
-    return this.authService.register(registerDto, res);
+    return await this.authService.register(registerDto, res);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -44,8 +44,7 @@ export class AuthController {
     @Response({ passthrough: true }) res: ExpressResponse,
     @Body() _loginDto: LoginDto,
   ) {
-    void _loginDto;
-    return this.authService.login(req.user, res);
+    return await this.authService.login(req.user, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -56,14 +55,14 @@ export class AuthController {
     @Request() req: RequestWithUser,
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
-    return this.authService.logout(req.user.id, res);
+    return await this.authService.logout(req.user.id, res);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
   async getProfile(@Request() req: RequestWithUser) {
-    return this.authService.getProfile(req.user.id);
+    return await this.authService.getProfile(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -74,6 +73,9 @@ export class AuthController {
     @Request() req: RequestWithUser,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.authService.updatePassword(req.user.id, updatePasswordDto);
+    return await this.authService.updatePassword(
+      req.user.id,
+      updatePasswordDto,
+    );
   }
 }

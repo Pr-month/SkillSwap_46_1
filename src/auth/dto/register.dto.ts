@@ -7,6 +7,8 @@ import {
   IsDateString,
   IsEnum,
   IsUrl,
+  IsArray,
+  IsUUID,
 } from 'class-validator';
 
 import { UserProfileResponse } from '../../users/dto/user-profile.response';
@@ -50,7 +52,7 @@ export class RegisterDto {
   })
   @IsEnum(UserGender)
   @IsOptional()
-  gender?: UserGender = UserGender.OTHER;
+  gender: UserGender = UserGender.OTHER;
 
   @ApiProperty({
     example: 'Москва',
@@ -73,6 +75,24 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   about?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID категорий/навыков, которые пользователь хочет выучить',
+    type: [String],
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+  })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  wantToLearn: string[];
+
+  @ApiPropertyOptional({
+    description: 'ID навыков, которыми пользователь может научить',
+    type: [String],
+    example: ['550e8400-e29b-41d4-a716-446655440001'],
+  })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  skills: string[];
 }
 
 // Ответ на регистрацию

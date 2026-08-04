@@ -4,8 +4,12 @@ import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import ms, { StringValue } from 'ms';
 
+import { Category } from '../categories/entities/category.entity';
 import { ConfigurationService } from '../module/configuration/configuration.service';
+import { Skill } from '../skills/entities/skills.entity';
+import { UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
+import { CreateUserData } from '../users/users.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -23,7 +27,25 @@ export class AuthService {
       this.configService.hashSalt,
     );
 
-    const user = await this.usersService.create(registerDto, hashedPassword);
+    const wantToLearn = registerDto.wantToLearn
+      ? registerDto.wantToLearn.map((id) => ({ id }) as Category)
+      : [];
+
+    const skills = registerDto.skills
+      ? registerDto.skills.map((id) => ({ id }) as Skill)
+      : [];
+
+    const createUserData: CreateUserData = {
+      ...registerDto,
+      password: hashedPassword,
+      birthdate: new Date(registerDto.birthdate),
+      role: UserRole.USER,
+      about: registerDto.about ?? null,
+      wantToLearn,
+      skills,
+    };
+
+    const user = await this.usersService.create(createUserData);
 
     const tokens = await this.generateTokens(user.id, user.email);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);

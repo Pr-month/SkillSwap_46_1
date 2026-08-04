@@ -6,10 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { RegisterDto } from '../auth/dto/register.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { UserRole } from './enums/user.enums';
+import { CreateUserData, UpdateUserData } from './users.types';
 
 @Injectable()
 export class UsersService {
@@ -36,33 +34,20 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async create(
-    registerDto: RegisterDto,
-    hashedPassword: string,
-  ): Promise<User> {
-    const existingUser = await this.findByEmail(registerDto.email);
+  async create(data: CreateUserData): Promise<User> {
+    const existingUser = await this.findByEmail(data.email);
     if (existingUser) {
       throw new ConflictException('Пользователь с таким email уже существует');
     }
 
-    const user = this.userRepository.create({
-      email: registerDto.email,
-      password: hashedPassword,
-      name: registerDto.name,
-      birthdate: new Date(registerDto.birthdate),
-      gender: registerDto.gender,
-      city: registerDto.city,
-      avatar: registerDto.avatar,
-      role: UserRole.USER,
-    });
-
+    const user = this.userRepository.create(data);
     return this.userRepository.save(user);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, data: UpdateUserData): Promise<User> {
     await this.findById(id);
 
-    await this.userRepository.update(id, updateUserDto as Partial<User>);
+    await this.userRepository.update(id, data);
 
     return this.findById(id);
   }
