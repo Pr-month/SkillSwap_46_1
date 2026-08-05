@@ -51,7 +51,6 @@ export class RegisterDto {
     description: 'Пол',
   })
   @IsEnum(UserGender)
-  @IsOptional()
   gender: UserGender = UserGender.OTHER;
 
   @ApiProperty({

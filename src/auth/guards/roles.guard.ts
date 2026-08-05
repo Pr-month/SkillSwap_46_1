@@ -2,13 +2,15 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { ROLES_KEY } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user.enums';
 import { UsersService } from '../../users/users.service';
+import { BusinessException } from 'src/common/errors/business.exception';
+import { exceptionCodes } from 'src/common/errors/error-codes';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -28,7 +30,10 @@ export class RolesGuard implements CanActivate {
     const fullUser = await this.usersService.findById(user.id);
 
     if (!requiredRoles.includes(fullUser.role as UserRole)) {
-      throw new ForbiddenException('Доступ запрещен: недостаточно прав');
+      throw new BusinessException(
+        exceptionCodes.common.forbidden,
+        HttpStatus.FORBIDDEN,
+      );
     }
     return true;
   }

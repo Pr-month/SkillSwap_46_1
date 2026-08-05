@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
@@ -12,6 +12,8 @@ import { UsersService } from '../users/users.service';
 import { CreateUserData } from '../users/users.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { BusinessException } from '../common/errors/business.exception';
+import { exceptionCodes } from '../common/errors/error-codes';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,13 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto, res: Response) {
+    const existingUser = await this.usersService.findByEmail(registerDto.email);
+    if (existingUser) {
+      throw new BusinessException(
+        exceptionCodes.users.alreadyExists,
+        HttpStatus.CONFLICT,
+      );
+    }
     const hashedPassword = await bcrypt.hash(
       registerDto.password,
       this.configService.hashSalt,
