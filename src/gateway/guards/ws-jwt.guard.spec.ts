@@ -1,7 +1,16 @@
 import { ExecutionContext } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {
+  JsonWebTokenError,
+  JwtService,
+  NotBeforeError,
+  TokenExpiredError,
+} from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 
+import {
+  exceptionCodes,
+  exceptionMessages,
+} from '../../common/errors/error-codes';
 import { ConfigurationService } from '../../module/configuration/configuration.service';
 import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 import { WsJwtGuard } from './ws-jwt.guard';
@@ -56,18 +65,26 @@ describe('WsJwtGuard', () => {
   it('отклоняет подключение без cookie', async () => {
     const client = createClient();
 
-    await expect(guard.authenticate(client)).rejects.toThrow(
-      'Необходима авторизация',
-    );
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.common.unauthorized,
+        message: exceptionMessages[exceptionCodes.common.unauthorized],
+      },
+    });
+
     expect(verifyAsyncMock).not.toHaveBeenCalled();
   });
 
   it('отклоняет подключение без accessToken в cookie', async () => {
     const client = createClient('refreshToken=refresh-token');
 
-    await expect(guard.authenticate(client)).rejects.toThrow(
-      'Необходима авторизация',
-    );
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.common.unauthorized,
+        message: exceptionMessages[exceptionCodes.common.unauthorized],
+      },
+    });
+
     expect(verifyAsyncMock).not.toHaveBeenCalled();
   });
 
@@ -80,19 +97,70 @@ describe('WsJwtGuard', () => {
       tokenType: 'refresh',
     });
 
-    await expect(guard.authenticate(client)).rejects.toThrow(
-      'Недействительный access token',
-    );
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.auth.invalidAccessToken,
+        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+      },
+    });
   });
 
-  it('отклоняет недействительный или просроченный JWT', async () => {
+  it('отклоняет просроченный JWT', async () => {
     const client = createClient('accessToken=expired-token');
 
-    verifyAsyncMock.mockRejectedValue(new Error('jwt expired'));
-
-    await expect(guard.authenticate(client)).rejects.toThrow(
-      'Недействительный или просроченный токен',
+    verifyAsyncMock.mockRejectedValue(
+      new TokenExpiredError('jwt expired', new Date()),
     );
+
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.auth.expiredAccessToken,
+        message: exceptionMessages[exceptionCodes.auth.expiredAccessToken],
+      },
+    });
+  });
+
+  it('отклоняет недействительный JWT', async () => {
+    const client = createClient('accessToken=invalid-token');
+
+    verifyAsyncMock.mockRejectedValue(
+      new JsonWebTokenError('invalid signature'),
+    );
+
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.auth.invalidAccessToken,
+        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+      },
+    });
+  });
+
+  it('отклоняет JWT, который ещё не активен', async () => {
+    const client = createClient('accessToken=inactive-token');
+
+    verifyAsyncMock.mockRejectedValue(
+      new NotBeforeError('jwt not active', new Date()),
+    );
+
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.auth.invalidAccessToken,
+        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+      },
+    });
+  });
+
+  it('скрывает внутреннюю ошибку проверки токена', async () => {
+    const client = createClient('accessToken=valid-token');
+
+    verifyAsyncMock.mockRejectedValue(new Error('database unavailable'));
+
+    await expect(guard.authenticate(client)).rejects.toMatchObject({
+      error: {
+        code: exceptionCodes.common.internal,
+        message: exceptionMessages[exceptionCodes.common.internal],
+      },
+    });
   });
 
   it('разрешает WebSocket context после успешной аутентификации', async () => {

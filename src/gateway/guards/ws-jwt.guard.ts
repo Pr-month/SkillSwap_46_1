@@ -1,9 +1,19 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {
+  JsonWebTokenError,
+  JwtService,
+  NotBeforeError,
+  TokenExpiredError,
+} from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 
 import { JwtPayload } from '../../auth/auth.types';
+import {
+  type ExceptionCode,
+  exceptionCodes,
+  exceptionMessages,
+} from '../../common/errors/error-codes';
 import { ConfigurationService } from '../../module/configuration/configuration.service';
 import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 
@@ -26,7 +36,7 @@ export class WsJwtGuard implements CanActivate {
     const accessToken = this.extractAccessToken(client);
 
     if (!accessToken) {
-      throw new WsException('Необходима авторизация');
+      throw this.createWsException(exceptionCodes.common.unauthorized);
     }
 
     try {
@@ -38,7 +48,7 @@ export class WsJwtGuard implements CanActivate {
       );
 
       if (payload.tokenType !== 'access' || !payload.sub || !payload.email) {
-        throw new WsException('Недействительный access token');
+        throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
       }
 
       const user: SocketUser = {
@@ -54,7 +64,19 @@ export class WsJwtGuard implements CanActivate {
         throw error;
       }
 
-      throw new WsException('Недействительный или просроченный токен');
+      if (error instanceof TokenExpiredError) {
+        throw this.createWsException(exceptionCodes.auth.expiredAccessToken);
+      }
+
+      if (error instanceof NotBeforeError) {
+        throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
+      }
+
+      if (error instanceof JsonWebTokenError) {
+        throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
+      }
+
+      throw this.createWsException(exceptionCodes.common.internal);
     }
   }
 
@@ -72,5 +94,12 @@ export class WsJwtGuard implements CanActivate {
     } catch {
       return null;
     }
+  }
+
+  private createWsException(code: ExceptionCode): WsException {
+    return new WsException({
+      code,
+      message: exceptionMessages[code],
+    });
   }
 }

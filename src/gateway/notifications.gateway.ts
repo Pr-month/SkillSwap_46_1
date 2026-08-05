@@ -13,8 +13,16 @@ import {
 } from './gateway.types';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 
+const PING_INTERVAL_MS = 25_000;
+const PING_TIMEOUT_MS = 20_000;
+
+// Engine.IO автоматически отключает клиента, если pong не получен
+// в течение PING_TIMEOUT_MS после отправки ping.
+
 @WebSocketGateway({
   namespace: '/notifications',
+  pingInterval: PING_INTERVAL_MS,
+  pingTimeout: PING_TIMEOUT_MS,
   cors: {
     origin: true,
     credentials: true,
@@ -55,8 +63,14 @@ export class NotificationsGateway
     userId: string,
     event: NotificationEvent,
     payload: NotificationPayload,
-  ): void {
+  ): boolean {
+    if (!this.isUserOnline(userId)) {
+      return false;
+    }
+
     this.server.to(this.getUserRoom(userId)).emit(event, payload);
+
+    return true;
   }
 
   isUserOnline(userId: string): boolean {

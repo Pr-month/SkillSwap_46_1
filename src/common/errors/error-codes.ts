@@ -6,6 +6,10 @@ export const exceptionCodes = {
     emailExists: 'user:email-exists',
     accessDenied: 'user:access-denied',
   },
+  auth: {
+    invalidAccessToken: 'auth:invalid-access-token',
+    expiredAccessToken: 'auth:expired-access-token',
+  },
   skills: {
     notFound: 'skill:not-found',
     alreadyExists: 'skill:already-exists',
@@ -55,6 +59,8 @@ export const exceptionMessages: Record<ExceptionCode, string> = {
   'user:invalid-credentials': 'Неверный email или пароль',
   'user:email-exists': 'Пользователь с таким email уже существует',
   'user:access-denied': 'Нет доступа к данным пользователя',
+  'auth:invalid-access-token': 'Недействительный access token',
+  'auth:expired-access-token': 'Срок действия access token истёк',
   'skill:not-found': 'Навык не найден',
   'skill:already-exists': 'Такой навык уже существует',
   'skill:access-denied': 'Нет доступа к навыку',

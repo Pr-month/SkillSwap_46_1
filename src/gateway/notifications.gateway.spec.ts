@@ -124,7 +124,19 @@ describe('NotificationsGateway', () => {
     expect(gateway.getConnectedUserIds()).toEqual([]);
   });
 
-  it('отправляет уведомление в личную комнату пользователя', () => {
+  it('отправляет уведомление в личную комнату online-пользователя', async () => {
+    const { client } = createClient('socket-1');
+
+    authenticateMock.mockImplementation(
+      (authenticatedClient: AuthenticatedSocket) => {
+        authenticatedClient.data.user = user;
+
+        return Promise.resolve(user);
+      },
+    );
+
+    await gateway.handleConnection(client);
+
     const payload: NotificationPayload = {
       requestId: 'request-id',
       message: 'Поступила новая заявка',
@@ -132,13 +144,35 @@ describe('NotificationsGateway', () => {
       fromUserId: 'sender-id',
     };
 
-    gateway.notifyUser('user-id', NotificationEvent.NewRequest, payload);
+    const result = gateway.notifyUser(
+      'user-id',
+      NotificationEvent.NewRequest,
+      payload,
+    );
 
+    expect(result).toBe(true);
     expect(toMock).toHaveBeenCalledWith('user:user-id');
     expect(emitMock).toHaveBeenCalledWith(
       NotificationEvent.NewRequest,
       payload,
     );
+  });
+
+  it('не отправляет уведомление offline-пользователю', () => {
+    const payload: NotificationPayload = {
+      requestId: 'request-id',
+      message: 'Поступила новая заявка',
+    };
+
+    const result = gateway.notifyUser(
+      'offline-user-id',
+      NotificationEvent.NewRequest,
+      payload,
+    );
+
+    expect(result).toBe(false);
+    expect(toMock).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
   it('безопасно обрабатывает отключение неаутентифицированного клиента', () => {
