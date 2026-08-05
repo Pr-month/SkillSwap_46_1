@@ -108,11 +108,6 @@ export class AuthService {
     return user;
   }
 
-  async checkUser(email: string) {
-    const exists = await this.usersService.existsByEmail(email);
-    return { exists, email };
-  }
-
   private async generateTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(

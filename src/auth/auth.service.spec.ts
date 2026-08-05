@@ -117,27 +117,6 @@ describe('AuthService', () => {
     });
   });
 
-  describe('checkUser', () => {
-    it('should return exists: true if user exists', async () => {
-      mockUsersService.existsByEmail.mockResolvedValue(true);
-
-      const result = await service.checkUser('test@example.com');
-
-      expect(result).toEqual({ exists: true, email: 'test@example.com' });
-      expect(mockUsersService.existsByEmail).toHaveBeenCalledWith(
-        'test@example.com',
-      );
-    });
-
-    it('should return exists: false if user does not exist', async () => {
-      mockUsersService.existsByEmail.mockResolvedValue(false);
-
-      const result = await service.checkUser('unknown@example.com');
-
-      expect(result).toEqual({ exists: false, email: 'unknown@example.com' });
-    });
-  });
-
   describe('validateUser', () => {
     const mockUser = {
       id: 'user-id',

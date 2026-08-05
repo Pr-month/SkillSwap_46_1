@@ -1,11 +1,12 @@
 import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
+  HttpStatus,
+  Injectable
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { BusinessException } from '../common/errors/business.exception';
+import { exceptionCodes } from '../common/errors/error-codes';
 import { User } from './entities/user.entity';
 import { CreateUserData, UpdateUserData } from './users.types';
 
@@ -24,7 +25,10 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return user;
@@ -35,11 +39,6 @@ export class UsersService {
   }
 
   async create(data: CreateUserData): Promise<User> {
-    const existingUser = await this.findByEmail(data.email);
-    if (existingUser) {
-      throw new ConflictException('Пользователь с таким email уже существует');
-    }
-
     const user = this.userRepository.create(data);
     return this.userRepository.save(user);
   }
@@ -56,7 +55,10 @@ export class UsersService {
     const result = await this.userRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
     }
   }
 
