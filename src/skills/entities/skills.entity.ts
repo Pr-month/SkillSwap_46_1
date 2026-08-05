@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  isArray,
-  IsOptional,
-  isString,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, IsUUID } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
