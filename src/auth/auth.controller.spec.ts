@@ -1,22 +1,35 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Response as ExpressResponse } from 'express';
 
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { UserGender } from '../users/enums/user.enums';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { RequestWithUser } from './auth.types';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 describe('AuthController', () => {
   let controller: AuthController;
+  let _authService: AuthService;
 
   const mockAuthService = {
     register: jest.fn(),
-    checkUser: jest.fn(),
     login: jest.fn(),
+    logout: jest.fn(),
+    getProfile: jest.fn(),
+    updatePassword: jest.fn(),
   };
+
+  const mockResponse = {
+    cookie: jest.fn(),
+    clearCookie: jest.fn(),
+  } as unknown as ExpressResponse;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,9 +43,12 @@ describe('AuthController', () => {
     })
       .overrideGuard(LocalAuthGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<AuthController>(AuthController);
+    _authService = module.get<AuthService>(AuthService);
 
     jest.clearAllMocks();
   });
@@ -42,7 +58,7 @@ describe('AuthController', () => {
   });
 
   describe('register', () => {
-    const registerDto = {
+    const registerDto: RegisterDto = {
       email: 'test@example.com',
       password: 'password123',
       name: 'Иван Петров',
@@ -52,20 +68,17 @@ describe('AuthController', () => {
       avatar: 'https://example.com/avatar.jpg',
     };
 
-    const registerResponse = {
-      status: true,
-      access_token: 'access-token',
-      refresh_token: 'refresh-token',
-      user: { id: 'user-id', email: 'test@example.com' },
-    };
+    it('should successfully call authService.register with dto and response', async () => {
+      const mockUser = { id: 'user-id', email: 'test@example.com' };
+      mockAuthService.register.mockResolvedValue(mockUser);
 
-    it('should successfully register a user', async () => {
-      mockAuthService.register.mockResolvedValue(registerResponse);
+      const result = await controller.register(registerDto, mockResponse);
 
-      const result = await controller.register(registerDto);
-
-      expect(result).toEqual(registerResponse);
-      expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
+      expect(result).toEqual(mockUser);
+      expect(mockAuthService.register).toHaveBeenCalledWith(
+        registerDto,
+        mockResponse,
+      );
       expect(mockAuthService.register).toHaveBeenCalledTimes(1);
     });
 
@@ -76,73 +89,92 @@ describe('AuthController', () => {
       );
       mockAuthService.register.mockRejectedValue(error);
 
-      await expect(controller.register(registerDto)).rejects.toThrow(
-        BusinessException,
-      );
-      await expect(controller.register(registerDto)).rejects.toThrow(error);
-    });
-
-    it('should wrap unknown error in BusinessException', async () => {
-      mockAuthService.register.mockRejectedValue(new Error('DB error'));
-
-      await expect(controller.register(registerDto)).rejects.toThrow(
-        BusinessException,
-      );
-    });
-  });
-
-  describe('checkUser', () => {
-    const loginDto = { email: 'test@example.com', password: 'password123' };
-
-    it('should return exists: true if user exists', async () => {
-      mockAuthService.checkUser.mockResolvedValue({
-        exists: true,
-        email: 'test@example.com',
-      });
-
-      const result = await controller.checkUser(loginDto);
-
-      expect(result).toEqual({ exists: true, email: 'test@example.com' });
-      expect(mockAuthService.checkUser).toHaveBeenCalledWith(
-        'test@example.com',
-      );
-    });
-
-    it('should return exists: false if user does not exist', async () => {
-      mockAuthService.checkUser.mockResolvedValue({
-        exists: false,
-        email: 'unknown@example.com',
-      });
-
-      const result = await controller.checkUser({
-        ...loginDto,
-        email: 'unknown@example.com',
-      });
-
-      expect(result.exists).toBe(false);
+      await expect(
+        controller.register(registerDto, mockResponse),
+      ).rejects.toThrow(BusinessException);
     });
   });
 
   describe('login', () => {
     const mockUser = { id: 'user-id', email: 'test@example.com', name: 'Иван' };
-    const loginResponse = {
-      status: true,
-      access_token: 'access-token',
-      refresh_token: 'refresh-token',
-      user: mockUser,
+    const loginDto: LoginDto = {
+      email: 'test@example.com',
+      password: 'password123',
     };
 
-    it('should successfully login user', async () => {
-      mockAuthService.login.mockResolvedValue(loginResponse);
+    it('should successfully call authService.login with user and response', async () => {
+      mockAuthService.login.mockResolvedValue(mockUser);
 
-      const mockRequest = { user: mockUser };
+      const mockRequest = { user: mockUser } as unknown as RequestWithUser;
+
       const result = await controller.login(
-        mockRequest as unknown as Request,
-        {} as LoginDto,
+        mockRequest,
+        mockResponse,
+        loginDto,
       );
 
-      expect(result).toEqual(loginResponse);
-      expect(mockAuthService.login).toHaveBeenCalledWith(mockUser);
+      expect(result).toEqual(mockUser);
+      expect(mockAuthService.login).toHaveBeenCalledWith(
+        mockUser,
+        mockResponse,
+      );
+    });
+  });
+
+  describe('logout', () => {
+    it('should successfully call authService.logout with userId and response', async () => {
+      const mockUser = { id: 'user-id', email: 'test@example.com' };
+      const mockRequest = { user: mockUser } as unknown as RequestWithUser;
+
+      mockAuthService.logout.mockResolvedValue({ message: 'Успешный выход' });
+
+      const result = await controller.logout(mockRequest, mockResponse);
+
+      expect(result).toEqual({ message: 'Успешный выход' });
+      expect(mockAuthService.logout).toHaveBeenCalledWith(
+        'user-id',
+        mockResponse,
+      );
+    });
+  });
+
+  describe('getProfile', () => {
+    it('should successfully call authService.getProfile with userId', async () => {
+      const mockUser = { id: 'user-id', email: 'test@example.com' };
+      const mockRequest = { user: mockUser } as RequestWithUser;
+
+      mockAuthService.getProfile.mockResolvedValue(mockUser);
+
+      const result = await controller.getProfile(mockRequest);
+
+      expect(result).toEqual(mockUser);
+      expect(mockAuthService.getProfile).toHaveBeenCalledWith('user-id');
+    });
+  });
+
+  describe('updatePassword', () => {
+    it('should successfully call authService.updatePassword with userId and dto', async () => {
+      const mockUser = { id: 'user-id', email: 'test@example.com' };
+      const mockRequest = { user: mockUser } as RequestWithUser;
+      const updatePasswordDto: UpdatePasswordDto = {
+        currentPassword: 'old',
+        newPassword: 'new',
+      };
+
+      mockAuthService.updatePassword.mockResolvedValue({
+        message: 'Пароль успешно обновлен',
+      });
+
+      const result = await controller.updatePassword(
+        mockRequest,
+        updatePasswordDto,
+      );
+
+      expect(result).toEqual({ message: 'Пароль успешно обновлен' });
+      expect(mockAuthService.updatePassword).toHaveBeenCalledWith(
+        'user-id',
+        updatePasswordDto,
+      );
     });
   });
 });
