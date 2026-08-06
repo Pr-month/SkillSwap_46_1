@@ -6,8 +6,9 @@ import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
 import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/enums/user.enums';
+import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
+import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -35,7 +36,7 @@ export class AuthService {
       password: hashedPassword,
       name: registerDto.name,
       birthdate: new Date(registerDto.birthdate),
-      gender: registerDto.gender,
+      gender: registerDto.gender ?? UserGender.OTHER,
       city: registerDto.city,
       avatar: registerDto.avatar,
       role: UserRole.USER,
@@ -88,8 +89,8 @@ export class AuthService {
 
     return null;
   }
-
-  async login(user: Omit<User, 'password' | 'refreshToken'>) {
+  // не нужен весь юзер, из-за этого падала сборка
+  async login(user: AuthenticatedUser) {
     const tokens = await this.generateTokens(user.id, user.email);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 

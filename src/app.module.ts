@@ -23,13 +23,14 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
     }),
     JwtModule.registerAsync({
+      global: true,
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
       useFactory: (configService: ConfigurationService) => {
         const jwtConfig = jwtConfigFactory(configService);
 
         return {
-          global: true,
+          // global: true,
           secret: jwtConfig.accessSecret,
           signOptions: {
             expiresIn: jwtConfig.accessExpiresIn as JwtSignOptions['expiresIn'],
