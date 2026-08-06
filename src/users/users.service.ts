@@ -7,9 +7,10 @@ import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { CreateUserDto, UserProfileResponse } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserProfileResponse } from './dto/user-profile.response';
 import { User } from './entities/user.entity';
+import { CreateUserData } from './users.types';
 
 @Injectable()
 export class UsersService {
@@ -34,8 +35,8 @@ export class UsersService {
     };
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
+  async create(createUserData: CreateUserData): Promise<User> {
+    const user = this.usersRepository.create(createUserData);
 
     return this.usersRepository.save(user);
   }
@@ -65,6 +66,11 @@ export class UsersService {
       );
     }
   }
+
+  async clearRefreshToken(id: string): Promise<void> {
+    await this.updateRefreshToken(id, null);
+  }
+
   async updatePassword(id: string, password: string): Promise<void> {
     const result = await this.usersRepository.update({ id }, { password });
 

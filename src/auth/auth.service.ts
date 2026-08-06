@@ -5,15 +5,15 @@ import { Response } from 'express';
 import ms, { StringValue } from 'ms';
 
 import { Category } from '../categories/entities/category.entity';
+import { BusinessException } from '../common/errors/business.exception';
+import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
-import { User } from '../users/entities/user.entity';
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
+import { CreateUserData } from '../users/users.types';
 import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
 
 @Injectable()
 export class AuthService {
@@ -78,7 +78,7 @@ export class AuthService {
     return null;
   }
   // не нужен весь юзер, из-за этого падала сборка
-  async login(user: AuthenticatedUser) {
+  async login(user: AuthenticatedUser, res: Response) {
     const tokens = await this.generateTokens(user.id, user.email);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 

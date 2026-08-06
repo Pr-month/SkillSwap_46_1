@@ -7,11 +7,11 @@ import { UpdateResult } from 'typeorm';
 import { BusinessException } from '../common/errors/business.exception';
 import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserGender, UserRole } from './enums/user.enums';
 import { UsersService } from './users.service';
+import { CreateUserData } from './users.types';
 
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
@@ -86,7 +86,9 @@ describe('UsersService', () => {
   });
 
   it('creates and saves a user', async () => {
-    const createUserDto: CreateUserDto = {
+    const createUserData: CreateUserData = {
+      about: null,
+      avatar: null,
       email: 'user@example.com',
       password: 'password-hash',
       name: 'Иван Иванов',
@@ -99,8 +101,8 @@ describe('UsersService', () => {
     usersRepository.create.mockReturnValue(user);
     usersRepository.save.mockResolvedValue(user);
 
-    await expect(service.create(createUserDto)).resolves.toBe(user);
-    expect(usersRepository.create).toHaveBeenCalledWith(createUserDto);
+    await expect(service.create(createUserData)).resolves.toBe(user);
+    expect(usersRepository.create).toHaveBeenCalledWith(createUserData);
     expect(usersRepository.save).toHaveBeenCalledWith(user);
   });
 

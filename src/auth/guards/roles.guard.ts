@@ -5,12 +5,12 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { BusinessException } from 'src/common/errors/business.exception';
+import { exceptionCodes } from 'src/common/errors/error-codes';
 
 import { ROLES_KEY } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user.enums';
 import { UsersService } from '../../users/users.service';
-import { BusinessException } from 'src/common/errors/business.exception';
-import { exceptionCodes } from 'src/common/errors/error-codes';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -28,7 +28,12 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
     const fullUser = await this.usersService.findById(user.id);
-
+    if (!fullUser) {
+      throw new BusinessException(
+        exceptionCodes.common.unauthorized,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     if (!requiredRoles.includes(fullUser.role as UserRole)) {
       throw new BusinessException(
         exceptionCodes.common.forbidden,
