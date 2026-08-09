@@ -1,13 +1,13 @@
 import { Exclude } from 'class-transformer';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Relation,
-  CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 

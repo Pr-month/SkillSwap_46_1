@@ -1,4 +1,3 @@
-import { IsArray, IsOptional, IsString, IsUUID } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -21,25 +20,20 @@ export class Skill {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
   @Column({ type: 'varchar', length: 100, nullable: false })
   title: string;
 
-  @IsString()
   @Column({ type: 'varchar', length: 1000, nullable: false })
   description: string;
 
-  @IsArray()
-  @IsOptional()
   @Column({ type: 'text', array: true, nullable: true })
-  images: string[];
+  images: string[] | null;
 
   @Index()
   @Column({ name: 'category_id', type: 'uuid' })
-  @IsUUID()
   categoryId: string;
 
-  @ManyToOne(() => Category, (category) => category.subcategories, {
+  @ManyToOne(() => Category, (category) => category.skills, {
     nullable: false,
     onDelete: 'CASCADE',
   })
@@ -48,9 +42,7 @@ export class Skill {
 
   @Index()
   @Column({ name: 'subcategory_id', type: 'uuid', nullable: true })
-  @IsUUID()
-  @IsOptional()
-  subcategoryId: string;
+  subcategoryId: string | null;
 
   @ManyToOne(() => Subcategory, {
     nullable: true,
@@ -59,10 +51,11 @@ export class Skill {
   @JoinColumn({ name: 'subcategory_id' })
   subcategory: Subcategory;
 
-  @Column({ name: 'owner_id' })
+  @Index()
+  @Column({ name: 'owner_id', type: 'uuid' })
   ownerId: string;
 
-  @ManyToOne(() => User, (user) => user.skills)
+  @ManyToOne(() => User, (user) => user.skills, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
