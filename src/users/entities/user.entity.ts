@@ -1,12 +1,14 @@
 import { Exclude } from 'class-transformer';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Relation,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Category } from '../../categories/entities/category.entity';
@@ -47,16 +49,28 @@ export class User {
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   favorites: Favorite[];
 
-  @OneToMany('Skill', 'owner')
+  @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Relation<Skill>[];
 
-  @ManyToMany('Category')
+  @ManyToMany(() => Category)
   @JoinTable({ name: 'user_want_to_learn' })
   wantToLearn: Relation<Category>[];
 
-  @ManyToMany('Skill')
+  @ManyToMany(() => Skill)
   @JoinTable({ name: 'user_favorite_skills' })
   favoriteSkills: Relation<Skill>[];
+
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamptz',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamptz',
+  })
+  updatedAt: Date;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;

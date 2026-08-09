@@ -21,6 +21,8 @@ describe('User entity', () => {
       'city',
       'gender',
       'avatar',
+      'createdAt',
+      'updatedAt',
       'role',
       'refreshToken',
     ]);
@@ -42,16 +44,31 @@ describe('User entity', () => {
     ).not.toHaveProperty('select');
   });
 
-  it('registers only the implemented favorites relation', () => {
+  it('registers user relations', () => {
     const relations = getMetadataArgsStorage().relations.filter(
       ({ target }) => target === User,
     );
 
-    expect(relations).toHaveLength(1);
-    expect(relations[0]).toMatchObject({
-      propertyName: 'favorites',
-      relationType: 'one-to-many',
-    });
+    expect(relations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          propertyName: 'favorites',
+          relationType: 'one-to-many',
+        }),
+        expect.objectContaining({
+          propertyName: 'skills',
+          relationType: 'one-to-many',
+        }),
+        expect.objectContaining({
+          propertyName: 'wantToLearn',
+          relationType: 'many-to-many',
+        }),
+        expect.objectContaining({
+          propertyName: 'favoriteSkills',
+          relationType: 'many-to-many',
+        }),
+      ]),
+    );
   });
 
   it('does not serialize password and refresh token', () => {

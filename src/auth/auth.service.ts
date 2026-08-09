@@ -1,13 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Response } from 'express';
+import ms, { StringValue } from 'ms';
 
+import { Category } from '../categories/entities/category.entity';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
-import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/enums/user.enums';
+import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
+import { CreateUserData } from '../users/users.types';
+import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -19,162 +23,129 @@ export class AuthService {
     private readonly configService: ConfigurationService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, res: Response) {
     const existingUser = await this.usersService.findByEmail(registerDto.email);
     if (existingUser) {
-      throw new BusinessException(exceptionCodes.users.alreadyExists, 409);
+      throw new BusinessException(
+        exceptionCodes.users.alreadyExists,
+        HttpStatus.CONFLICT,
+      );
     }
-
     const hashedPassword = await bcrypt.hash(
       registerDto.password,
       this.configService.hashSalt,
     );
 
-    const newUser = await this.usersService.create({
-      email: registerDto.email,
+    const wantToLearn = registerDto.wantToLearn
+      ? registerDto.wantToLearn.map((id) => ({ id }) as Category)
+      : [];
+
+    const skills = registerDto.skills
+      ? registerDto.skills.map((id) => ({ id }) as Skill)
+      : [];
+
+    const createUserData: CreateUserData = {
+      ...registerDto,
       password: hashedPassword,
-      name: registerDto.name,
       birthdate: new Date(registerDto.birthdate),
-      gender: registerDto.gender,
+      gender: registerDto.gender ?? UserGender.OTHER,
       city: registerDto.city,
       avatar: registerDto.avatar,
       role: UserRole.USER,
-    });
-
-    const tokens = await this.generateTokens(newUser.id, newUser.email);
-
-    await this.usersService.updateRefreshToken(newUser.id, tokens.refreshToken);
-
-    return {
-      status: true,
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        birthDate: newUser.birthdate,
-        gender: newUser.gender,
-        city: newUser.city,
-        avatar: newUser.avatar,
-      },
+      about: registerDto.about ?? null,
+      wantToLearn,
+      skills,
     };
-  }
 
-  async checkUser(email: string) {
-    const user = await this.usersService.findByEmail(email);
-    return {
-      exists: !!user,
-      email,
-    };
+    const user = await this.usersService.create(createUserData);
+
+    const tokens = await this.generateTokens(user.id, user.email);
+    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+
+    this.setAuthCookies(res, tokens);
+
+    return user;
   }
 
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<User, 'password' | 'refreshToken'> | null> {
+  ): Promise<{ id: string; email: string } | null> {
     const user = await this.usersService.findByEmail(email);
-
     if (user && (await bcrypt.compare(password, user.password))) {
-      const {
-        password: _password,
-        refreshToken: _refreshToken,
-        ...result
-      } = user;
-      void _password;
-      void _refreshToken;
-      return result;
+      return { id: user.id, email: user.email };
     }
-
     return null;
   }
-
-  async login(user: Omit<User, 'password' | 'refreshToken'>) {
+  // не нужен весь юзер, из-за этого падала сборка
+  async login(user: AuthenticatedUser, res: Response) {
     const tokens = await this.generateTokens(user.id, user.email);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return {
-      status: true,
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-      user,
-    };
+    this.setAuthCookies(res, tokens);
+
+    const fullUser = await this.usersService.findById(user.id);
+    return fullUser;
   }
 
-  async getProfile(userId: string) {
-    const user = await this.usersService.findById(userId);
+  async logout(userId: string, res: Response) {
+    await this.usersService.clearRefreshToken(userId);
 
-    if (!user) {
-      throw new BusinessException(exceptionCodes.users.notFound, 404);
-    }
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
 
-    return {
-      status: true,
-      data: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        birthDate: user.birthdate,
-        gender: user.gender,
-        city: user.city,
-        avatar: user.avatar,
-        about: user.about,
-        createdAt: user.createdAt?.toISOString(),
-        updatedAt: user.updatedAt?.toISOString(),
-      },
-    };
+    return { message: 'Успешный выход' };
   }
 
   async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
-    const user = await this.usersService.findById(userId);
-
-    if (!user) {
-      throw new BusinessException(exceptionCodes.users.notFound, 404);
-    }
-
     const hashedPassword = await bcrypt.hash(
       updatePasswordDto.newPassword,
       this.configService.hashSalt,
     );
-
     await this.usersService.updatePassword(userId, hashedPassword);
-
-    return {
-      status: true,
-      message: 'Пароль успешно обновлен',
-    };
+    return { message: 'Пароль успешно обновлен' };
   }
 
-  async refreshTokens(userId: string) {
+  async getProfile(userId: string) {
     const user = await this.usersService.findById(userId);
-
-    if (!user || !user.refreshToken) {
-      throw new UnauthorizedException('Недействительный токен обновления');
-    }
-
-    const tokens = await this.generateTokens(user.id, user.email);
-
-    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
-
-    return {
-      status: true,
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-    };
+    return user;
   }
 
   private async generateTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub: userId, email, tokenType: 'access' },
-        { expiresIn: '15m' },
+        { expiresIn: this.configService.jwtAccessExpiresIn as StringValue },
       ),
       this.jwtService.signAsync(
         { sub: userId, email, tokenType: 'refresh' },
-        { expiresIn: '7d' },
+        {
+          expiresIn: this.configService.jwtRefreshExpiresIn as StringValue,
+          secret: this.configService.jwtRefreshSecret,
+        },
       ),
     ]);
-
     return { accessToken, refreshToken };
+  }
+
+  private setAuthCookies(
+    res: Response,
+    tokens: { accessToken: string; refreshToken: string },
+  ) {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
+    });
   }
 }
