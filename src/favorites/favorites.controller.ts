@@ -29,27 +29,6 @@ import { FavoritesService } from './favorites.service';
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
-  @Get('favorites')
-  @ApiOperation({
-    summary: 'Получить список избранных навыков текущего пользователя',
-  })
-  @ApiResponse({ status: 200, type: [FavoriteDto] })
-  async findAll(@Request() req: RequestWithUser): Promise<FavoriteDto[]> {
-    return await this.favoritesService.findAll(req.user.id);
-  }
-
-  @Get('favorites/:id/check')
-  @ApiOperation({
-    summary: 'Проверить, находится ли навык в избранном у пользователя',
-  })
-  @ApiResponse({ status: 200, type: FavoriteCheckDto })
-  async check(
-    @Request() req: RequestWithUser,
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<FavoriteCheckDto> {
-    return await this.favoritesService.check(req.user.id, id);
-  }
-
   @Post(':id/favorite')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Добавить навык в избранное' })
@@ -70,5 +49,34 @@ export class FavoritesController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     await this.favoritesService.remove(req.user.id, id);
+  }
+}
+
+@ApiTags('favorites')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('favorites')
+export class MyFavoritesController {
+  constructor(private readonly favoritesService: FavoritesService) {}
+
+  @Get()
+  @ApiOperation({
+    summary: 'Получить список избранных навыков текущего пользователя',
+  })
+  @ApiResponse({ status: 200, type: [FavoriteDto] })
+  async findAll(@Request() req: RequestWithUser): Promise<FavoriteDto[]> {
+    return await this.favoritesService.findAll(req.user.id);
+  }
+
+  @Get(':id/check')
+  @ApiOperation({
+    summary: 'Проверить, находится ли навык в избранном у пользователя',
+  })
+  @ApiResponse({ status: 200, type: FavoriteCheckDto })
+  async check(
+    @Request() req: RequestWithUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FavoriteCheckDto> {
+    return await this.favoritesService.check(req.user.id, id);
   }
 }
