@@ -7,6 +7,7 @@ import { exceptionCodes } from '../common/errors/error-codes';
 import { Favorite } from '../skills/entities/favorite.entity';
 import { Skill } from '../skills/entities/skills.entity';
 import { FavoriteCheckDto, FavoriteDto } from './dto/favorite-response.dto';
+import { FavoriteData, FavoriteSkillData } from './favorites.types';
 
 @Injectable()
 export class FavoritesService {
@@ -94,7 +95,10 @@ export class FavoritesService {
     return { isFavorite: count > 0 };
   }
 
-  private toDto(favorite: Favorite, skill: Skill): FavoriteDto {
+  private toDto(
+    favorite: FavoriteData,
+    skill: FavoriteSkillData,
+  ): FavoriteDto {
     return {
       id: favorite.id,
       userId: favorite.userId,
