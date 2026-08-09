@@ -7,6 +7,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Relation,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Category } from '../../categories/entities/category.entity';
@@ -57,6 +59,18 @@ export class User {
   @ManyToMany(() => Skill)
   @JoinTable({ name: 'user_favorite_skills' })
   favoriteSkills: Relation<Skill>[];
+
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamptz',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamptz',
+  })
+  updatedAt: Date;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;

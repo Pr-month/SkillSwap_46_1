@@ -8,7 +8,14 @@ export type UserData = Pick<User, keyof User>;
 // Тип для создания пользователя
 export type CreateUserData = Omit<
   UserData,
-  'id' | 'refreshToken' | 'favoriteSkills' | 'favorites'
+  | 'id'
+  | 'refreshToken'
+  | 'favoriteSkills'
+  | 'favorites'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'skills'
+  | 'wantToLearn'
 > & {
   password: string;
   wantToLearn?: Category[];

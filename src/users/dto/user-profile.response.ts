@@ -1,29 +1,41 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { UserGender } from '../enums/user.enums';
+import { UserGender, UserRole } from '../enums/user.enums';
 
 export class UserProfileResponse {
-  @ApiProperty({ example: 'user-id' })
-  id!: string;
+  @ApiProperty({ format: 'uuid' })
+  id: string;
 
   @ApiProperty({ example: 'user@example.com' })
-  email!: string;
+  email: string;
 
-  @ApiProperty({ example: 'Иван Петров' })
-  name!: string;
+  @ApiProperty({ example: 'Иван Иванов' })
+  name: string;
 
-  @ApiProperty({ example: '1990-01-01' })
-  birthdate!: string;
+  @ApiProperty({ type: String, format: 'date' })
+  birthDate: Date;
 
-  @ApiProperty({ enum: UserGender, example: 'MALE' })
-  gender!: UserGender;
+  @ApiProperty({ enum: UserGender })
+  gender: UserGender;
 
   @ApiProperty({ example: 'Москва' })
-  city!: string;
+  city: string;
 
-  @ApiProperty({ example: 'https://example.com/avatar.jpg' })
-  avatar!: string;
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    nullable: true,
+  })
+  avatar: string | null;
 
-  @ApiPropertyOptional({ example: 'О себе...' })
-  about?: string;
+  @ApiPropertyOptional({ nullable: true })
+  about: string | null;
+
+  @ApiProperty({ enum: UserRole })
+  role: UserRole;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt: Date;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt: Date;
 }

@@ -11,9 +11,11 @@ export interface JwtPayload {
 export type JwtPayloadInput = Pick<JwtPayload, 'sub' | 'email'>;
 
 export interface RequestWithUser extends Request {
-  user: {
-    id: string;
-    email: string;
-    [key: string]: unknown;
-  };
+  user: AuthenticatedUser;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  [key: string]: unknown;
 }
