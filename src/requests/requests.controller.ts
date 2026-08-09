@@ -16,8 +16,7 @@ import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { RequestWithUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import { CreateRequestDto, UpdateRequestDto } from './dto';
 import { RequestsService } from './requests.service';
 
 @ApiTags('requests')

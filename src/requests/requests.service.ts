@@ -7,10 +7,10 @@ import { exceptionCodes } from '../common/errors/error-codes';
 import { Skill } from '../skills/entities/skills.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/enums/user.enums';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import { CreateRequestDto, UpdateRequestDto } from './dto';
 import { Request } from './entities/request.entity';
 import { RequestStatus } from './enums/request-status.enum';
+import { PUBLIC_REQUEST_FIELDS, REQUEST_RELATIONS } from './requests.select';
 
 const ACTIVE_STATUSES = [RequestStatus.PENDING, RequestStatus.IN_PROGRESS];
 
@@ -62,8 +62,8 @@ export class RequestsService {
         receiver: { id: userId },
         status: In(ACTIVE_STATUSES),
       },
-      relations: this.relations,
-      select: this.publicRequestFields,
+      relations: REQUEST_RELATIONS,
+      select: PUBLIC_REQUEST_FIELDS,
       order: { createdAt: 'DESC' },
     });
   }
@@ -74,8 +74,8 @@ export class RequestsService {
         sender: { id: userId },
         status: In(ACTIVE_STATUSES),
       },
-      relations: this.relations,
-      select: this.publicRequestFields,
+      relations: REQUEST_RELATIONS,
+      select: PUBLIC_REQUEST_FIELDS,
       order: { createdAt: 'DESC' },
     });
   }
@@ -141,8 +141,8 @@ export class RequestsService {
   private async findOne(id: string): Promise<Request> {
     const request = await this.requestsRepository.findOne({
       where: { id },
-      relations: this.relations,
-      select: this.publicRequestFields,
+      relations: REQUEST_RELATIONS,
+      select: PUBLIC_REQUEST_FIELDS,
     });
 
     if (!request) {
@@ -169,58 +169,4 @@ export class RequestsService {
 
     return skill;
   }
-
-  private readonly relations = {
-    sender: true,
-    receiver: true,
-    offeredSkill: true,
-    requestedSkill: true,
-  } as const;
-
-  private readonly publicRequestFields = {
-    id: true,
-    createdAt: true,
-    status: true,
-    isRead: true,
-    sender: {
-      id: true,
-      name: true,
-      about: true,
-      birthdate: true,
-      city: true,
-      gender: true,
-      avatar: true,
-    },
-    receiver: {
-      id: true,
-      name: true,
-      about: true,
-      birthdate: true,
-      city: true,
-      gender: true,
-      avatar: true,
-    },
-    offeredSkill: {
-      id: true,
-      title: true,
-      description: true,
-      images: true,
-      categoryId: true,
-      subcategoryId: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-    requestedSkill: {
-      id: true,
-      title: true,
-      description: true,
-      images: true,
-      categoryId: true,
-      subcategoryId: true,
-      ownerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  } as const;
 }
