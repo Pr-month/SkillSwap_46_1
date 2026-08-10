@@ -1,4 +1,5 @@
 export enum EnvKey {
+  NodeEnv = 'NODE_ENV',
   Port = 'APP_PORT',
   HashSalt = 'HASH_SALT',
   JwtAccessSecret = 'JWT_ACCESS_SECRET',

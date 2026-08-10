@@ -10,6 +10,10 @@ export class ConfigurationService {
     private configService: ConfigService<EnvironmentVariables, true>,
   ) {}
 
+  get nodeEnv(): string {
+    return this.configService.get<string>(EnvKey.NodeEnv);
+  }
+
   get port(): number {
     return this.configService.get<number>(EnvKey.Port);
   }
