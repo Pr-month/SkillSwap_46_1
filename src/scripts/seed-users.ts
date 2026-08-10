@@ -1,10 +1,20 @@
 import * as bcrypt from 'bcrypt';
+import * as process from 'process';
 
+import { nodeEnvValue } from '../module/configuration/const';
 import { User } from '../users/entities/user.entity';
 import { getAppDataSource } from './data-source';
 import { adminSeedData } from './data/admin.data';
 
 async function seed() {
+  if (process.env.NODE_ENV !== nodeEnvValue.Development) {
+    console.log(
+      `Сидинг разрешён только в среде "${nodeEnvValue.Development}". ` +
+        `Текущая среда: "${process.env.NODE_ENV}"`,
+    );
+    return;
+  }
+
   const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
