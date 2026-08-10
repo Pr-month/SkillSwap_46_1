@@ -1,10 +1,11 @@
 import * as bcrypt from 'bcrypt';
 
-import { AppDataSource } from '../config/ormconfig';
 import { User } from '../users/entities/user.entity';
+import { getAppDataSource } from './data-source';
 import { adminSeedData } from './data/admin.data';
 
 async function seed() {
+  const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
   const userRepo = AppDataSource.getRepository(User);
@@ -19,11 +20,8 @@ async function seed() {
     return;
   }
 
-  const SALT_ROUNDS = 10;
-  const hashedPassword = await bcrypt.hash(
-    adminSeedData.password,
-    SALT_ROUNDS,
-  );
+  const saltRounds = Number(process.env.HASH_SALT) || 10;
+  const hashedPassword = await bcrypt.hash(adminSeedData.password, saltRounds);
 
   const admin = await userRepo.save(
     userRepo.create({

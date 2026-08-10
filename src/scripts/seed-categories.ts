@@ -1,9 +1,10 @@
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../categories/entities/subcategory.entity';
-import { AppDataSource } from '../config/ormconfig';
+import { getAppDataSource } from './data-source';
 import { categoriesSeedData } from './data/categories.data';
 
 async function seed() {
+  const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
   const categoryRepo = AppDataSource.getRepository(Category);
