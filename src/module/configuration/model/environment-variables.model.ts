@@ -1,9 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { EnvKey } from '../const';
+import {EnvKey, nodeEnvValues} from '../const';
 import {IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, Max, Min} from "class-validator";
 import {Transform} from "class-transformer";
 
 export class EnvironmentVariables {
+  @IsString()
+  @IsIn(nodeEnvValues)
+  [EnvKey.NodeEnv]: string;
+
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1)

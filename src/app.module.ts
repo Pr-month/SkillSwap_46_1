@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
+import { StringValue } from 'ms';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -10,9 +10,13 @@ import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
+import { FavoritesModule } from './favorites/favorites.module';
+import { GatewayModule } from './gateway/gateway.module';
 import { ConfigurationModule } from './module/configuration/configuration.module';
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
+import { RequestsModule } from './requests/requests.module';
+import { SkillsModule } from './skills/skills.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -23,16 +27,17 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
     }),
     JwtModule.registerAsync({
+      global: true,
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
       useFactory: (configService: ConfigurationService) => {
         const jwtConfig = jwtConfigFactory(configService);
 
         return {
-          global: true,
+          // global: true,
           secret: jwtConfig.accessSecret,
           signOptions: {
-            expiresIn: jwtConfig.accessExpiresIn as JwtSignOptions['expiresIn'],
+            expiresIn: jwtConfig.accessExpiresIn as StringValue,
           },
         };
       },
@@ -46,6 +51,10 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     CategoriesModule,
     SubcategoriesModule,
+    FavoritesModule,
+    SkillsModule,
+    RequestsModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
