@@ -82,7 +82,8 @@ export class RegisterDto {
   })
   @IsArray()
   @IsUUID('all', { each: true })
-  wantToLearn: string[];
+  @IsOptional()
+  wantToLearn?: string[];
 
   @ApiPropertyOptional({
     description: 'ID навыков, которыми пользователь может научить',
@@ -91,7 +92,8 @@ export class RegisterDto {
   })
   @IsArray()
   @IsUUID('all', { each: true })
-  skills: string[];
+  @IsOptional()
+  skills?: string[];
 }
 
 // Ответ на регистрацию
