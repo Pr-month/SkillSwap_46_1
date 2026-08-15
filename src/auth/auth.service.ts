@@ -14,6 +14,7 @@ import { CreateUserData } from '../users/users.types';
 import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { Skill } from '../skills/entities/skills.entity';
 
 @Injectable()
 export class AuthService {
