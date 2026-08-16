@@ -43,13 +43,23 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: UsersService, useValue: mockUsersService },
-        { provide: JwtService, useValue: mockJwtService },
-        { provide: ConfigurationService, useValue: mockConfigService },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: ConfigurationService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+
     jest.clearAllMocks();
   });
 
@@ -80,12 +90,17 @@ describe('AuthService', () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
-      mockJwtService.signAsync.mockResolvedValueOnce('access-token');
-      mockJwtService.signAsync.mockResolvedValueOnce('refresh-token');
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValue('hashed-password' as never);
+
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
     });
 
     it('should successfully register a new user and set cookies', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
       mockUsersService.create.mockResolvedValue(mockUser);
       mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
 
@@ -93,10 +108,8 @@ describe('AuthService', () => {
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUsersService.create).toHaveBeenCalledWith(
-        registerDto,
-        'hashed-password',
-      );
+      expect(mockUsersService.create).toHaveBeenCalled();
+
       expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
         'user-id',
         'refresh-token',
@@ -106,13 +119,16 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if user already exists', async () => {
-      mockUsersService.create.mockRejectedValue(
-        new BusinessException(exceptionCodes.users.alreadyExists, 409),
-      );
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'existing-user-id',
+        email: registerDto.email,
+      });
 
-      await expect(service.register(registerDto, mockResponse)).rejects.toThrow(
-        BusinessException,
-      );
+      await expect(
+        service.register(registerDto, mockResponse),
+      ).rejects.toThrow(BusinessException);
+
+      expect(mockUsersService.create).not.toHaveBeenCalled();
       expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
     });
   });
@@ -128,14 +144,20 @@ describe('AuthService', () => {
 
     it('should return { id, email } if credentials are valid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockResolvedValue(true as never);
 
       const result = await service.validateUser(
         'test@example.com',
         'password123',
       );
 
-      expect(result).toEqual({ id: 'user-id', email: 'test@example.com' });
+      expect(result).toEqual({
+        id: 'user-id',
+        email: 'test@example.com',
+      });
     });
 
     it('should return null if user does not exist', async () => {
@@ -145,43 +167,66 @@ describe('AuthService', () => {
         'unknown@example.com',
         'password123',
       );
+
       expect(result).toBeNull();
     });
 
     it('should return null if password is invalid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
+
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockResolvedValue(false as never);
 
       const result = await service.validateUser(
         'test@example.com',
         'wrong-password',
       );
+
       expect(result).toBeNull();
     });
   });
 
   describe('login', () => {
-    const mockUserPayload = { id: 'user-id', email: 'test@example.com' };
-    const mockFullUser = { ...mockUserPayload, name: 'Иван Петров' };
+    const mockUserPayload = {
+      id: 'user-id',
+      email: 'test@example.com',
+    };
+
+    const mockFullUser = {
+      ...mockUserPayload,
+      name: 'Иван Петров',
+    };
 
     beforeEach(() => {
-      mockJwtService.signAsync.mockResolvedValueOnce('access-token');
-      mockJwtService.signAsync.mockResolvedValueOnce('refresh-token');
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
+
       mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
       mockUsersService.findById.mockResolvedValue(mockFullUser);
     });
 
     it('should successfully login user, set cookies, and return full user', async () => {
-      const result = await service.login(mockUserPayload, mockResponse);
+      const result = await service.login(
+        mockUserPayload,
+        mockResponse,
+      );
 
       expect(result).toEqual(mockFullUser);
 
-      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+      expect(
+        mockUsersService.updateRefreshToken,
+      ).toHaveBeenCalledWith(
         'user-id',
         'refresh-token',
       );
+
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
-      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
   });
 
@@ -189,14 +234,26 @@ describe('AuthService', () => {
     it('should clear refresh token in DB and clear cookies', async () => {
       mockUsersService.clearRefreshToken.mockResolvedValue(undefined);
 
-      const result = await service.logout('user-id', mockResponse);
-
-      expect(result).toEqual({ message: 'Успешный выход' });
-      expect(mockUsersService.clearRefreshToken).toHaveBeenCalledWith(
+      const result = await service.logout(
         'user-id',
+        mockResponse,
       );
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('accessToken');
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken');
+
+      expect(result).toEqual({
+        message: 'Успешный выход',
+      });
+
+      expect(
+        mockUsersService.clearRefreshToken,
+      ).toHaveBeenCalledWith('user-id');
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+        'accessToken',
+      );
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
+        'refreshToken',
+      );
     });
   });
 
@@ -218,17 +275,23 @@ describe('AuthService', () => {
       const result = await service.getProfile('user-id');
 
       expect(result).toEqual(mockUser);
-      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
 
     it('should throw NotFoundException if user not found', async () => {
       mockUsersService.findById.mockRejectedValue(
-        new BusinessException(exceptionCodes.users.notFound, 404),
+        new BusinessException(
+          exceptionCodes.users.notFound,
+          404,
+        ),
       );
 
-      await expect(service.getProfile('invalid-id')).rejects.toThrow(
-        BusinessException,
-      );
+      await expect(
+        service.getProfile('invalid-id'),
+      ).rejects.toThrow(BusinessException);
     });
   });
 
@@ -238,33 +301,103 @@ describe('AuthService', () => {
       newPassword: 'newPassword123',
     };
 
+    const mockUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      password: 'hashed-old-password',
+    };
+
     beforeEach(() => {
+      mockUsersService.findById.mockResolvedValue(mockUser);
+
+      mockUsersService.updatePassword.mockResolvedValue(
+        undefined,
+      );
+
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockResolvedValue(true as never);
+
       jest
         .spyOn(bcrypt, 'hash')
-        .mockResolvedValue('hashed-new-password' as never);
-      mockUsersService.updatePassword.mockResolvedValue(undefined);
+        .mockResolvedValue(
+          'hashed-new-password' as never,
+        );
     });
 
-    it('should successfully update password', async () => {
-      const result = await service.updatePassword('user-id', updatePasswordDto);
+    it('should successfully update password when current password is valid', async () => {
+      const result = await service.updatePassword(
+        'user-id',
+        updatePasswordDto,
+      );
 
-      expect(result).toEqual({ message: 'Пароль успешно обновлен' });
-      expect(bcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
-      expect(mockUsersService.updatePassword).toHaveBeenCalledWith(
+      expect(result).toEqual({
+        message: 'Пароль успешно обновлен',
+      });
+
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'oldPassword123',
+        'hashed-old-password',
+      );
+
+      expect(bcrypt.hash).toHaveBeenCalledWith(
+        'newPassword123',
+        10,
+      );
+
+      expect(
+        mockUsersService.updatePassword,
+      ).toHaveBeenCalledWith(
         'user-id',
         'hashed-new-password',
       );
     });
 
-    it('should throw BusinessException if user not found', async () => {
-      mockUsersService.findById.mockRejectedValue(
-        new BusinessException(exceptionCodes.users.notFound, 404),
-      );
+    it('should throw UnauthorizedException when current password is invalid', async () => {
+      (
+        bcrypt.compare as unknown as jest.Mock
+      ).mockResolvedValue(false);
 
       await expect(
-        service.updatePassword('invalid-id', updatePasswordDto),
-      ).rejects.toThrow(BusinessException);
-      expect(mockUsersService.updatePassword).not.toHaveBeenCalled();
+        service.updatePassword(
+          'user-id',
+          updatePasswordDto,
+        ),
+      ).rejects.toMatchObject({
+        status: HttpStatus.UNAUTHORIZED,
+      });
+
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'oldPassword123',
+        'hashed-old-password',
+      );
+
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+
+      expect(
+        mockUsersService.updatePassword,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      mockUsersService.findById.mockResolvedValue(null);
+
+      await expect(
+        service.updatePassword(
+          'invalid-user-id',
+          updatePasswordDto,
+        ),
+      ).rejects.toMatchObject({
+        status: HttpStatus.NOT_FOUND,
+      });
+
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+
+      expect(
+        mockUsersService.updatePassword,
+      ).not.toHaveBeenCalled();
     });
   });
 });

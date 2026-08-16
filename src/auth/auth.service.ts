@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
@@ -25,12 +25,14 @@ export class AuthService {
 
   async register(registerDto: RegisterDto, res: Response) {
     const existingUser = await this.usersService.findByEmail(registerDto.email);
+
     if (existingUser) {
       throw new BusinessException(
         exceptionCodes.users.alreadyExists,
         HttpStatus.CONFLICT,
       );
     }
+
     const hashedPassword = await bcrypt.hash(
       registerDto.password,
       this.configService.hashSalt,
@@ -60,7 +62,11 @@ export class AuthService {
     const user = await this.usersService.create(createUserData);
 
     const tokens = await this.generateTokens(user.id, user.email);
-    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+
+    await this.usersService.updateRefreshToken(
+      user.id,
+      tokens.refreshToken,
+    );
 
     this.setAuthCookies(res, tokens);
 
@@ -72,19 +78,30 @@ export class AuthService {
     password: string,
   ): Promise<{ id: string; email: string } | null> {
     const user = await this.usersService.findByEmail(email);
+
     if (user && (await bcrypt.compare(password, user.password))) {
-      return { id: user.id, email: user.email };
+      return {
+        id: user.id,
+        email: user.email,
+      };
     }
+
     return null;
   }
+
   // не нужен весь юзер, из-за этого падала сборка
   async login(user: AuthenticatedUser, res: Response) {
     const tokens = await this.generateTokens(user.id, user.email);
-    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+
+    await this.usersService.updateRefreshToken(
+      user.id,
+      tokens.refreshToken,
+    );
 
     this.setAuthCookies(res, tokens);
 
     const fullUser = await this.usersService.findById(user.id);
+
     return fullUser;
   }
 
@@ -97,40 +114,86 @@ export class AuthService {
     return { message: 'Успешный выход' };
   }
 
-  async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
+  async updatePassword(
+    userId: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ) {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const passwordMatches = await bcrypt.compare(
+      updatePasswordDto.currentPassword,
+      user.password,
+    );
+
+    if (!passwordMatches) {
+      throw new BusinessException(
+        exceptionCodes.users.invalidCredentials,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(
       updatePasswordDto.newPassword,
       this.configService.hashSalt,
     );
+
     await this.usersService.updatePassword(userId, hashedPassword);
+
     return { message: 'Пароль успешно обновлен' };
   }
 
   async getProfile(userId: string) {
     const user = await this.usersService.findById(userId);
+
     return user;
   }
 
   private async generateTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, email, tokenType: 'access' },
-        { expiresIn: this.configService.jwtAccessExpiresIn as StringValue },
+        {
+          sub: userId,
+          email,
+          tokenType: 'access',
+        },
+        {
+          expiresIn:
+            this.configService.jwtAccessExpiresIn as StringValue,
+        },
       ),
       this.jwtService.signAsync(
-        { sub: userId, email, tokenType: 'refresh' },
         {
-          expiresIn: this.configService.jwtRefreshExpiresIn as StringValue,
+          sub: userId,
+          email,
+          tokenType: 'refresh',
+        },
+        {
+          expiresIn:
+            this.configService.jwtRefreshExpiresIn as StringValue,
           secret: this.configService.jwtRefreshSecret,
         },
       ),
     ]);
-    return { accessToken, refreshToken };
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   private setAuthCookies(
     res: Response,
-    tokens: { accessToken: string; refreshToken: string },
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+    },
   ) {
     const isProduction = process.env.NODE_ENV === 'production';
 
@@ -138,14 +201,18 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
+      maxAge: ms(
+        this.configService.jwtAccessExpiresIn as StringValue,
+      ),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
+      maxAge: ms(
+        this.configService.jwtRefreshExpiresIn as StringValue,
+      ),
     });
   }
 }
