@@ -1,12 +1,12 @@
 import {
   Column,
   Entity,
-  Index,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  Unique
 } from 'typeorm';
 
 @Entity('city')
-@Index(['name', 'subject'])
+@Unique(['name', 'subject'])
 export class City {
   @PrimaryGeneratedColumn('uuid')
   id: string;
