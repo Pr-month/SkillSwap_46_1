@@ -1,6 +1,6 @@
 import { nodeEnvValue } from '../module/configuration/const';
-import { City } from './entities/city.entity';
 import { getAppDataSource } from '../scripts/data-source';
+import { City } from './entities/city.entity';
 
 async function seedCities() {
   if (process.env.NODE_ENV !== nodeEnvValue.Development) {
@@ -23,9 +23,7 @@ async function seedCities() {
       const lon = Number(city.lon);
 
       if (Number.isNaN(lat) || Number.isNaN(lon)) {
-        console.warn(
-          `Пропущен город "${city.name}": некорректные координаты`,
-        );
+        console.warn(`Пропущен город "${city.name}": некорректные координаты`);
         continue;
       }
 

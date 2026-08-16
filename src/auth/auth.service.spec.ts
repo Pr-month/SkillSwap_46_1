@@ -13,7 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 
 jest.mock('bcrypt');
 
-const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+const mockedBcrypt = bcrypt;
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -101,10 +101,7 @@ describe('AuthService', () => {
       expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
         registerDto.email,
       );
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(
-        registerDto.password,
-        10,
-      );
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
       expect(mockUsersService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           email: registerDto.email,
@@ -169,9 +166,9 @@ describe('AuthService', () => {
     it('should throw BusinessException if user with this email already exists', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      await expect(
-        service.register(registerDto, mockResponse),
-      ).rejects.toThrow(BusinessException);
+      await expect(service.register(registerDto, mockResponse)).rejects.toThrow(
+        BusinessException,
+      );
       expect(mockUsersService.create).not.toHaveBeenCalled();
       expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
     });
@@ -309,10 +306,7 @@ describe('AuthService', () => {
     it('should successfully update password', async () => {
       mockUsersService.updatePassword.mockResolvedValue(undefined);
 
-      const result = await service.updatePassword(
-        'user-id',
-        updatePasswordDto,
-      );
+      const result = await service.updatePassword('user-id', updatePasswordDto);
 
       expect(result).toEqual({ message: 'Пароль успешно обновлен' });
       expect(mockedBcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);

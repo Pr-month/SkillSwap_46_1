@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity('city')
 @Unique(['name', 'subject'])
@@ -29,8 +24,7 @@ export class City {
     scale: 6,
     transformer: {
       to: (value: number) => value,
-      from: (value: string | null) =>
-        value === null ? null : Number(value),
+      from: (value: string | null) => (value === null ? null : Number(value)),
     },
   })
   lat: number;
@@ -41,8 +35,7 @@ export class City {
     scale: 6,
     transformer: {
       to: (value: number) => value,
-      from: (value: string | null) =>
-        value === null ? null : Number(value),
+      from: (value: string | null) => (value === null ? null : Number(value)),
     },
   })
   lon: number;
