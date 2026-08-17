@@ -64,10 +64,7 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user.id, user.email);
 
-    await this.usersService.updateRefreshToken(
-      user.id,
-      tokens.refreshToken,
-    );
+    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
     this.setAuthCookies(res, tokens);
 
@@ -94,10 +91,7 @@ export class AuthService {
   async login(user: AuthenticatedUser, res: Response) {
     const tokens = await this.generateTokens(user.id, user.email);
 
-    await this.usersService.updateRefreshToken(
-      user.id,
-      tokens.refreshToken,
-    );
+    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
     this.setAuthCookies(res, tokens);
 
@@ -115,10 +109,7 @@ export class AuthService {
     return { message: 'Успешный выход' };
   }
 
-  async updatePassword(
-    userId: string,
-    updatePasswordDto: UpdatePasswordDto,
-  ) {
+  async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
@@ -165,8 +156,7 @@ export class AuthService {
           tokenType: 'access',
         },
         {
-          expiresIn:
-            this.configService.jwtAccessExpiresIn as StringValue,
+          expiresIn: this.configService.jwtAccessExpiresIn as StringValue,
         },
       ),
       this.jwtService.signAsync(
@@ -176,8 +166,7 @@ export class AuthService {
           tokenType: 'refresh',
         },
         {
-          expiresIn:
-            this.configService.jwtRefreshExpiresIn as StringValue,
+          expiresIn: this.configService.jwtRefreshExpiresIn as StringValue,
           secret: this.configService.jwtRefreshSecret,
         },
       ),
@@ -202,18 +191,14 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      maxAge: ms(
-        this.configService.jwtAccessExpiresIn as StringValue,
-      ),
+      maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'strict',
-      maxAge: ms(
-        this.configService.jwtRefreshExpiresIn as StringValue,
-      ),
+      maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
   }
 }

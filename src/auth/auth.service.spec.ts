@@ -319,6 +319,9 @@ describe('AuthService', () => {
     });
 
     it('should successfully update password when current password is valid', async () => {
+      mockUsersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
       mockUsersService.updatePassword.mockResolvedValue(undefined);
 
       const result = await service.updatePassword('user-id', updatePasswordDto);
@@ -326,6 +329,8 @@ describe('AuthService', () => {
       expect(result).toEqual({
         message: 'Пароль успешно обновлен',
       });
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
 
       expect(bcrypt.compare).toHaveBeenCalledWith(
         'oldPassword123',
