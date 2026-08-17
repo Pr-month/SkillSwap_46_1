@@ -95,10 +95,7 @@ export class FavoritesService {
     return { isFavorite: count > 0 };
   }
 
-  private toDto(
-    favorite: FavoriteData,
-    skill: FavoriteSkillData,
-  ): FavoriteDto {
+  private toDto(favorite: FavoriteData, skill: FavoriteSkillData): FavoriteDto {
     return {
       id: favorite.id,
       userId: favorite.userId,

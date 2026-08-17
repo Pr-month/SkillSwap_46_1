@@ -1,12 +1,7 @@
-import {
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity('city')
-@Index(['name', 'subject'])
+@Unique(['name', 'subject'])
 export class City {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -29,8 +24,7 @@ export class City {
     scale: 6,
     transformer: {
       to: (value: number) => value,
-      from: (value: string | null) =>
-        value === null ? null : Number(value),
+      from: (value: string | null) => (value === null ? null : Number(value)),
     },
   })
   lat: number;
@@ -41,8 +35,7 @@ export class City {
     scale: 6,
     transformer: {
       to: (value: number) => value,
-      from: (value: string | null) =>
-        value === null ? null : Number(value),
+      from: (value: string | null) => (value === null ? null : Number(value)),
     },
   })
   lon: number;
