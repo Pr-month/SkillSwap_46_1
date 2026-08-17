@@ -1,3 +1,4 @@
+import { City } from '@/cities/entities/city.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { UserGender, UserRole } from '../enums/user.enums';
@@ -18,8 +19,8 @@ export class UserProfileResponse {
   @ApiProperty({ enum: UserGender })
   gender: UserGender;
 
-  @ApiProperty({ example: 'Москва' })
-  city: string;
+  @ApiProperty({ type: () => City })
+  city: City;
 
   @ApiPropertyOptional({
     example: 'https://example.com/avatar.jpg',

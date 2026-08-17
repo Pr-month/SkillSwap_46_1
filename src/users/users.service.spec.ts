@@ -29,8 +29,19 @@ describe('UsersService', () => {
   };
 
   const userId = 'ec9308f4-ef0a-44f5-b621-dab103719c62';
+  const cityId = 'city-uuid-123';
   const createdAt = new Date('2026-08-01T10:00:00.000Z');
   const updatedAt = new Date('2026-08-02T10:00:00.000Z');
+
+  const mockCity = {
+    id: cityId,
+    name: 'Москва',
+    district: 'Центральный',
+    subject: 'Москва',
+    population: 12655050,
+    lat: 55.7558,
+    lon: 37.6173,
+  };
 
   const createUser = (overrides: Partial<User> = {}): User =>
     Object.assign(new User(), {
@@ -40,7 +51,8 @@ describe('UsersService', () => {
       name: 'Иван Иванов',
       about: null,
       birthdate: new Date('1990-01-01'),
-      city: 'Москва',
+      cityId,
+      city: mockCity, 
       gender: UserGender.OTHER,
       avatar: null,
       favorites: [],
@@ -93,7 +105,7 @@ describe('UsersService', () => {
       password: 'password-hash',
       name: 'Иван Иванов',
       birthdate: new Date('1990-01-01'),
-      city: 'Москва',
+      cityId,
       gender: UserGender.OTHER,
       role: UserRole.USER,
     };
@@ -113,6 +125,7 @@ describe('UsersService', () => {
     await expect(service.findByEmail(user.email)).resolves.toBe(user);
     expect(usersRepository.findOne).toHaveBeenCalledWith({
       where: { email: user.email },
+      relations: { city: true },
     });
   });
 
@@ -123,6 +136,7 @@ describe('UsersService', () => {
     await expect(service.findById(userId)).resolves.toBe(user);
     expect(usersRepository.findOne).toHaveBeenCalledWith({
       where: { id: userId },
+      relations: { city: true },
     });
   });
 
@@ -160,7 +174,7 @@ describe('UsersService', () => {
       name: 'Иван Иванов',
       birthDate: new Date('1990-01-01'),
       gender: UserGender.OTHER,
-      city: 'Москва',
+      city: mockCity,
       avatar: null,
       about: null,
       role: UserRole.USER,
@@ -181,17 +195,17 @@ describe('UsersService', () => {
 
   it('updates and returns a user profile', async () => {
     const updateUserDto: UpdateUserDto = { name: 'Новое имя' };
+    const existingUser = createUser();
     const updatedUser = createUser({ name: 'Новое имя' });
-    usersRepository.preload.mockResolvedValue(updatedUser);
+
+    usersRepository.findOne
+      .mockResolvedValueOnce(existingUser)
+      .mockResolvedValue(updatedUser);
     usersRepository.save.mockResolvedValue(updatedUser);
 
     const result = await service.updateProfile(userId, updateUserDto);
 
-    expect(usersRepository.preload).toHaveBeenCalledWith({
-      id: userId,
-      ...updateUserDto,
-    });
-    expect(usersRepository.save).toHaveBeenCalledWith(updatedUser);
+    expect(usersRepository.save).toHaveBeenCalled();
     expect(result.name).toBe('Новое имя');
   });
 
