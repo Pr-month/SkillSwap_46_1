@@ -94,9 +94,8 @@ describe('AuthService', () => {
     };
 
     beforeEach(() => {
-      mockedBcrypt.hash
-        .mockResolvedValue('hashed-password' as never);
-mockUsersService.findByEmail.mockResolvedValue(null);
+      mockedBcrypt.hash.mockResolvedValue('hashed-password' as never);
+      mockUsersService.findByEmail.mockResolvedValue(null);
       mockJwtService.signAsync
         .mockResolvedValueOnce('access-token')
         .mockResolvedValueOnce('refresh-token');
@@ -146,9 +145,9 @@ mockUsersService.findByEmail.mockResolvedValue(null);
         email: registerDto.email,
       });
 
-      await expect(
-        service.register(registerDto, mockResponse),
-      ).rejects.toThrow(BusinessException);
+      await expect(service.register(registerDto, mockResponse)).rejects.toThrow(
+        BusinessException,
+      );
 
       expect(mockUsersService.create).not.toHaveBeenCalled();
       expect(mockUsersService.create).not.toHaveBeenCalled();
@@ -168,8 +167,7 @@ mockUsersService.findByEmail.mockResolvedValue(null);
     it('should return { id, email } if credentials are valid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      mockedBcrypt.compare
-        .mockResolvedValue(true as never);
+      mockedBcrypt.compare.mockResolvedValue(true as never);
 
       const result = await service.validateUser(
         'test@example.com',
@@ -201,8 +199,7 @@ mockUsersService.findByEmail.mockResolvedValue(null);
     it('should return null if password is invalid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      mockedBcrypt.compare
-        .mockResolvedValue(false as never);
+      mockedBcrypt.compare.mockResolvedValue(false as never);
 
       const result = await service.validateUser(
         'test@example.com',
@@ -234,25 +231,18 @@ mockUsersService.findByEmail.mockResolvedValue(null);
     });
 
     it('should successfully login user, set cookies, and return full user', async () => {
-      const result = await service.login(
-        mockUserPayload,
-        mockResponse,
-      );
+      const result = await service.login(mockUserPayload, mockResponse);
 
       expect(result).toEqual(mockFullUser);
 
-      expect(
-        mockUsersService.updateRefreshToken,
-      ).toHaveBeenCalledWith(
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
         'user-id',
         'refresh-token',
       );
 
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
 
-      expect(mockUsersService.findById).toHaveBeenCalledWith(
-        'user-id',
-      );
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
     });
   });
 
@@ -260,26 +250,19 @@ mockUsersService.findByEmail.mockResolvedValue(null);
     it('should clear refresh token in DB and clear cookies', async () => {
       mockUsersService.clearRefreshToken.mockResolvedValue(undefined);
 
-      const result = await service.logout(
-        'user-id',
-        mockResponse,
-      );
+      const result = await service.logout('user-id', mockResponse);
 
       expect(result).toEqual({
         message: 'Успешный выход',
       });
 
-      expect(
-        mockUsersService.clearRefreshToken,
-      ).toHaveBeenCalledWith('user-id');
-
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
-        'accessToken',
+      expect(mockUsersService.clearRefreshToken).toHaveBeenCalledWith(
+        'user-id',
       );
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith(
-        'refreshToken',
-      );
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('accessToken');
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken');
     });
   });
 
@@ -302,9 +285,7 @@ mockUsersService.findByEmail.mockResolvedValue(null);
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUsersService.findById).toHaveBeenCalledWith(
-        'user-id',
-      );
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
     });
 
     it('should throw NotFoundException if user not found', async () => {
@@ -340,10 +321,7 @@ mockUsersService.findByEmail.mockResolvedValue(null);
     it('should successfully update password when current password is valid', async () => {
       mockUsersService.updatePassword.mockResolvedValue(undefined);
 
-      const result = await service.updatePassword(
-        'user-id',
-        updatePasswordDto,
-      );
+      const result = await service.updatePassword('user-id', updatePasswordDto);
 
       expect(result).toEqual({
         message: 'Пароль успешно обновлен',
@@ -354,14 +332,9 @@ mockUsersService.findByEmail.mockResolvedValue(null);
         'hashed-old-password',
       );
 
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(
-        'newPassword123',
-        10,
-      );
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
 
-      expect(
-        mockUsersService.updatePassword,
-      ).toHaveBeenCalledWith(
+      expect(mockUsersService.updatePassword).toHaveBeenCalledWith(
         'user-id',
         'hashed-new-password',
       );
@@ -374,9 +347,7 @@ mockUsersService.findByEmail.mockResolvedValue(null);
 
       expect(bcrypt.hash).not.toHaveBeenCalled();
 
-      expect(
-        mockUsersService.updatePassword,
-      ).not.toHaveBeenCalled();
+      expect(mockUsersService.updatePassword).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when user does not exist', async () => {
