@@ -8,6 +8,7 @@ import { Category } from '../categories/entities/category.entity';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
+import { Skill } from '../skills/entities/skills.entity';
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { CreateUserData } from '../users/users.types';

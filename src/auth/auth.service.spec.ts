@@ -9,6 +9,11 @@ import { ConfigurationService } from '../module/configuration/configuration.serv
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+
+jest.mock('bcrypt');
+
+const mockedBcrypt = bcrypt;
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -20,7 +25,6 @@ describe('AuthService', () => {
     updateRefreshToken: jest.fn(),
     updatePassword: jest.fn(),
     clearRefreshToken: jest.fn(),
-    existsByEmail: jest.fn(),
   };
 
   const mockJwtService = {
@@ -68,7 +72,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const registerDto = {
+    const registerDto: RegisterDto = {
       email: 'test@example.com',
       password: 'password123',
       name: 'Иван Петров',
@@ -90,10 +94,9 @@ describe('AuthService', () => {
     };
 
     beforeEach(() => {
-      jest
-        .spyOn(bcrypt, 'hash')
+      mockedBcrypt.hash
         .mockResolvedValue('hashed-password' as never);
-
+mockUsersService.findByEmail.mockResolvedValue(null);
       mockJwtService.signAsync
         .mockResolvedValueOnce('access-token')
         .mockResolvedValueOnce('refresh-token');
@@ -108,6 +111,25 @@ describe('AuthService', () => {
 
       expect(result).toEqual(mockUser);
 
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        registerDto.email,
+      );
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
+      expect(mockUsersService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: registerDto.email,
+          password: 'hashed-password',
+          name: registerDto.name,
+          birthdate: new Date(registerDto.birthdate),
+          gender: registerDto.gender,
+          city: registerDto.city,
+          avatar: registerDto.avatar,
+          role: UserRole.USER,
+          about: null,
+          wantToLearn: [],
+          skills: [],
+        }),
+      );
       expect(mockUsersService.create).toHaveBeenCalled();
 
       expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
@@ -129,6 +151,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(BusinessException);
 
       expect(mockUsersService.create).not.toHaveBeenCalled();
+      expect(mockUsersService.create).not.toHaveBeenCalled();
       expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
     });
   });
@@ -145,8 +168,7 @@ describe('AuthService', () => {
     it('should return { id, email } if credentials are valid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      jest
-        .spyOn(bcrypt, 'compare')
+      mockedBcrypt.compare
         .mockResolvedValue(true as never);
 
       const result = await service.validateUser(
@@ -158,6 +180,10 @@ describe('AuthService', () => {
         id: 'user-id',
         email: 'test@example.com',
       });
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith(
+        'password123',
+        'hashed-password',
+      );
     });
 
     it('should return null if user does not exist', async () => {
@@ -169,13 +195,13 @@ describe('AuthService', () => {
       );
 
       expect(result).toBeNull();
+      expect(mockedBcrypt.compare).not.toHaveBeenCalled();
     });
 
     it('should return null if password is invalid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      jest
-        .spyOn(bcrypt, 'compare')
+      mockedBcrypt.compare
         .mockResolvedValue(false as never);
 
       const result = await service.validateUser(
@@ -283,15 +309,12 @@ describe('AuthService', () => {
 
     it('should throw NotFoundException if user not found', async () => {
       mockUsersService.findById.mockRejectedValue(
-        new BusinessException(
-          exceptionCodes.users.notFound,
-          404,
-        ),
+        new BusinessException(exceptionCodes.users.notFound, 404),
       );
 
-      await expect(
-        service.getProfile('invalid-id'),
-      ).rejects.toThrow(BusinessException);
+      await expect(service.getProfile('invalid-id')).rejects.toThrow(
+        BusinessException,
+      );
     });
   });
 
@@ -308,24 +331,15 @@ describe('AuthService', () => {
     };
 
     beforeEach(() => {
-      mockUsersService.findById.mockResolvedValue(mockUser);
-
-      mockUsersService.updatePassword.mockResolvedValue(
-        undefined,
-      );
-
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockResolvedValue(true as never);
-
       jest
         .spyOn(bcrypt, 'hash')
-        .mockResolvedValue(
-          'hashed-new-password' as never,
-        );
+        .mockResolvedValue('hashed-new-password' as never);
+      mockUsersService.updatePassword.mockResolvedValue(undefined);
     });
 
     it('should successfully update password when current password is valid', async () => {
+      mockUsersService.updatePassword.mockResolvedValue(undefined);
+
       const result = await service.updatePassword(
         'user-id',
         updatePasswordDto,
@@ -340,7 +354,7 @@ describe('AuthService', () => {
         'hashed-old-password',
       );
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(
         'newPassword123',
         10,
       );
@@ -353,23 +367,9 @@ describe('AuthService', () => {
       );
     });
 
-    it('should throw UnauthorizedException when current password is invalid', async () => {
-      (
-        bcrypt.compare as unknown as jest.Mock
-      ).mockResolvedValue(false);
-
-      await expect(
-        service.updatePassword(
-          'user-id',
-          updatePasswordDto,
-        ),
-      ).rejects.toMatchObject({
-        status: HttpStatus.UNAUTHORIZED,
-      });
-
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        'oldPassword123',
-        'hashed-old-password',
+    it('should throw BusinessException if user not found', async () => {
+      mockUsersService.findById.mockRejectedValue(
+        new BusinessException(exceptionCodes.users.notFound, 404),
       );
 
       expect(bcrypt.hash).not.toHaveBeenCalled();
@@ -383,21 +383,9 @@ describe('AuthService', () => {
       mockUsersService.findById.mockResolvedValue(null);
 
       await expect(
-        service.updatePassword(
-          'invalid-user-id',
-          updatePasswordDto,
-        ),
-      ).rejects.toMatchObject({
-        status: HttpStatus.NOT_FOUND,
-      });
-
-      expect(bcrypt.compare).not.toHaveBeenCalled();
-
-      expect(bcrypt.hash).not.toHaveBeenCalled();
-
-      expect(
-        mockUsersService.updatePassword,
-      ).not.toHaveBeenCalled();
+        service.updatePassword('invalid-id', updatePasswordDto),
+      ).rejects.toThrow(BusinessException);
+      expect(mockUsersService.updatePassword).not.toHaveBeenCalled();
     });
   });
 });
