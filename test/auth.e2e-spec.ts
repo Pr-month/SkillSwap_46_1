@@ -1,14 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-
 import { AppModule } from '@/app.module';
 import { UserGender } from '@/users/enums/user.enums';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let accessToken: string;
-  let userId: string;
+  let _userId: string;
 
   const testUser = {
     email: 'e2e-test@example.com',
@@ -37,10 +36,10 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-  if (app) {
-    await app.close();
-  }
-});
+    if (app) {
+      await app.close();
+    }
+  });
 
   describe('/auth/register (POST)', () => {
     it('should register a new user', () => {
@@ -64,29 +63,29 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('/auth/login (POST)', () => {
-  it('should login with valid credentials', () => {
-    return request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: testUser.email,
-        password: testUser.password,
-      })
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        
-        const cookies = res.headers['set-cookie'];
-        const cookiesArray = Array.isArray(cookies) ? cookies : [cookies];
-        
-        const accessTokenCookie = cookiesArray.find((c: string) =>
-          c.startsWith('accessToken='),
-        );
-        
-        if (accessTokenCookie) {
-          accessToken = accessTokenCookie.split(';')[0].split('=')[1];
-        }
-      });
-  });
+    it('should login with valid credentials', () => {
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('id');
+
+          const cookies = res.headers['set-cookie'];
+          const cookiesArray = Array.isArray(cookies) ? cookies : [cookies];
+
+          const accessTokenCookie = cookiesArray.find((c: string) =>
+            c.startsWith('accessToken='),
+          );
+
+          if (accessTokenCookie) {
+            accessToken = accessTokenCookie.split(';')[0].split('=')[1];
+          }
+        });
+    });
 
     it('should fail with invalid password', () => {
       return request(app.getHttpServer())
@@ -111,9 +110,7 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should fail without token', () => {
-      return request(app.getHttpServer())
-        .get('/auth/profile')
-        .expect(401);
+      return request(app.getHttpServer()).get('/auth/profile').expect(401);
     });
   });
 
