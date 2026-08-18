@@ -54,11 +54,11 @@ export class RegisterDto {
   gender: UserGender = UserGender.OTHER;
 
   @ApiProperty({
-    example: 'Москва',
-    description: 'Город',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID города из справочника',
   })
-  @IsString()
-  city: string;
+  @IsUUID()
+  cityId: string;
 
   @ApiProperty({
     example: 'https://example.com/avatar.jpg',

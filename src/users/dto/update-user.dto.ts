@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
@@ -5,6 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -25,10 +27,13 @@ export class UpdateUserDto {
   @IsDate()
   birthdate?: Date;
 
+  @ApiPropertyOptional({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID города из справочника',
+  })
+  @IsUUID()
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  city?: string;
+  cityId?: string;
 
   @IsOptional()
   @IsEnum(UserGender)

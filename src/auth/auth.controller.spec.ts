@@ -18,6 +18,8 @@ describe('AuthController', () => {
   let controller: AuthController;
   let _authService: AuthService;
 
+  const cityId = 'city-uuid-123';
+
   const mockAuthService = {
     register: jest.fn(),
     login: jest.fn(),
@@ -64,7 +66,7 @@ describe('AuthController', () => {
       name: 'Иван Петров',
       birthdate: '1990-01-01',
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
       avatar: 'https://example.com/avatar.jpg',
     };
 

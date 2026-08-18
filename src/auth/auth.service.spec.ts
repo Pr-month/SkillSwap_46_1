@@ -18,6 +18,17 @@ const mockedBcrypt = bcrypt;
 describe('AuthService', () => {
   let service: AuthService;
 
+  const cityId = 'city-uuid-123';
+  const mockCity = {
+    id: cityId,
+    name: 'Москва',
+    district: 'Центральный',
+    subject: 'Москва',
+    population: 12655050,
+    lat: 55.7558,
+    lon: 37.6173,
+  };
+
   const mockUsersService = {
     findByEmail: jest.fn(),
     findById: jest.fn(),
@@ -78,7 +89,7 @@ describe('AuthService', () => {
       name: 'Иван Петров',
       birthdate: '1990-01-01',
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
       avatar: 'https://example.com/avatar.jpg',
     };
 
@@ -88,7 +99,8 @@ describe('AuthService', () => {
       name: 'Иван Петров',
       birthdate: new Date('1990-01-01'),
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
+      city: mockCity, 
       avatar: 'https://example.com/avatar.jpg',
       role: UserRole.USER,
     };
@@ -121,7 +133,7 @@ describe('AuthService', () => {
           name: registerDto.name,
           birthdate: new Date(registerDto.birthdate),
           gender: registerDto.gender,
-          city: registerDto.city,
+          cityId: registerDto.cityId, 
           avatar: registerDto.avatar,
           role: UserRole.USER,
           about: null,
@@ -273,7 +285,8 @@ describe('AuthService', () => {
       name: 'Иван Петров',
       birthdate: new Date('1990-01-01'),
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
+      city: mockCity,
       avatar: 'https://example.com/avatar.jpg',
       about: 'О себе',
     };

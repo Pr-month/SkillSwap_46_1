@@ -44,12 +44,14 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },
+      relations: { city: true },
     });
   }
 
   async findById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { id },
+      relations: { city: true },
     });
   }
 
@@ -98,10 +100,7 @@ export class UsersService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserProfileResponse> {
-    const user = await this.usersRepository.preload({
-      id,
-      ...updateUserDto,
-    });
+    const user = await this.findById(id);
 
     if (!user) {
       throw new BusinessException(
@@ -110,9 +109,18 @@ export class UsersService {
       );
     }
 
-    const updatedUser = await this.usersRepository.save(user);
+    if (updateUserDto.name !== undefined) user.name = updateUserDto.name;
+    if (updateUserDto.birthdate !== undefined)
+      user.birthdate = updateUserDto.birthdate;
+    if (updateUserDto.gender !== undefined) user.gender = updateUserDto.gender;
+    if (updateUserDto.cityId !== undefined) user.cityId = updateUserDto.cityId;
+    if (updateUserDto.avatar !== undefined) user.avatar = updateUserDto.avatar;
+    if (updateUserDto.about !== undefined) user.about = updateUserDto.about;
 
-    return this.toProfileResponse(updatedUser);
+    await this.usersRepository.save(user);
+
+    const fullUser = await this.findById(id);
+    return this.toProfileResponse(fullUser!);
   }
 
   async changePassword(

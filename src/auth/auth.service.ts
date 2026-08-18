@@ -52,7 +52,7 @@ export class AuthService {
       password: hashedPassword,
       birthdate: new Date(registerDto.birthdate),
       gender: registerDto.gender ?? UserGender.OTHER,
-      city: registerDto.city,
+      cityId: registerDto.cityId,
       avatar: registerDto.avatar,
       role: UserRole.USER,
       about: registerDto.about ?? null,
