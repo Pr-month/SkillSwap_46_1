@@ -19,6 +19,11 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMe(@Request() request: RequestWithUser) {
