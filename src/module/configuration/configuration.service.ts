@@ -65,4 +65,24 @@ export class ConfigurationService {
   get loggerType(): string {
     return this.configService.get<string>(EnvKey.LoggerType);
   }
+
+  get s3Region(): string {
+    return this.configService.get<string>(EnvKey.S3Region);
+  }
+
+  get s3AccessKeyId(): string {
+    return this.configService.get<string>(EnvKey.S3AccessKeyId);
+  }
+
+  get s3SecretAccessKey(): string {
+    return this.configService.get<string>(EnvKey.S3SecretAccessKey);
+  }
+
+  get s3Endpoint(): string {
+    return this.configService.get<string>(EnvKey.S3Endpoint);
+  }
+
+  get s3Bucket(): string {
+    return this.configService.get<string>(EnvKey.S3Bucket);
+  }
 }
