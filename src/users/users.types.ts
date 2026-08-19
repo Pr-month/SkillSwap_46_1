@@ -16,8 +16,10 @@ export type CreateUserData = Omit<
   | 'updatedAt'
   | 'skills'
   | 'wantToLearn'
+  | 'city'
 > & {
   password: string;
+  cityId: string;
   wantToLearn?: Category[];
   skills?: Skill[];
 };

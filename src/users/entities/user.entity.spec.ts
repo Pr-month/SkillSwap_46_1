@@ -18,7 +18,7 @@ describe('User entity', () => {
       'password',
       'about',
       'birthdate',
-      'city',
+      'cityId',
       'gender',
       'avatar',
       'createdAt',
@@ -51,6 +51,10 @@ describe('User entity', () => {
 
     expect(relations).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          propertyName: 'city',
+          relationType: 'many-to-one',
+        }),
         expect.objectContaining({
           propertyName: 'favorites',
           relationType: 'one-to-many',

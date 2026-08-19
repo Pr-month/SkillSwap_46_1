@@ -3,8 +3,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Relation,
@@ -12,6 +14,7 @@ import {
 } from 'typeorm';
 
 import { Category } from '../../categories/entities/category.entity';
+import { City } from '../../cities/entities/city.entity';
 import { Favorite } from '../../skills/entities/favorite.entity';
 import { Skill } from '../../skills/entities/skills.entity';
 import { UserGender, UserRole } from '../enums/user.enums';
@@ -37,8 +40,14 @@ export class User {
   @Column({ type: 'date' })
   birthdate: Date;
 
-  @Column({ type: 'varchar', length: 100 })
-  city: string;
+  @ManyToOne(() => City, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'cityId' })
+  city: Relation<City>;
+
+  @Column({ type: 'uuid' })
+  cityId: string;
 
   @Column({ type: 'enum', enum: UserGender })
   gender: UserGender;
@@ -47,7 +56,7 @@ export class User {
   avatar: string | null;
 
   @OneToMany(() => Favorite, (favorite) => favorite.user)
-  favorites: Favorite[];
+  favorites: Relation<Favorite>[];
 
   @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Relation<Skill>[];

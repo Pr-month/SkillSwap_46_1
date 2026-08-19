@@ -54,11 +54,11 @@ export class RegisterDto {
   gender: UserGender = UserGender.OTHER;
 
   @ApiProperty({
-    example: 'Москва',
-    description: 'Город',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID города из справочника',
   })
-  @IsString()
-  city: string;
+  @IsUUID()
+  cityId: string;
 
   @ApiProperty({
     example: 'https://example.com/avatar.jpg',
@@ -82,7 +82,8 @@ export class RegisterDto {
   })
   @IsArray()
   @IsUUID('all', { each: true })
-  wantToLearn: string[];
+  @IsOptional()
+  wantToLearn?: string[];
 
   @ApiPropertyOptional({
     description: 'ID навыков, которыми пользователь может научить',
@@ -91,7 +92,8 @@ export class RegisterDto {
   })
   @IsArray()
   @IsUUID('all', { each: true })
-  skills: string[];
+  @IsOptional()
+  skills?: string[];
 }
 
 // Ответ на регистрацию

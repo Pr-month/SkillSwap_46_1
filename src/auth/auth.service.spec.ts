@@ -9,9 +9,25 @@ import { ConfigurationService } from '../module/configuration/configuration.serv
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+
+jest.mock('bcrypt');
+
+const mockedBcrypt = bcrypt;
 
 describe('AuthService', () => {
   let service: AuthService;
+
+  const cityId = 'city-uuid-123';
+  const mockCity = {
+    id: cityId,
+    name: 'Москва',
+    district: 'Центральный',
+    subject: 'Москва',
+    population: 12655050,
+    lat: 55.7558,
+    lon: 37.6173,
+  };
 
   const mockUsersService = {
     findByEmail: jest.fn(),
@@ -20,7 +36,6 @@ describe('AuthService', () => {
     updateRefreshToken: jest.fn(),
     updatePassword: jest.fn(),
     clearRefreshToken: jest.fn(),
-    existsByEmail: jest.fn(),
   };
 
   const mockJwtService = {
@@ -43,13 +58,23 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: UsersService, useValue: mockUsersService },
-        { provide: JwtService, useValue: mockJwtService },
-        { provide: ConfigurationService, useValue: mockConfigService },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: ConfigurationService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+
     jest.clearAllMocks();
   });
 
@@ -58,13 +83,13 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const registerDto = {
+    const registerDto: RegisterDto = {
       email: 'test@example.com',
       password: 'password123',
       name: 'Иван Петров',
       birthdate: '1990-01-01',
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
       avatar: 'https://example.com/avatar.jpg',
     };
 
@@ -74,18 +99,22 @@ describe('AuthService', () => {
       name: 'Иван Петров',
       birthdate: new Date('1990-01-01'),
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
+      city: mockCity,
       avatar: 'https://example.com/avatar.jpg',
       role: UserRole.USER,
     };
 
     beforeEach(() => {
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
-      mockJwtService.signAsync.mockResolvedValueOnce('access-token');
-      mockJwtService.signAsync.mockResolvedValueOnce('refresh-token');
+      mockedBcrypt.hash.mockResolvedValue('hashed-password' as never);
+      mockUsersService.findByEmail.mockResolvedValue(null);
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
     });
 
     it('should successfully register a new user and set cookies', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
       mockUsersService.create.mockResolvedValue(mockUser);
       mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
 
@@ -93,10 +122,27 @@ describe('AuthService', () => {
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUsersService.create).toHaveBeenCalledWith(
-        registerDto,
-        'hashed-password',
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        registerDto.email,
       );
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
+      expect(mockUsersService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: registerDto.email,
+          password: 'hashed-password',
+          name: registerDto.name,
+          birthdate: new Date(registerDto.birthdate),
+          gender: registerDto.gender,
+          cityId: registerDto.cityId,
+          avatar: registerDto.avatar,
+          role: UserRole.USER,
+          about: null,
+          wantToLearn: [],
+          skills: [],
+        }),
+      );
+      expect(mockUsersService.create).toHaveBeenCalled();
+
       expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
         'user-id',
         'refresh-token',
@@ -106,13 +152,17 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if user already exists', async () => {
-      mockUsersService.create.mockRejectedValue(
-        new BusinessException(exceptionCodes.users.alreadyExists, 409),
-      );
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'existing-user-id',
+        email: registerDto.email,
+      });
 
       await expect(service.register(registerDto, mockResponse)).rejects.toThrow(
         BusinessException,
       );
+
+      expect(mockUsersService.create).not.toHaveBeenCalled();
+      expect(mockUsersService.create).not.toHaveBeenCalled();
       expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
     });
   });
@@ -128,14 +178,22 @@ describe('AuthService', () => {
 
     it('should return { id, email } if credentials are valid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+
+      mockedBcrypt.compare.mockResolvedValue(true as never);
 
       const result = await service.validateUser(
         'test@example.com',
         'password123',
       );
 
-      expect(result).toEqual({ id: 'user-id', email: 'test@example.com' });
+      expect(result).toEqual({
+        id: 'user-id',
+        email: 'test@example.com',
+      });
+      expect(mockedBcrypt.compare).toHaveBeenCalledWith(
+        'password123',
+        'hashed-password',
+      );
     });
 
     it('should return null if user does not exist', async () => {
@@ -145,28 +203,41 @@ describe('AuthService', () => {
         'unknown@example.com',
         'password123',
       );
+
       expect(result).toBeNull();
+      expect(mockedBcrypt.compare).not.toHaveBeenCalled();
     });
 
     it('should return null if password is invalid', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
+
+      mockedBcrypt.compare.mockResolvedValue(false as never);
 
       const result = await service.validateUser(
         'test@example.com',
         'wrong-password',
       );
+
       expect(result).toBeNull();
     });
   });
 
   describe('login', () => {
-    const mockUserPayload = { id: 'user-id', email: 'test@example.com' };
-    const mockFullUser = { ...mockUserPayload, name: 'Иван Петров' };
+    const mockUserPayload = {
+      id: 'user-id',
+      email: 'test@example.com',
+    };
+
+    const mockFullUser = {
+      ...mockUserPayload,
+      name: 'Иван Петров',
+    };
 
     beforeEach(() => {
-      mockJwtService.signAsync.mockResolvedValueOnce('access-token');
-      mockJwtService.signAsync.mockResolvedValueOnce('refresh-token');
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
+
       mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
       mockUsersService.findById.mockResolvedValue(mockFullUser);
     });
@@ -180,7 +251,9 @@ describe('AuthService', () => {
         'user-id',
         'refresh-token',
       );
+
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+
       expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
     });
   });
@@ -191,11 +264,16 @@ describe('AuthService', () => {
 
       const result = await service.logout('user-id', mockResponse);
 
-      expect(result).toEqual({ message: 'Успешный выход' });
+      expect(result).toEqual({
+        message: 'Успешный выход',
+      });
+
       expect(mockUsersService.clearRefreshToken).toHaveBeenCalledWith(
         'user-id',
       );
+
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('accessToken');
+
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('refreshToken');
     });
   });
@@ -207,7 +285,8 @@ describe('AuthService', () => {
       name: 'Иван Петров',
       birthdate: new Date('1990-01-01'),
       gender: UserGender.MALE,
-      city: 'Москва',
+      cityId,
+      city: mockCity,
       avatar: 'https://example.com/avatar.jpg',
       about: 'О себе',
     };
@@ -218,6 +297,7 @@ describe('AuthService', () => {
       const result = await service.getProfile('user-id');
 
       expect(result).toEqual(mockUser);
+
       expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
     });
 
@@ -238,6 +318,12 @@ describe('AuthService', () => {
       newPassword: 'newPassword123',
     };
 
+    const mockUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      password: 'hashed-old-password',
+    };
+
     beforeEach(() => {
       jest
         .spyOn(bcrypt, 'hash')
@@ -245,11 +331,27 @@ describe('AuthService', () => {
       mockUsersService.updatePassword.mockResolvedValue(undefined);
     });
 
-    it('should successfully update password', async () => {
+    it('should successfully update password when current password is valid', async () => {
+      mockUsersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      mockUsersService.updatePassword.mockResolvedValue(undefined);
+
       const result = await service.updatePassword('user-id', updatePasswordDto);
 
-      expect(result).toEqual({ message: 'Пароль успешно обновлен' });
-      expect(bcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
+      expect(result).toEqual({
+        message: 'Пароль успешно обновлен',
+      });
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'oldPassword123',
+        'hashed-old-password',
+      );
+
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
+
       expect(mockUsersService.updatePassword).toHaveBeenCalledWith(
         'user-id',
         'hashed-new-password',
@@ -260,6 +362,14 @@ describe('AuthService', () => {
       mockUsersService.findById.mockRejectedValue(
         new BusinessException(exceptionCodes.users.notFound, 404),
       );
+
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+
+      expect(mockUsersService.updatePassword).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      mockUsersService.findById.mockResolvedValue(null);
 
       await expect(
         service.updatePassword('invalid-id', updatePasswordDto),
