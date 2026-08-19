@@ -67,4 +67,24 @@ export class EnvironmentVariables {
   @IsString()
   @IsIn(['dev', 'production', 'test', 'combined', 'console'])
   [EnvKey.LoggerType]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.S3Region]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.S3AccessKeyId]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.S3SecretAccessKey]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.S3Endpoint]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.S3Bucket]: string;
 }
