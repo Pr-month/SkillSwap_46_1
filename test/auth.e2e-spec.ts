@@ -7,7 +7,6 @@ import request from 'supertest';
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let accessToken: string;
-  let _userId: string;
 
   const testUser = {
     email: 'e2e-test@example.com',
@@ -19,12 +18,15 @@ describe('AuthController (e2e)', () => {
     avatar: 'https://example.com/avatar.jpg',
   };
 
+  const newPassword = 'newPassword123';
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -32,6 +34,7 @@ describe('AuthController (e2e)', () => {
         transform: true,
       }),
     );
+
     await app.init();
   });
 
@@ -50,7 +53,6 @@ describe('AuthController (e2e)', () => {
         .expect((res) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.email).toBe(testUser.email);
-          userId = res.body.id;
         });
     });
 
@@ -80,6 +82,8 @@ describe('AuthController (e2e)', () => {
           const accessTokenCookie = cookiesArray.find((c: string) =>
             c.startsWith('accessToken='),
           );
+
+          expect(accessTokenCookie).toBeDefined();
 
           if (accessTokenCookie) {
             accessToken = accessTokenCookie.split(';')[0].split('=')[1];
@@ -111,6 +115,78 @@ describe('AuthController (e2e)', () => {
 
     it('should fail without token', () => {
       return request(app.getHttpServer()).get('/auth/profile').expect(401);
+    });
+  });
+
+  describe('/auth/password (PATCH)', () => {
+    it('should fail without token', () => {
+      return request(app.getHttpServer())
+        .patch('/auth/password')
+        .send({
+          currentPassword: testUser.password,
+          newPassword,
+        })
+        .expect(401);
+    });
+
+    it('should fail with incorrect current password', () => {
+      return request(app.getHttpServer())
+        .patch('/auth/password')
+        .set('Cookie', [`accessToken=${accessToken}`])
+        .send({
+          currentPassword: 'wrongpassword',
+          newPassword,
+        })
+        .expect(401)
+        .expect((res) => {
+          expect(res.body.code).toBe('user:invalid-credentials');
+        });
+    });
+
+    it('should keep old password after failed password change', () => {
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        })
+        .expect(200);
+    });
+
+    it('should update password with correct current password', () => {
+      return request(app.getHttpServer())
+        .patch('/auth/password')
+        .set('Cookie', [`accessToken=${accessToken}`])
+        .send({
+          currentPassword: testUser.password,
+          newPassword,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual({
+            message: 'Пароль успешно обновлен',
+          });
+        });
+    });
+
+    it('should fail login with old password after password update', () => {
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        })
+        .expect(401);
+    });
+
+    it('should login with new password after password update', () => {
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: testUser.email,
+          password: newPassword,
+        })
+        .expect(200);
     });
   });
 
