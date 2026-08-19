@@ -100,7 +100,7 @@ describe('AuthService', () => {
       birthdate: new Date('1990-01-01'),
       gender: UserGender.MALE,
       cityId,
-      city: mockCity, 
+      city: mockCity,
       avatar: 'https://example.com/avatar.jpg',
       role: UserRole.USER,
     };
@@ -133,7 +133,7 @@ describe('AuthService', () => {
           name: registerDto.name,
           birthdate: new Date(registerDto.birthdate),
           gender: registerDto.gender,
-          cityId: registerDto.cityId, 
+          cityId: registerDto.cityId,
           avatar: registerDto.avatar,
           role: UserRole.USER,
           about: null,

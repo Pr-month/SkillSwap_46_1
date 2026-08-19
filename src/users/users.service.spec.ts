@@ -52,7 +52,7 @@ describe('UsersService', () => {
       about: null,
       birthdate: new Date('1990-01-01'),
       cityId,
-      city: mockCity, 
+      city: mockCity,
       gender: UserGender.OTHER,
       avatar: null,
       favorites: [],
