@@ -1,0 +1,48 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  width: 100%;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-size: var(--fs-h1, 32px);
+  font-weight: var(--font-weight-medium, 500);
+  line-height: var(--lh-h1, 40px);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-bg-card, #ffffff);
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-size: var(--fs-body, 16px);
+  font-weight: var(--font-weight-regular, 400);
+  line-height: var(--lh-body, 24px);
+  cursor: pointer;
+  padding-inline: var(--space-24, 24px);
+  padding-block: var(--space-12, 12px);
+}
+
+.actionIcon {
+  flex-shrink: 0;
+}
+
+.action:hover {
+  opacity: 0.8;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--color-accent, #abd27a);
+  outline-offset: 4px;
+  border-radius: 8px;
+}

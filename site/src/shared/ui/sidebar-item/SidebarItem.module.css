@@ -1,0 +1,33 @@
+.sidebar_item {
+  justify-content: flex-start;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  color: var(--color-text-primary, #253017);
+  text-decoration: none;
+  background-color: transparent;
+}
+
+.sidebar_item:hover:not(:disabled) {
+  background-color: var(--color-accent-hover, #deebc5);
+}
+
+.sidebar_item:active:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--color-accent-strong, #508826);
+}
+
+.sidebar_item:disabled {
+  border-color: var(--color-bg-disabled, #e4e8df);
+  color: var(--color-text-muted, #69735d);
+  background-color: var(--color-bg-disabled, #e4e8df);
+}
+
+.active {
+  background-color: var(--color-accent-hover, #deebc5);
+}
+
+.label {
+  font-weight: var(--font-weight-regular);
+}

@@ -1,0 +1,106 @@
+.search {
+  width: 100%;
+  max-width: 527px;
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s, 12px);
+  padding: var(--space-12, 12px);
+  background-color: var(--color-bg-card, #ffffff);
+  transition: all 0.2s ease;
+}
+
+.searchContainer:focus-within {
+  border-color: var(--color-accent-strong, #508826);
+  outline: none;
+}
+
+.iconInputWrapper {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-8, 8px);
+  min-width: 0;
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--color-text-muted, var(--color-olive, #69735d));
+}
+
+.input {
+  width: 100%;
+  border: none;
+  padding: 0;
+  outline: none;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+  letter-spacing: 0.02em;
+  background: transparent;
+}
+
+.input::placeholder {
+  opacity: 1;
+  color: var(--color-text-muted, var(--color-olive, #69735d));
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.clearButton {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: var(--space-12, 12px);
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted, var(--color-olive, #69735d));
+  background: transparent;
+  transition: color 0.2s ease;
+  animation: fadeIn 0.2s ease;
+  cursor: pointer;
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid var(--color-accent-strong, #508826);
+  outline-offset: 2px;
+}
+
+.clearButton:disabled {
+  opacity: 0.4;
+  color: var(--color-text-disabled, #9ca197);
+  cursor: not-allowed;
+}
+
+.clearButton:hover {
+  color: var(--color-text-primary, #253017);
+  transform: scale(1.1);
+}
+
+.clearButton:active {
+  transform: scale(0.95);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

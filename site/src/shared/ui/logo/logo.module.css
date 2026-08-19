@@ -1,0 +1,49 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoWithText {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.logoImage {
+  display: block;
+  object-fit: contain;
+}
+
+/* Размеры по умолчанию */
+.sizeSm {
+  width: 32px;
+  height: 32px;
+}
+
+.sizeMd {
+  width: 40px;
+  height: 40px;
+}
+
+.sizeLg {
+  width: 48px;
+  height: 48px;
+}
+
+.logoText {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: var(--lh-h2);
+  color: var(--color-text-primary);
+}
+
+.fallbackText {
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  color: var(--color-text-muted);
+  display: inline;
+}

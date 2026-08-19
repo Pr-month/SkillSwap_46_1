@@ -1,0 +1,79 @@
+.sliderWrapper {
+  position: relative;
+  width: 1368px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.sliderViewport {
+  width: 1368px;
+  overflow: hidden;
+}
+
+.slide {
+  width: 324px;
+  box-sizing: border-box;
+}
+
+.sliderViewport :global(.slick-list) {
+  overflow: hidden;
+}
+
+.sliderViewport :global(.slick-track) {
+  display: flex;
+  gap: 24px;
+}
+
+.sliderViewport :global(.slick-slide) {
+  height: auto;
+}
+
+.sliderViewport :global(.slick-slide > div) {
+  display: block;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  border: none;
+  border-radius: 100px;
+  background-color: #e4e8df;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.arrowNext {
+  right: -16px;
+}
+
+.arrowIcon {
+  position: relative;
+  top: 1px;
+  left: -1px;
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid #69735d;
+  border-right: 2px solid #69735d;
+  box-sizing: border-box;
+  transform: rotate(45deg);
+}
+
+.staticGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 324px);
+  gap: 24px;
+  width: 1368px;
+}
+
+.staticCard {
+  width: 324px;
+  box-sizing: border-box;
+}

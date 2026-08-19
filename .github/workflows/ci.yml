@@ -17,10 +17,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install server dependencies
+        working-directory: server
         run: npm ci
 
-      - name: Run linter
+      - name: Run server linter
+        working-directory: server
+        run: npm run lint
+
+      - name: Install site dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Run site linter
+        working-directory: site
         run: npm run lint
 
   unit-tests:
@@ -36,10 +46,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install server dependencies
+        working-directory: server
         run: npm ci
 
-      - name: Run unit tests
+      - name: Run server unit tests
+        working-directory: server
+        run: npm run test
+
+      - name: Install site dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Run site unit tests
+        working-directory: site
         run: npm run test
 
   e2e-tests:
@@ -75,8 +95,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install server dependencies
+        working-directory: server
         run: npm ci
 
       - name: Run e2e tests
+        working-directory: server
         run: npm run test:e2e

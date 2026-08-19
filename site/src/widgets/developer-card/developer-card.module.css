@@ -1,0 +1,124 @@
+.card {
+  display: flex;
+  gap: 16px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  padding: 16px;
+  background-color: var(--color-bg-card);
+  transition: all 0.2s ease;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.avatar {
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0 0 4px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.role {
+  margin: 0 0 12px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.contributions {
+  margin-bottom: 8px;
+}
+
+.contributions_title {
+  margin: 0 0 4px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.contributions_list {
+  margin: 0;
+  padding: 0 0 0 20px;
+  list-style: disc;
+}
+
+.contributions_item {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.github_button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  border: none;
+  padding: 4px 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  background: transparent;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.github_button:hover {
+  color: var(--color-accent);
+}
+
+.github_button:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.contributions_item:empty::before,
+.contributions_item:blank {
+  content: "—";
+  color: var(--color-text-disabled);
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .card {
+  background-color: var(--color-bg-card);
+  border-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .github_button {
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .github_button:hover {
+  color: var(--color-accent);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

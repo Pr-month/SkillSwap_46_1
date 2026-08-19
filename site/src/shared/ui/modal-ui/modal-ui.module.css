@@ -1,0 +1,49 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(142 142 142 / 0.6);
+  backdrop-filter: blur(4px);
+  animation: overlay-fade-in 0.2s ease;
+}
+
+.modal {
+  width: 100%;
+  border-radius: var(--radius-s, 12px);
+  overflow: auto;
+  background: var(--color-bg-card, #fff);
+  animation: modal-appear 0.2s ease;
+}
+
+.modal_size_default {
+  max-width: 556px;
+}
+
+.modal_size_wide {
+  max-width: 1024px;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

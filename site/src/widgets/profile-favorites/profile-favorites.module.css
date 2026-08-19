@@ -1,0 +1,58 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1020px;
+  min-height: 752px;
+  border-radius: 24px;
+  padding: 60px;
+  background-color: var(--color-bg-card);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--fs-h2);
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 324px);
+  justify-content: center;
+  align-content: start;
+  gap: 24px;
+}
+
+.cardItem {
+  width: 324px;
+}
+
+.emptyWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.emptyMessage {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--fs-body);
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}

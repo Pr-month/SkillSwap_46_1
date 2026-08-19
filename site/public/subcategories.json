@@ -1,0 +1,215 @@
+{
+  "status": true,
+  "data": [
+    {
+      "id": "sub-1-1",
+      "name": "Управление командой",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-2",
+      "name": "Маркетинг и реклама",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-3",
+      "name": "Продажи и переговоры",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-4",
+      "name": "Личный бренд",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-5",
+      "name": "Резюме и собеседование",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-6",
+      "name": "Тайм-менеджмент",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-7",
+      "name": "Проектное управление",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-1-8",
+      "name": "Предпринимательство",
+      "skillCategoryId": "cat-1"
+    },
+    {
+      "id": "sub-2-1",
+      "name": "Английский",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-2",
+      "name": "Французский",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-3",
+      "name": "Испанский",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-4",
+      "name": "Немецкий",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-5",
+      "name": "Китайский",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-6",
+      "name": "Японский",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-2-7",
+      "name": "Подготовка к экзаменам (IELTS, TOEFL)",
+      "skillCategoryId": "cat-2"
+    },
+    {
+      "id": "sub-3-1",
+      "name": "Уборка и организация",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-3-2",
+      "name": "Домашние финансы",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-3-3",
+      "name": "Приготовление еды",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-3-4",
+      "name": "Домашние растения",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-3-5",
+      "name": "Ремонт",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-3-6",
+      "name": "Хранение вещей",
+      "skillCategoryId": "cat-3"
+    },
+    {
+      "id": "sub-4-1",
+      "name": "Рисование и иллюстрация",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-2",
+      "name": "Фотография",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-3",
+      "name": "Видеомонтаж",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-4",
+      "name": "Музыка и звук",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-5",
+      "name": "Актёрское мастерство",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-6",
+      "name": "Креативное письмо",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-7",
+      "name": "Арт-терапия",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-4-8",
+      "name": "Декор и DIY",
+      "skillCategoryId": "cat-4"
+    },
+    {
+      "id": "sub-5-1",
+      "name": "Личностное развитие",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-5-2",
+      "name": "Навыки обучения",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-5-3",
+      "name": "Когнитивные техники",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-5-4",
+      "name": "Скорочтение",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-5-5",
+      "name": "Навыки преподавания",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-5-6",
+      "name": "Коучинг",
+      "skillCategoryId": "cat-5"
+    },
+    {
+      "id": "sub-6-1",
+      "name": "Йога и медитация",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-2",
+      "name": "Питание и ЗОЖ",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-3",
+      "name": "Ментальное здоровье",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-4",
+      "name": "Осознанность",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-5",
+      "name": "Физические тренировки",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-6",
+      "name": "Сон и восстановление",
+      "skillCategoryId": "cat-6"
+    },
+    {
+      "id": "sub-6-7",
+      "name": "Баланс жизни и работы",
+      "skillCategoryId": "cat-6"
+    }
+  ]
+}

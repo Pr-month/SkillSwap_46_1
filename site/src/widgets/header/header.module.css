@@ -1,0 +1,199 @@
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-32);
+  min-height: 104px;
+  padding: var(--space-20) var(--space-36);
+  background-color: var(--color-bg-page);
+}
+
+.logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-12);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.logoImage {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
+.logoText {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: var(--lh-h2);
+}
+
+.nav {
+  flex-shrink: 0;
+}
+
+.navList {
+  display: flex;
+  align-items: center;
+  gap: var(--space-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navLink,
+.catalogButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 24px;
+  border: none;
+  padding: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.userTrigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+}
+
+.navLink:hover {
+  color: inherit;
+}
+
+.searchWrapper {
+  flex: 1;
+  max-width: 527px;
+}
+
+.themeToggle {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.authButtons {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.loginButton,
+.registerButton {
+  height: 48px;
+  border-radius: var(--radius-s);
+  padding: 0 var(--space-24);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  cursor: pointer;
+}
+
+.loginButton {
+  border: 1px solid var(--color-accent);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-card);
+}
+
+.registerButton {
+  border: 1px solid var(--color-accent);
+  color: var(--color-text-primary);
+  background-color: var(--color-accent);
+}
+
+.loginButton:hover {
+  border: 1px solid var(--color-accent-hover);
+  color: var(--color-olive);
+  background-color: var(--color-bg-card);
+}
+
+.registerButton:hover {
+  border: 1px solid var(--color-accent-hover);
+  background-color: var(--color-accent-hover);
+}
+
+.loginButton:active {
+  border: 1px solid var(--color-accent-strong);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-card);
+}
+
+.registerButton:active {
+  border: 1px solid var(--color-accent-strong);
+  color: #ffffff;
+  background-color: var(--color-accent-strong);
+}
+
+.loginButton:disabled {
+  border: 1px solid var(--color-bg-disabled);
+  color: var(--color-text-disabled);
+  background-color: var(--color-bg-card);
+}
+
+.registerButton:disabled {
+  border: 1px solid var(--color-bg-disabled);
+  color: var(--color-olive);
+  background-color: var(--color-bg-disabled);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* Стили для тёмной темы */
+[data-theme="dark"] .loginButton {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-card);
+}
+
+[data-theme="dark"] .loginButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+  background-color: var(--color-accent-hover);
+}
+
+[data-theme="dark"] .loginButton:active {
+  border-color: var(--color-accent-strong);
+  color: var(--color-text-primary);
+  background-color: var(--color-accent-strong);
+}
+
+[data-theme="dark"] .registerButton {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+  background-color: var(--color-accent);
+}
+
+[data-theme="dark"] .registerButton:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-hover);
+}
+
+[data-theme="dark"] .registerButton:active {
+  border-color: var(--color-accent-strong);
+  background-color: var(--color-accent-strong);
+}

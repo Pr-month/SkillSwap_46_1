@@ -1,0 +1,10 @@
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}

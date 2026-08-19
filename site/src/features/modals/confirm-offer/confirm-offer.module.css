@@ -1,0 +1,34 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 44px;
+  padding-bottom: 72px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 8px;
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--fs-h2);
+  line-height: 28px;
+}
+
+.description {
+  font-family: var(--font-family-base);
+  font-size: var(--fs-caption);
+  line-height: 16px;
+}
+
+.content {
+  max-width: 1024px;
+  margin: 0 auto;
+}

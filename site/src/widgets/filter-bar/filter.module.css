@@ -1,0 +1,28 @@
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-40, 40px);
+  padding: var(--space-20, 20px);
+  background-color: var(--color-bg-filter, #ffffff);
+  width: 324px;
+  height: 100%;
+  max-height: 100%;
+}
+
+.title {
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--fs-h2, 24px);
+  line-height: var(--lh-h2, 28px);
+  letter-spacing: -1.1%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32, 32px);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+}

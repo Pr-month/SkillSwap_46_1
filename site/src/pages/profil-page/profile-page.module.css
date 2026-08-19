@@ -1,0 +1,27 @@
+.page {
+  width: 100%;
+  padding: 24px 32px 60px;
+  box-sizing: border-box;
+}
+
+.content {
+  width: 100%;
+  max-width: 1368px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 308px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.sidebar {
+  min-width: 0;
+}
+
+.info {
+  min-width: 0;
+}
+
+.userInfoWrapper {
+  width: 100%;
+}

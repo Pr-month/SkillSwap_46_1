@@ -1,0 +1,3 @@
+export { Icon } from "./icon";
+export type { IconName, IconProps } from "./icon";
+export { ICON_NAMES } from "./icon";

@@ -1,0 +1,93 @@
+.login__form {
+  padding-block: 112px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24, 24px);
+}
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16, 16px);
+  width: 100%;
+}
+
+.account__google,
+.account__apple {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-12, 12px);
+  padding-block: var(--space-12, 12px);
+  border-radius: var(--radius-s, 12px);
+  cursor: pointer;
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+  border: 1px solid var(--color-border, #9ca197);
+}
+
+.account__google img,
+.account__apple img {
+  width: 24px;
+  height: 24px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+}
+
+.divider span {
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32, 32px);
+  width: 100%;
+}
+
+.form__with__error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20, 20px);
+  width: 100%;
+}
+
+.form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16, 16px);
+  width: 100%;
+}
+
+.form__fields input {
+  width: 100%;
+}
+
+.error {
+  color: var(--color-error, #d93025);
+  font-size: var(--fs-caption, 12px);
+  line-height: var(--lh-caption, 16px);
+  align-self: start;
+}
+
+.forms__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+}
+
+.registration__link {
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+  color: var(--color-accent-strong, #508826);
+  text-align: center;
+  cursor: pointer;
+}
+
+.registration__link:hover {
+  text-decoration: underline;
+}

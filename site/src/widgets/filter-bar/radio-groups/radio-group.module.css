@@ -1,0 +1,77 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20, 20px);
+}
+
+.title {
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--fs-h3, 20px);
+  line-height: var(--lh-h3, 1.2);
+  letter-spacing: -1.1%;
+}
+
+.radiogroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+}
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.label {
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  margin: 0;
+}
+
+.radio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-control-border, #000000);
+  border-radius: 50%;
+}
+
+.radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-accent-strong, #508826);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.input:checked + .radio {
+  border-color: var(--color-accent-strong, #508826);
+}
+
+.input:checked + .radio::after {
+  opacity: 1;
+}
+
+.option:hover .radio {
+  border-color: var(--color-accent, #abd27a);
+}
+
+.option:has(.input:focus-visible) {
+  box-shadow: 0 0 0 2px var(--color-accent-strong, #508826);
+  outline: none;
+}

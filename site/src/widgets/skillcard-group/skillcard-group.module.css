@@ -1,0 +1,42 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: fit-content;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 324px);
+  gap: 24px;
+}
+
+.cardItem {
+  width: 100%;
+}
+
+.cardEnter {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.cardEnterActive {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease;
+}
+
+.cardExit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cardExitActive {
+  opacity: 0;
+  transform: translateY(-16px);
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease;
+}

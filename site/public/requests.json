@@ -1,0 +1,41 @@
+{
+  "data": {
+    "sent": [
+      {
+        "id": "req-1",
+        "userSkill": "skill-1",
+        "requiredSkillUserId": "user-2",
+        "message": "Хочу научиться фотографии",
+        "createdAt": "2024-01-01T10:00:00.000Z",
+        "updatedAt": "2024-01-01T10:00:00.000Z",
+        "status": "pending",
+        "fromUserId": "user-1",
+        "toUserId": "user-2"
+      },
+      {
+        "id": "req-2",
+        "userSkill": "skill-2",
+        "requiredSkillUserId": "user-3",
+        "message": "Обмен дизайном",
+        "createdAt": "2024-01-02T12:00:00.000Z",
+        "updatedAt": "2024-01-02T12:00:00.000Z",
+        "status": "accepted",
+        "fromUserId": "user-1",
+        "toUserId": "user-3"
+      }
+    ],
+    "received": [
+      {
+        "id": "req-3",
+        "userSkill": "skill-4",
+        "requiredSkillUserId": "user-1",
+        "message": "Научи меня React",
+        "createdAt": "2024-01-03T15:00:00.000Z",
+        "updatedAt": "2024-01-03T15:00:00.000Z",
+        "status": "inProgress",
+        "fromUserId": "user-4",
+        "toUserId": "user-1"
+      }
+    ]
+  }
+}

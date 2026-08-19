@@ -1,0 +1,565 @@
+{
+  "status": true,
+  "data": [
+    {
+      "id": "skill-1",
+      "title": "Игра на барабанах",
+      "description": "Играю на барабанах уже больше 10 лет — от репетиций в гараже до выступлений на сцене с живыми группами. Научу основам техники, играть любимые ритмы и разбирать песни, импровизировать и звучать уверенно",
+      "skillSubcategory": "sub-4-4",
+      "userId": "user-1",
+      "updatedAt": "2025-02-14T15:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-1-1/400/300",
+        "https://picsum.photos/seed/skill-1-2/400/300",
+        "https://picsum.photos/seed/skill-1-3/400/300",
+        "https://picsum.photos/seed/skill-1-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-2",
+      "title": "Портретная фотография",
+      "description": "Профессионально занимаюсь портретной съёмкой 5 лет. Научу работать со светом, выстраивать кадр и раскрепощать людей перед камерой. Работаем с любым фотоаппаратом и даже смартфоном",
+      "skillSubcategory": "sub-4-2",
+      "userId": "user-2",
+      "updatedAt": "2025-01-20T09:15:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-2-1/400/300",
+        "https://picsum.photos/seed/skill-2-2/400/300",
+        "https://picsum.photos/seed/skill-2-3/400/300",
+        "https://picsum.photos/seed/skill-2-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-3",
+      "title": "Запуск бизнеса с нуля",
+      "description": "Прошёл путь от идеи до работающего бизнеса трижды. Помогу разобраться с бизнес-моделью, первыми продажами и типичными ошибками на старте. Без воды — только практика",
+      "skillSubcategory": "sub-1-8",
+      "userId": "user-3",
+      "updatedAt": "2025-03-02T08:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-3-1/400/300",
+        "https://picsum.photos/seed/skill-3-2/400/300",
+        "https://picsum.photos/seed/skill-3-3/400/300",
+        "https://picsum.photos/seed/skill-3-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-4",
+      "title": "Питание и ЗОЖ",
+      "description": "Нутрициолог с практикой 4 года. Составлю персональный план питания, разберём мифы о диетах и найдём подход который работает именно для тебя. Без жёстких ограничений",
+      "skillSubcategory": "sub-6-2",
+      "userId": "user-4",
+      "updatedAt": "2025-01-17T14:05:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-4-1/400/300",
+        "https://picsum.photos/seed/skill-4-2/400/300",
+        "https://picsum.photos/seed/skill-4-3/400/300",
+        "https://picsum.photos/seed/skill-4-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-5",
+      "title": "Английский для IT",
+      "description": "Помогу подтянуть технический английский — чтение документации, общение с иностранными коллегами, собеседования. Сам работаю в международной команде уже 3 года",
+      "skillSubcategory": "sub-2-1",
+      "userId": "user-5",
+      "updatedAt": "2025-04-10T12:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-5-1/400/300",
+        "https://picsum.photos/seed/skill-5-2/400/300",
+        "https://picsum.photos/seed/skill-5-3/400/300",
+        "https://picsum.photos/seed/skill-5-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-6",
+      "title": "Йога для начинающих",
+      "description": "Веду занятия йогой уже 6 лет. Помогу освоить базовые асаны, научу правильному дыханию и расслаблению. Подходит для любого уровня физической подготовки",
+      "skillSubcategory": "sub-6-1",
+      "userId": "user-6",
+      "updatedAt": "2025-02-03T11:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-6-1/400/300",
+        "https://picsum.photos/seed/skill-6-2/400/300",
+        "https://picsum.photos/seed/skill-6-3/400/300",
+        "https://picsum.photos/seed/skill-6-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-7",
+      "title": "Видеомонтаж в Premiere Pro",
+      "description": "Монтирую видео профессионально уже 7 лет. Научу базовым техникам монтажа, работе со звуком и цветокоррекции. После обучения сможешь делать красивые ролики самостоятельно",
+      "skillSubcategory": "sub-4-3",
+      "userId": "user-7",
+      "updatedAt": "2025-03-15T14:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-7-1/400/300",
+        "https://picsum.photos/seed/skill-7-2/400/300",
+        "https://picsum.photos/seed/skill-7-3/400/300",
+        "https://picsum.photos/seed/skill-7-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-8",
+      "title": "Французский язык",
+      "description": "Преподаю французский 8 лет, жила в Париже 2 года. Научу с нуля до разговорного уровня. Акцент на живой речи и реальных ситуациях, не на учебниках",
+      "skillSubcategory": "sub-2-2",
+      "userId": "user-8",
+      "updatedAt": "2025-01-29T13:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-8-1/400/300",
+        "https://picsum.photos/seed/skill-8-2/400/300",
+        "https://picsum.photos/seed/skill-8-3/400/300",
+        "https://picsum.photos/seed/skill-8-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-9",
+      "title": "Проектное управление Agile",
+      "description": "Работаю проджект-менеджером в IT 5 лет. Расскажу про Scrum, Kanban, как выстраивать процессы в команде и не сгореть. Только реальные кейсы",
+      "skillSubcategory": "sub-1-7",
+      "userId": "user-9",
+      "updatedAt": "2025-02-20T10:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-9-1/400/300",
+        "https://picsum.photos/seed/skill-9-2/400/300",
+        "https://picsum.photos/seed/skill-9-3/400/300",
+        "https://picsum.photos/seed/skill-9-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-10",
+      "title": "Рисование акварелью",
+      "description": "Рисую акварелью 12 лет, участвую в выставках. Научу работать с водой и цветом, передавать свет и настроение. Начнём с простых набросков и дойдём до полноценных работ",
+      "skillSubcategory": "sub-4-1",
+      "userId": "user-10",
+      "updatedAt": "2025-04-05T09:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-10-1/400/300",
+        "https://picsum.photos/seed/skill-10-2/400/300",
+        "https://picsum.photos/seed/skill-10-3/400/300",
+        "https://picsum.photos/seed/skill-10-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-11",
+      "title": "Силовые тренировки",
+      "description": "Тренер по фитнесу с сертификатом и 6 годами практики. Составлю программу тренировок под твои цели, расскажу про технику и питание. Без травм и лишних страданий",
+      "skillSubcategory": "sub-6-5",
+      "userId": "user-11",
+      "updatedAt": "2025-01-26T08:45:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-11-1/400/300",
+        "https://picsum.photos/seed/skill-11-2/400/300",
+        "https://picsum.photos/seed/skill-11-3/400/300",
+        "https://picsum.photos/seed/skill-11-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-12",
+      "title": "Креативное письмо",
+      "description": "Пишу рассказы и веду литературный блог 5 лет. Научу находить идеи, выстраивать сюжет и писать так чтобы читатель не мог оторваться",
+      "skillSubcategory": "sub-4-6",
+      "userId": "user-12",
+      "updatedAt": "2025-05-01T10:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-12-1/400/300",
+        "https://picsum.photos/seed/skill-12-2/400/300",
+        "https://picsum.photos/seed/skill-12-3/400/300",
+        "https://picsum.photos/seed/skill-12-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-13",
+      "title": "Ремонт квартиры своими руками",
+      "description": "Сделал ремонт в 4 квартирах с нуля. Покажу как класть плитку, красить стены, монтировать розетки и не вызывать мастеров по каждому пустяку",
+      "skillSubcategory": "sub-3-5",
+      "userId": "user-13",
+      "updatedAt": "2025-02-15T08:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-13-1/400/300",
+        "https://picsum.photos/seed/skill-13-2/400/300",
+        "https://picsum.photos/seed/skill-13-3/400/300",
+        "https://picsum.photos/seed/skill-13-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-14",
+      "title": "Актёрское мастерство",
+      "description": "Актриса театра с 7-летним стажем. Помогу раскрепоститься, работать с голосом и телом, создавать образы. Полезно не только для сцены, но и для публичных выступлений",
+      "skillSubcategory": "sub-4-5",
+      "userId": "user-14",
+      "updatedAt": "2025-03-28T14:45:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-14-1/400/300",
+        "https://picsum.photos/seed/skill-14-2/400/300",
+        "https://picsum.photos/seed/skill-14-3/400/300",
+        "https://picsum.photos/seed/skill-14-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-15",
+      "title": "Личные финансы и бюджет",
+      "description": "Финансовый аналитик с 10-летним опытом. Научу вести бюджет, копить, инвестировать и не паниковать при виде выписки с карты",
+      "skillSubcategory": "sub-3-2",
+      "userId": "user-15",
+      "updatedAt": "2025-02-21T10:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-15-1/400/300",
+        "https://picsum.photos/seed/skill-15-2/400/300",
+        "https://picsum.photos/seed/skill-15-3/400/300",
+        "https://picsum.photos/seed/skill-15-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-16",
+      "title": "Приготовление суши и роллов",
+      "description": "Готовлю японскую кухню дома уже 4 года. Научу выбирать рыбу, готовить рис и делать красивые роллы. После мастер-класса больше не нужно заказывать доставку",
+      "skillSubcategory": "sub-3-3",
+      "userId": "user-16",
+      "updatedAt": "2025-05-12T11:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-16-1/400/300",
+        "https://picsum.photos/seed/skill-16-2/400/300",
+        "https://picsum.photos/seed/skill-16-3/400/300",
+        "https://picsum.photos/seed/skill-16-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-17",
+      "title": "Японский язык",
+      "description": "Преподаю японский онлайн уже 5 лет, сам жил в Токио. Научу хирагане, катакане и базовым иероглифам. Делаем акцент на разговорной речи и реальном общении",
+      "skillSubcategory": "sub-2-6",
+      "userId": "user-17",
+      "updatedAt": "2025-03-01T09:50:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-17-1/400/300",
+        "https://picsum.photos/seed/skill-17-2/400/300",
+        "https://picsum.photos/seed/skill-17-3/400/300",
+        "https://picsum.photos/seed/skill-17-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-18",
+      "title": "Работа с тревогой и стрессом",
+      "description": "Психолог с практикой 6 лет. Поделюсь техниками работы с тревогой, научу отличать продуктивный стресс от разрушительного и выстраивать ментальную устойчивость",
+      "skillSubcategory": "sub-6-3",
+      "userId": "user-18",
+      "updatedAt": "2025-04-18T16:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-18-1/400/300",
+        "https://picsum.photos/seed/skill-18-2/400/300",
+        "https://picsum.photos/seed/skill-18-3/400/300",
+        "https://picsum.photos/seed/skill-18-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-19",
+      "title": "Маркетинг в социальных сетях",
+      "description": "Веду соцсети брендов уже 5 лет. Научу создавать контент-план, писать цепляющие тексты и продвигаться без большого бюджета",
+      "skillSubcategory": "sub-1-2",
+      "userId": "user-19",
+      "updatedAt": "2025-03-07T11:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-19-1/400/300",
+        "https://picsum.photos/seed/skill-19-2/400/300",
+        "https://picsum.photos/seed/skill-19-3/400/300",
+        "https://picsum.photos/seed/skill-19-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-20",
+      "title": "Декор интерьера своими руками",
+      "description": "Дизайнер интерьеров с 7-летним опытом. Научу создавать уютное пространство без дорогого ремонта — с помощью текстиля, растений и простых DIY-проектов",
+      "skillSubcategory": "sub-4-8",
+      "userId": "user-20",
+      "updatedAt": "2025-05-20T09:15:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-20-1/400/300",
+        "https://picsum.photos/seed/skill-20-2/400/300",
+        "https://picsum.photos/seed/skill-20-3/400/300",
+        "https://picsum.photos/seed/skill-20-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-21",
+      "title": "Переговоры и убеждение",
+      "description": "Провёл более 500 переговоров в бизнесе. Научу читать собеседника, выстраивать аргументацию и выходить победителем даже из сложных ситуаций",
+      "skillSubcategory": "sub-1-3",
+      "userId": "user-21",
+      "updatedAt": "2025-03-13T08:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-21-1/400/300",
+        "https://picsum.photos/seed/skill-21-2/400/300",
+        "https://picsum.photos/seed/skill-21-3/400/300",
+        "https://picsum.photos/seed/skill-21-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-22",
+      "title": "Подготовка к IELTS",
+      "description": "Сдала IELTS на 8.0, помогла подготовиться 30+ студентам. Разберём все части экзамена, научу стратегиям и доведём до нужного балла",
+      "skillSubcategory": "sub-2-7",
+      "userId": "user-22",
+      "updatedAt": "2025-04-05T10:40:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-22-1/400/300",
+        "https://picsum.photos/seed/skill-22-2/400/300",
+        "https://picsum.photos/seed/skill-22-3/400/300",
+        "https://picsum.photos/seed/skill-22-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-23",
+      "title": "Иллюстрация персонажей",
+      "description": "Профессиональный иллюстратор с 8-летним стажем. Научу рисовать персонажей с нуля — от скетча до финального арта. Работаем в цифре или традиционной технике",
+      "skillSubcategory": "sub-4-1",
+      "userId": "user-23",
+      "updatedAt": "2025-03-19T10:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-23-1/400/300",
+        "https://picsum.photos/seed/skill-23-2/400/300",
+        "https://picsum.photos/seed/skill-23-3/400/300",
+        "https://picsum.photos/seed/skill-23-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-24",
+      "title": "Хатха-йога и пранаяма",
+      "description": "Сертифицированный инструктор йоги с 8-летней практикой. Научу правильному дыханию, базовым и продвинутым асанам. Занятия адаптированы под твой уровень",
+      "skillSubcategory": "sub-6-1",
+      "userId": "user-24",
+      "updatedAt": "2025-05-08T08:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-24-1/400/300",
+        "https://picsum.photos/seed/skill-24-2/400/300",
+        "https://picsum.photos/seed/skill-24-3/400/300",
+        "https://picsum.photos/seed/skill-24-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-25",
+      "title": "Игра на акустической гитаре",
+      "description": "Играю на гитаре 15 лет, выступаю на акустических концертах. Научу с нуля — базовые аккорды, бой, перебор и твои любимые песни. Главное — практика каждый день",
+      "skillSubcategory": "sub-4-4",
+      "userId": "user-25",
+      "updatedAt": "2025-03-25T09:45:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-25-1/400/300",
+        "https://picsum.photos/seed/skill-25-2/400/300",
+        "https://picsum.photos/seed/skill-25-3/400/300",
+        "https://picsum.photos/seed/skill-25-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-26",
+      "title": "Составление резюме и подготовка к интервью",
+      "description": "HR с 8-летним опытом, провела 1000+ интервью. Помогу составить резюме которое заметят, подготовиться к вопросам и презентовать себя уверенно",
+      "skillSubcategory": "sub-1-5",
+      "userId": "user-26",
+      "updatedAt": "2025-04-30T13:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-26-1/400/300",
+        "https://picsum.photos/seed/skill-26-2/400/300",
+        "https://picsum.photos/seed/skill-26-3/400/300",
+        "https://picsum.photos/seed/skill-26-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-27",
+      "title": "Скорочтение и память",
+      "description": "Читаю 400+ страниц в час, обучил технике 200+ человек. Научу читать в 3-5 раз быстрее без потери понимания и запоминать прочитанное надолго",
+      "skillSubcategory": "sub-5-4",
+      "userId": "user-27",
+      "updatedAt": "2025-04-01T11:10:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-27-1/400/300",
+        "https://picsum.photos/seed/skill-27-2/400/300",
+        "https://picsum.photos/seed/skill-27-3/400/300",
+        "https://picsum.photos/seed/skill-27-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-28",
+      "title": "Организация пространства KonMari",
+      "description": "Сертифицированный специалист по методу KonMari. Помогу разобрать захламлённое пространство, выстроить систему хранения и сохранить порядок навсегда",
+      "skillSubcategory": "sub-3-1",
+      "userId": "user-28",
+      "updatedAt": "2025-05-15T10:50:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-28-1/400/300",
+        "https://picsum.photos/seed/skill-28-2/400/300",
+        "https://picsum.photos/seed/skill-28-3/400/300",
+        "https://picsum.photos/seed/skill-28-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-29",
+      "title": "Управление командой",
+      "description": "Руководил командами от 5 до 30 человек. Расскажу как давать обратную связь, мотивировать людей и разрешать конфликты. Без теории — только реальные инструменты",
+      "skillSubcategory": "sub-1-1",
+      "userId": "user-29",
+      "updatedAt": "2025-04-07T08:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-29-1/400/300",
+        "https://picsum.photos/seed/skill-29-2/400/300",
+        "https://picsum.photos/seed/skill-29-3/400/300",
+        "https://picsum.photos/seed/skill-29-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-30",
+      "title": "Коучинг и постановка целей",
+      "description": "Сертифицированный коуч ICF. Помогу найти настоящие цели, убрать блоки и выстроить путь к результату. Работаем с личными и профессиональными задачами",
+      "skillSubcategory": "sub-5-6",
+      "userId": "user-30",
+      "updatedAt": "2025-05-25T12:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-30-1/400/300",
+        "https://picsum.photos/seed/skill-30-2/400/300",
+        "https://picsum.photos/seed/skill-30-3/400/300",
+        "https://picsum.photos/seed/skill-30-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-31",
+      "title": "Испанский язык с нуля",
+      "description": "Жила в Испании 3 года, преподаю испанский 6 лет. Научу говорить, читать и понимать на слух. Делаем упор на разговорную практику с первого занятия",
+      "skillSubcategory": "sub-2-3",
+      "userId": "user-31",
+      "updatedAt": "2025-02-10T09:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-31-1/400/300",
+        "https://picsum.photos/seed/skill-31-2/400/300",
+        "https://picsum.photos/seed/skill-31-3/400/300",
+        "https://picsum.photos/seed/skill-31-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-32",
+      "title": "Осознанная медитация",
+      "description": "Практикую медитацию 10 лет, прошла ретрит Випассана. Научу техникам mindfulness, работе с мыслями и созданию ежедневной практики которая реально работает",
+      "skillSubcategory": "sub-6-4",
+      "userId": "user-32",
+      "updatedAt": "2025-03-22T14:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-32-1/400/300",
+        "https://picsum.photos/seed/skill-32-2/400/300",
+        "https://picsum.photos/seed/skill-32-3/400/300",
+        "https://picsum.photos/seed/skill-32-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-33",
+      "title": "Личный бренд в LinkedIn",
+      "description": "Вырастила LinkedIn с 0 до 15к подписчиков. Помогу выстроить личный бренд, писать посты которые читают и находить клиентов через соцсети",
+      "skillSubcategory": "sub-1-4",
+      "userId": "user-33",
+      "updatedAt": "2025-04-15T11:20:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-33-1/400/300",
+        "https://picsum.photos/seed/skill-33-2/400/300",
+        "https://picsum.photos/seed/skill-33-3/400/300",
+        "https://picsum.photos/seed/skill-33-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-34",
+      "title": "Домашние растения и уход",
+      "description": "Коллекционирую растения 8 лет, у меня их больше 100. Расскажу как выбрать растение под твои условия, как поливать, пересаживать и реанимировать умирающее",
+      "skillSubcategory": "sub-3-4",
+      "userId": "user-34",
+      "updatedAt": "2025-01-30T16:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-34-1/400/300",
+        "https://picsum.photos/seed/skill-34-2/400/300",
+        "https://picsum.photos/seed/skill-34-3/400/300",
+        "https://picsum.photos/seed/skill-34-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-35",
+      "title": "Немецкий язык",
+      "description": "Преподаю немецкий 7 лет, имею сертификат C1. Научу с нуля или подтяну существующий уровень. Грамматика без зубрёжки — через понимание логики языка",
+      "skillSubcategory": "sub-2-4",
+      "userId": "user-35",
+      "updatedAt": "2025-05-03T10:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-35-1/400/300",
+        "https://picsum.photos/seed/skill-35-2/400/300",
+        "https://picsum.photos/seed/skill-35-3/400/300",
+        "https://picsum.photos/seed/skill-35-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-36",
+      "title": "Арт-терапия",
+      "description": "Арт-терапевт с психологическим образованием. Помогу проработать стресс и эмоции через творчество. Не нужно уметь рисовать — важен процесс, а не результат",
+      "skillSubcategory": "sub-4-7",
+      "userId": "user-36",
+      "updatedAt": "2025-02-28T13:45:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-36-1/400/300",
+        "https://picsum.photos/seed/skill-36-2/400/300",
+        "https://picsum.photos/seed/skill-36-3/400/300",
+        "https://picsum.photos/seed/skill-36-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-37",
+      "title": "Китайский язык",
+      "description": "Жил в Китае 4 года, HSK 5. Научу читать иероглифы, говорить и понимать на слух. Методика адаптирована для русскоязычных — без лишней воды",
+      "skillSubcategory": "sub-2-5",
+      "userId": "user-37",
+      "updatedAt": "2025-03-10T09:15:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-37-1/400/300",
+        "https://picsum.photos/seed/skill-37-2/400/300",
+        "https://picsum.photos/seed/skill-37-3/400/300",
+        "https://picsum.photos/seed/skill-37-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-38",
+      "title": "Навыки публичных выступлений",
+      "description": "Выступаю на конференциях 8 лет, обучил 300+ человек. Помогу справиться со страхом сцены, структурировать речь и держать внимание аудитории",
+      "skillSubcategory": "sub-5-5",
+      "userId": "user-38",
+      "updatedAt": "2025-04-20T15:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-38-1/400/300",
+        "https://picsum.photos/seed/skill-38-2/400/300",
+        "https://picsum.photos/seed/skill-38-3/400/300",
+        "https://picsum.photos/seed/skill-38-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-39",
+      "title": "Баланс работы и жизни",
+      "description": "Прошла путь от выгорания до осознанной жизни. Помогу выстроить границы, расставить приоритеты и перестать жить только работой",
+      "skillSubcategory": "sub-6-7",
+      "userId": "user-39",
+      "updatedAt": "2025-05-10T08:30:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-39-1/400/300",
+        "https://picsum.photos/seed/skill-39-2/400/300",
+        "https://picsum.photos/seed/skill-39-3/400/300",
+        "https://picsum.photos/seed/skill-39-4/400/300"
+      ]
+    },
+    {
+      "id": "skill-40",
+      "title": "Хранение и организация вещей",
+      "description": "Помогла организовать пространство в 50+ домах. Научу системам хранения, капсульному гардеробу и тому как поддерживать порядок без усилий",
+      "skillSubcategory": "sub-3-6",
+      "userId": "user-40",
+      "updatedAt": "2025-04-25T12:00:00Z",
+      "images": [
+        "https://picsum.photos/seed/skill-40-1/400/300",
+        "https://picsum.photos/seed/skill-40-2/400/300",
+        "https://picsum.photos/seed/skill-40-3/400/300",
+        "https://picsum.photos/seed/skill-40-4/400/300"
+      ]
+    }
+  ]
+}

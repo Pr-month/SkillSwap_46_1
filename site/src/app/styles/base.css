@@ -1,0 +1,12 @@
+:root {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base, sans-serif);
+  font-weight: var(--font-weight-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+}

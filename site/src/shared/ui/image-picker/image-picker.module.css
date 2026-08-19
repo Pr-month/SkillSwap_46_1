@@ -1,0 +1,195 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  max-width: 436px;
+  min-height: 200px;
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-s);
+  padding: var(--space-20);
+  background: var(--color-bg-card);
+}
+
+.dragActive {
+  border-color: var(--color-accent);
+  background: var(--color-accent-hover);
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-s);
+  background: var(--color-bg-overlay);
+}
+
+.addBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  padding: 0;
+  color: var(--color-accent-strong);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  color: var(--color-accent-hover);
+  opacity: 1;
+}
+
+[data-theme="dark"] .button {
+  color: var(--color-accent);
+}
+
+[data-theme="dark"] .button:hover {
+  color: var(--color-accent-hover);
+}
+
+.buttonIcon {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.limitText {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex: 0 0 80px;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-12);
+  width: 80px;
+  height: 80px;
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.item.dragging {
+  opacity: 0.5;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-s);
+  object-fit: cover;
+}
+
+.filename {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  color: var(--color-text-primary);
+  background: var(--color-bg-overlay);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove:hover {
+  background: var(--color-error);
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .remove {
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .remove:hover {
+  background: var(--color-error);
+  color: var(--color-text-primary);
+}
+
+.input {
+  display: none;
+}
+
+.errorText {
+  margin: var(--space-8) 0 0;
+  color: var(--color-error);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Тёмная тема для drag active */
+[data-theme="dark"] .dragActive {
+  border-color: var(--color-accent);
+  background: var(--color-accent-hover);
+}
