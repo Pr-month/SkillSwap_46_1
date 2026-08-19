@@ -1,5 +1,5 @@
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
@@ -91,12 +91,10 @@ describe('CategoriesService', () => {
     it('должен бросать BusinessException, если категория не найдена', async () => {
       mockCategoryRepo.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.update('missing-id', { name: 'X' }),
-      ).rejects.toThrow(BusinessException);
-      await expect(
-        service.update('missing-id', { name: 'X' }),
-      ).rejects.toThrow(
+      await expect(service.update('missing-id', { name: 'X' })).rejects.toThrow(
+        BusinessException,
+      );
+      await expect(service.update('missing-id', { name: 'X' })).rejects.toThrow(
         new BusinessException(exceptionCodes.categories.notFound, 404),
       );
 
