@@ -41,6 +41,10 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  async findAll(): Promise<User[] | null> {
+    return this.usersRepository.find();
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },

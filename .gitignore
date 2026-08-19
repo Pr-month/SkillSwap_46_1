@@ -54,3 +54,9 @@ pids
 
 # Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Frontend (site)
+site/dist
+site/dist-ssr
+site/node_modules
+*.local
