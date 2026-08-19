@@ -1,4 +1,3 @@
-import { adminSeedData } from '@/scripts/data/admin.data';
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 
@@ -6,6 +5,7 @@ import { City } from '../cities/entities/city.entity';
 import { nodeEnvValue } from '../module/configuration/const';
 import { User } from '../users/entities/user.entity';
 import { getAppDataSource } from './data-source';
+import { adminSeedData } from './data/admin.data';
 
 async function seed() {
   if (process.env.NODE_ENV !== nodeEnvValue.Development) {
@@ -19,32 +19,38 @@ async function seed() {
   const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
-  const userRepo = AppDataSource.getRepository(User);
-  const cityRepo = AppDataSource.getRepository(City);
+  try {
+    const userRepo = AppDataSource.getRepository(User);
+    const cityRepo = AppDataSource.getRepository(City);
 
-  const existingAdmin = await userRepo.findOne({
-    where: { email: adminSeedData.email },
-  });
+    const existingAdmin = await userRepo.findOne({
+      where: { email: adminSeedData.email },
+    });
 
-  if (existingAdmin) {
-    console.log('Администратор уже существует, сидинг пропущен');
-    await AppDataSource.destroy();
-    return;
-  }
+    if (existingAdmin) {
+      console.log('Администратор уже существует, сидинг пропущен');
+      return;
+    }
 
-  const city = await cityRepo.findOne({
-    where: { name: adminSeedData.city },
-  });
+    const city = await cityRepo.findOne({
+      where: {
+        name: adminSeedData.city,
+      },
+    });
 
-  if (!city) {
-    throw new Error(`Город "${adminSeedData.city}" не найден в базе данных`);
-  }
+    if (!city) {
+      throw new Error(
+        `Город "${adminSeedData.city}" не найден в базе данных.`,
+      );
+    }
 
-  const saltRounds = Number(process.env.HASH_SALT) || 10;
-  const hashedPassword = await bcrypt.hash(adminSeedData.password, saltRounds);
+    const saltRounds = Number(process.env.HASH_SALT) || 10;
+    const hashedPassword = await bcrypt.hash(
+      adminSeedData.password,
+      saltRounds,
+    );
 
-  const admin = await userRepo.save(
-    userRepo.create({
+    const admin = userRepo.create({
       email: adminSeedData.email,
       password: hashedPassword,
       name: adminSeedData.name,
@@ -52,11 +58,17 @@ async function seed() {
       gender: adminSeedData.gender,
       role: adminSeedData.role,
       city,
-    }),
-  );
+      cityId: city.id,
+    });
 
-  console.log(`Сид администратора успешно выполнен: ${admin.email}`);
-  await AppDataSource.destroy();
+    const savedAdmin = await userRepo.save(admin);
+
+    console.log(
+      `Сид администратора успешно выполнен: ${savedAdmin.email}`,
+    );
+  } finally {
+    await AppDataSource.destroy();
+  }
 }
 
 seed().catch((e) => {
