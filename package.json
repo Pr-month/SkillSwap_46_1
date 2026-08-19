@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seeding:categories": "ts-node -r tsconfig-paths/register src/scripts/seed-categories.ts",
     "seeding:users": "ts-node -r tsconfig-paths/register src/scripts/seed-users.ts",
-    "seeding:cities": "ts-node -r tsconfig-paths/register src/cities/seed-cities.ts"
+    "seeding:cities": "ts-node -r tsconfig-paths/register src/scripts/seed-cities.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1113.0",

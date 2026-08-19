@@ -41,6 +41,6 @@ async function bootstrap() {
   const port = configService.port || 8080;
 
   await app.listen(port);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();

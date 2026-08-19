@@ -18,8 +18,8 @@ export class ConfigurationService {
     return this.configService.get<number>(EnvKey.Port);
   }
 
-  get hashSalt(): string {
-    return this.configService.get<string>(EnvKey.HashSalt);
+  get hashSalt(): number {
+    return this.configService.get<number>(EnvKey.HashSalt);
   }
 
   get jwtAccessSecret(): string {

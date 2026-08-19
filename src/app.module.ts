@@ -1,3 +1,5 @@
+import { CitiesModule } from '@/cities/cities.module';
+import { S3Module } from '@/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -55,7 +57,9 @@ import { UsersModule } from './users/users.module';
     FavoritesModule,
     SkillsModule,
     RequestsModule,
+    CitiesModule,
     GatewayModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService],

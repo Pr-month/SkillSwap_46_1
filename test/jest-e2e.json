@@ -11,7 +11,8 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@/(.*)$": "<rootDir>/../src/$1"
+    "^@/(.*)$": "<rootDir>/../src/$1",
+    "^src/(.*)$": "<rootDir>/../src/$1"
   },
   "testTimeout": 30000,
   "forceExit": true,
