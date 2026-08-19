@@ -1,22 +1,37 @@
 import { AppModule } from '@/app.module';
+import { City } from '@/cities/entities/city.entity';
 import { UserGender } from '@/users/enums/user.enums';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import request from 'supertest';
+import { Repository } from 'typeorm';
+
+import cookieParser = require('cookie-parser');
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let accessToken: string;
+  let cityRepository: Repository<City>;
+  let cityId: string;
+  let userId: string;
 
-  const testUser = {
-    email: 'e2e-test@example.com',
-    password: 'password123',
-    name: 'E2E Test User',
-    birthdate: '1990-01-01',
-    gender: UserGender.MALE,
-    cityId: '00000000-0000-0000-0000-000000000001',
-    avatar: 'https://example.com/avatar.jpg',
-  };
+  const testUser: {
+  email: string;
+  password: string;
+  name: string;
+  birthdate: string;
+  gender: UserGender;
+  avatar: string;
+  cityId?: string;
+} = {
+  email: `e2e-test-${Date.now()}@example.com`,
+  password: 'password123',
+  name: 'E2E Test User',
+  birthdate: '1990-01-01',
+  gender: UserGender.MALE,
+  avatar: 'https://example.com/avatar.jpg',
+};
 
   const newPassword = 'newPassword123';
 
@@ -27,6 +42,8 @@ describe('AuthController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
+    app.use(cookieParser());
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -36,10 +53,38 @@ describe('AuthController (e2e)', () => {
     );
 
     await app.init();
+
+    cityRepository = app.get(getRepositoryToken(City));
+
+    const city = await cityRepository.save(
+      cityRepository.create({
+        name: `E2E-город-${Date.now()}`,
+        district: 'Центральный',
+        subject: 'Москва',
+        population: 1000000,
+        lat: 55.7558,
+        lon: 37.6173,
+      }),
+    );
+
+    cityId = city.id;
+
+    testUser.cityId = cityId;
   });
 
   afterAll(async () => {
     if (app) {
+      if (userId) {
+        await cityRepository.manager
+          .getRepository('users')
+          .delete(userId)
+          .catch(() => undefined);
+      }
+
+      if (cityId) {
+        await cityRepository.delete(cityId).catch(() => undefined);
+      }
+
       await app.close();
     }
   });
@@ -53,6 +98,8 @@ describe('AuthController (e2e)', () => {
         .expect((res) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.email).toBe(testUser.email);
+
+          userId = res.body.id;
         });
     });
 

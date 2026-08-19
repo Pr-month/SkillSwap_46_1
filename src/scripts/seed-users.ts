@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 
+import { City } from '../cities/entities/city.entity';
 import { nodeEnvValue } from '../module/configuration/const';
 import { User } from '../users/entities/user.entity';
 import { getAppDataSource } from './data-source';
@@ -18,30 +19,56 @@ async function seed() {
   const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
-  const userRepo = AppDataSource.getRepository(User);
+  try {
+    const userRepo = AppDataSource.getRepository(User);
+    const cityRepo = AppDataSource.getRepository(City);
 
-  const existingAdmin = await userRepo.findOne({
-    where: { email: adminSeedData.email },
-  });
+    const existingAdmin = await userRepo.findOne({
+      where: { email: adminSeedData.email },
+    });
 
-  if (existingAdmin) {
-    console.log('Администратор уже существует, сидинг пропущен');
-    await AppDataSource.destroy();
-    return;
-  }
+    if (existingAdmin) {
+      console.log('Администратор уже существует, сидинг пропущен');
+      return;
+    }
 
-  const saltRounds = Number(process.env.HASH_SALT) || 10;
-  const hashedPassword = await bcrypt.hash(adminSeedData.password, saltRounds);
+    const city = await cityRepo.findOne({
+      where: {
+        name: adminSeedData.city,
+      },
+    });
 
-  const admin = await userRepo.save(
-    userRepo.create({
-      ...adminSeedData,
+    if (!city) {
+      throw new Error(
+        `Город "${adminSeedData.city}" не найден в базе данных.`,
+      );
+    }
+
+    const saltRounds = Number(process.env.HASH_SALT) || 10;
+    const hashedPassword = await bcrypt.hash(
+      adminSeedData.password,
+      saltRounds,
+    );
+
+    const admin = userRepo.create({
+      email: adminSeedData.email,
       password: hashedPassword,
-    }),
-  );
+      name: adminSeedData.name,
+      birthdate: adminSeedData.birthdate,
+      gender: adminSeedData.gender,
+      role: adminSeedData.role,
+      city,
+      cityId: city.id,
+    });
 
-  console.log(`Сид администратора успешно выполнен: ${admin.email}`);
-  await AppDataSource.destroy();
+    const savedAdmin = await userRepo.save(admin);
+
+    console.log(
+      `Сид администратора успешно выполнен: ${savedAdmin.email}`,
+    );
+  } finally {
+    await AppDataSource.destroy();
+  }
 }
 
 seed().catch((e) => {

@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
+import { CitiesModule } from './cities/cities.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
@@ -22,11 +23,14 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    ConfigurationModule,
     ConfigModule.forRoot({
-      validate,
       isGlobal: true,
+      envFilePath: '.env',
+      validate,
     }),
+
+    ConfigurationModule,
+
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigurationModule],
@@ -35,7 +39,6 @@ import { UsersModule } from './users/users.module';
         const jwtConfig = jwtConfigFactory(configService);
 
         return {
-          // global: true,
           secret: jwtConfig.accessSecret,
           signOptions: {
             expiresIn: jwtConfig.accessExpiresIn as StringValue,
@@ -43,20 +46,24 @@ import { UsersModule } from './users/users.module';
         };
       },
     }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
       useFactory: dbConfig,
     }),
+
     UsersModule,
     AuthModule,
     CategoriesModule,
+    CitiesModule,
     SubcategoriesModule,
     FavoritesModule,
     SkillsModule,
     RequestsModule,
     GatewayModule,
   ],
+
   controllers: [AppController],
   providers: [AppService],
 })
