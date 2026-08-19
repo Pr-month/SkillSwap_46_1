@@ -1,0 +1,285 @@
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 12px 16px;
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-s);
+  font-family: var(--font-family-base);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: var(--font-weight-regular);
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-width: 2px;
+  border-color: var(--color-accent);
+}
+
+.input.error {
+  border-width: 2px;
+  border-color: var(--color-error);
+}
+
+.input:disabled {
+  background-color: var(--color-bg-disabled);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+/* Для многострочного текста */
+.textarea {
+  composes: input;
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Поле поиска с иконкой */
+.searchWrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 240px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  composes: input;
+  padding-left: 40px;
+  border-radius: var(--radius-round);
+  background-color: var(--color-bg-page);
+}
+
+/* Контейнер для поля с ошибкой */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Текст ошибки */
+.errorText {
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+  padding-left: 4px;
+  min-height: 16px;
+}
+
+/* Обёртка с иконками */
+.wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  overflow: visible;
+}
+
+/* Поле с отступами под иконки */
+.inputWithLeftIcon {
+  padding-left: 44px;
+}
+
+.inputWithRightIcon {
+  padding-right: 44px;
+}
+
+/* Иконка слева */
+.leftIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Иконка справа (глаз, крестик) */
+.rightIcon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.rightIcon:hover {
+  color: var(--color-text-primary);
+}
+
+/* Анимация при фокусе */
+@keyframes focusGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(171, 210, 122, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(171, 210, 122, 0);
+  }
+}
+
+.input:focus {
+  animation: focusGlow 0.4s ease-out;
+}
+
+/* Выпадающий список автодополнения */
+.autocompleteList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-s);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.autocompleteItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.autocompleteItem:hover,
+.autocompleteItem:focus {
+  background-color: var(--color-accent-hover);
+}
+
+.autocompleteItem.selected {
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* ===== Адаптация для мобильных устройств ===== */
+
+@media (max-width: 768px) {
+  .input,
+  .textarea,
+  .searchInput {
+    height: 56px; /* Увеличиваем высоту для удобного касания */
+    padding: 16px 20px;
+    font-size: calc(var(--fs-body) + 2px); /* Чуть крупнее текст */
+    max-width: 100%; /* Убираем ограничение по ширине */
+  }
+
+  .inputWithLeftIcon {
+    padding-left: 52px;
+  }
+
+  .inputWithRightIcon {
+    padding-right: 52px;
+  }
+
+  .leftIcon,
+  .rightIcon,
+  .searchIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .leftIcon {
+    left: 20px;
+  }
+
+  .rightIcon {
+    right: 20px;
+  }
+
+  /* Увеличиваем область клика для иконок */
+  .rightIcon {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Выпадающий список автодополнения */
+  .autocompleteList {
+    max-height: 180px;
+  }
+
+  .autocompleteItem {
+    padding: 16px 20px;
+    min-height: 48px; /* Достаточная высота для касания */
+  }
+
+  /* Уменьшаем максимальную ширину обёртки */
+  .wrapper,
+  .container {
+    max-width: 100%;
+  }
+}
+
+/* Оптимизация для тачскринов */
+@media (hover: none) and (pointer: coarse) {
+  .input:focus {
+    border-width: 3px; /* Более толстая рамка для визуального акцента */
+  }
+
+  .rightIcon:hover {
+    color: var(--color-text-muted); /* Отключаем hover-эффекты */
+  }
+
+  /* Убираем анимацию свечения, если она мешает */
+  .input:focus {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(171, 210, 122, 0.3);
+  }
+
+  /* Увеличиваем отступы для текстовых областей */
+  .textarea {
+    min-height: 120px;
+  }
+}
+
+/* Для очень маленьких экранов (до 480px) */
+@media (max-width: 480px) {
+  .input,
+  .textarea,
+  .searchInput {
+    height: 52px;
+    padding: 14px 18px;
+    font-size: var(--fs-body);
+  }
+
+  .leftIcon,
+  .rightIcon {
+    width: 22px;
+    height: 22px;
+  }
+}

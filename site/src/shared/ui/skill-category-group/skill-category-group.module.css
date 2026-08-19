@@ -1,0 +1,10 @@
+.group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 47px 60px;
+  width: 100%;
+}
+
+.category {
+  width: 100%;
+}

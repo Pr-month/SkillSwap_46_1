@@ -1,0 +1,13 @@
+{
+  "data": {
+    "id": "req-1",
+    "userSkill": "skill-1",
+    "requiredSkillUserId": "user-2",
+    "message": "Хочу научиться фотографии",
+    "createdAt": "2024-01-01T10:00:00.000Z",
+    "updatedAt": "2024-01-01T10:00:00.000Z",
+    "status": "pending",
+    "fromUserId": "user-1",
+    "toUserId": "user-2"
+  }
+}

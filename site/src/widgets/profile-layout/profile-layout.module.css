@@ -1,0 +1,23 @@
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 24px 24px 60px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 324px minmax(0, 1020px);
+  align-items: start;
+  gap: 24px;
+  width: 100%;
+  max-width: 1368px;
+  margin: 0 auto;
+}
+
+.sidebar {
+  min-width: 0;
+}
+
+.main {
+  min-width: 0;
+}

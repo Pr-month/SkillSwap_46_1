@@ -1,0 +1,51 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32, 32px);
+  padding-block: 50px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16, 16px);
+  width: 100%;
+  min-width: 436px;
+}
+
+.description {
+  min-height: 96px;
+  width: 100%;
+  resize: none;
+  border-radius: 12px;
+  padding-block: 12px;
+  padding-inline: 20px;
+  background-color: var(--color-bg-card);
+  color: var(--color-text)
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-20, 20px);
+}
+
+.button {
+  width: 100%;
+}
+
+.error {
+  color: var(--color-error, #d93025);
+  font-size: var(--fs-caption, 12px);
+  line-height: var(--lh-caption, 16px);
+  align-self: start;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-inline: 60px;
+  padding-block-start: 44px;
+  padding-block-end: 72px;
+}

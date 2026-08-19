@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20, 20px);
+}
+
+.title {
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--fs-h3, 20px);
+  line-height: var(--lh-h3, 1.2);
+  letter-spacing: -1.1%;
+}
+
+.checkboxgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+}
+
+.category-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.category-header:hover .checkbox {
+  color: var(--color-accent, #abd27a);
+}
+
+.category-header:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent-strong, #508826);
+  outline: none;
+}
+
+.category-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.category-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8, 8px);
+  padding-left: var(--space-32, 32px);
+  margin-top: var(--space-12, 12px);
+}
+
+.category-options.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.option:hover .checkbox {
+  color: var(--color-accent, #abd27a);
+}
+
+.option:has(.input:focus-visible) {
+  box-shadow: 0 0 0 2px var(--color-accent-strong, #508826);
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+}
+
+.see-all-button {
+  display: flex;
+  align-items: start;
+  cursor: pointer;
+  color: var(--color-accent-strong, #508826);
+}
+
+.see-all-button__icon {
+  display: flex;
+  align-items: center;
+}
+
+.see-all-button:focus-visible {
+  outline: 2px solid var(--color-accent-strong, #508826);
+  outline-offset: 2px;
+}

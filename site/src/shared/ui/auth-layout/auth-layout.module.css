@@ -1,0 +1,42 @@
+.container {
+  min-height: 100vh;
+  padding-top: var(--space-40, 40px);
+  padding-left: var(--space-36, 36px);
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-32, 32px);
+  padding-inline: 116px;
+}
+
+.title,
+.description__title {
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--fs-h2, 24px);
+  line-height: var(--lh-h2, 28px);
+  letter-spacing: -1.1%;
+}
+
+.content {
+  display: flex;
+  gap: var(--space-24, 24px);
+}
+
+.form__section {
+  background-color: var(--color-bg-card, #ffffff);
+  padding-inline: 60px;
+}
+
+.description__section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-40, 40px);
+  background-color: var(--color-bg-card, #ffffff);
+  padding-inline: 60px;
+}

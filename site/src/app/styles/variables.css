@@ -1,0 +1,135 @@
+:root {
+  /* === Светлая тема по умолчанию === */
+
+  /* Палитра */
+  --color-olive: #69735d;
+
+  /* Цвета текста */
+
+  --color-text-primary: #253017;
+  --color-text-muted: var(--color-olive);
+  --color-text-disabled: #9ca197;
+
+  /* Фоны */
+
+  --color-bg-page: #f9faf7;
+  --color-bg-card: #ffffff;
+  --color-bg-filter: #ffffff;
+  --color-bg-disabled: #e4e8df;
+  --color-bg-overlay: rgb(0 0 0 / 0.5);
+
+  /* Акценты */
+
+  --color-accent: #abd27a;
+  --color-accent-strong: #508826;
+  --color-accent-hover: #deebc5;
+  --color-toggle-off: #b2b9a9;
+
+  /* Состояния */
+
+  --color-error: #bf3920;
+  --color-warning: #e0796e;
+
+  /* Границы */
+  --color-border-default: var(--color-olive);
+  --color-control-border: #000000;
+
+  /* Категории */
+
+  --color-category-business: #eee7f7;
+  --color-category-creative: #f7e7f2;
+  --color-category-languages: #ebe5c5;
+  --color-category-education: #e7f2f6;
+  --color-category-home: #f7ebe5;
+  --color-category-health: #e9f7e7;
+  --color-tag-plus: #e8ecf7;
+  --color-category-it: #e8ecf7;
+
+  /* Типографика */
+
+  --font-family-heading: "Jost", sans-serif;
+  --font-family-base: "Roboto", sans-serif;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* Заголовки */
+  --fs-h1: 32px;
+  --lh-h1: 40px;
+  --fs-h2: 24px;
+  --lh-h2: 32px;
+  --fs-h3: 20px;
+  --lh-h3: 24px;
+  --fs-h4: 16px;
+  --lh-h4: 24px;
+
+  /* Текст */
+  --fs-body: 16px;
+  --lh-body: 24px;
+  --fs-caption: 12px;
+  --lh-caption: 16px;
+
+  /* Скругления */
+  --radius-s: 12px;
+  --radius-m: 20px;
+  --radius-round: 100px;
+
+  /* Отступы */
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-36: 36px;
+  --space-40: 40px;
+  --space-60: 60px;
+}
+
+/* === Тёмная тема === */
+[data-theme="dark"] {
+  /* Основные цвета */
+  --color-bg-page: #1a1c17;
+  --color-bg-card: #2d2e2a;
+  --color-bg-filter: #2d2e2a;
+  --color-bg-disabled: #4a4c46;
+
+  /* Текст */
+  --color-text-primary: #ffffff;
+  --color-text-muted: #b8bfa8;
+  --color-text-disabled: #6f7269;
+
+  /* Акценты */
+  --color-accent: #8bbf5a;
+  --color-accent-strong: #6fa03a;
+  --color-accent-hover: #3e5230;
+
+  /* Границы */
+  --color-border-default: #5e6652;
+  --color-control-border: #8f9a7f;
+
+  /* Категории (приглушённые) */
+  --color-category-business: #4a3a5a;   /* глубокий фиолет */
+  --color-category-creative: #5a3a4a;   /* виноградный */
+  --color-category-languages: #5a553a;  /* оливковый */
+  --color-category-education: #3a5a5a;  /* тёмный бирюзовый */
+  --color-category-home: #5a4a3a;       /* тёмный терракотовый */
+  --color-category-health: #3a5a3a;     /* тёмный изумрудный */
+  --color-category-it: #3a4a6a;         /* индиго */
+  --color-tag-plus: #2e3538;
+
+  /* Состояния */
+  --color-error: #e06b4f;
+  --color-warning: #ff8c7a;
+}
+
+[data-theme="dark"] select,
+[data-theme="dark"] option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] select option:checked,
+[data-theme="dark"] select option:hover {
+  background-color: var(--color-accent-hover);
+  color: var(--color-text-primary);
+}

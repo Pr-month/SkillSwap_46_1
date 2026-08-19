@@ -1,0 +1,87 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 1;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.fallbackContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  margin: 0 auto;
+}
+
+.imageContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.fallback {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.fallbackText {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  color: var(--color-text-tertiary);
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.title {
+  margin: 0;
+  font-family: Jost, sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -1.1%;
+  text-align: center;
+  vertical-align: middle;
+  color: var(--color-text-primary);
+  opacity: 1;
+}
+
+.message {
+  max-width: 436px;
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 2%;
+  text-align: center;
+  vertical-align: middle;
+  color: var(--color-text-secondary);
+  opacity: 1;
+}

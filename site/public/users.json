@@ -1,0 +1,935 @@
+{
+  "status": true,
+  "data": [
+    {
+      "id": "user-1",
+      "email": "ivan.petrov@mail.ru",
+      "name": "Иван Петров",
+      "birthDate": "1990-03-15",
+      "gender": "male",
+      "city": "Санкт-Петербург",
+      "avatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "aboutMe": "Люблю ритм, кофе по утрам и людей, которые не боятся пробовать новое",
+      "likesSkillsIds": [
+        "skill-2",
+        "skill-4"
+      ],
+      "userSkill": "skill-1",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-6",
+        "sub-6-1",
+        "sub-2-1",
+        "sub-5-4"
+      ],
+      "createdAt": "2025-01-08T10:24:00Z",
+      "updatedAt": "2025-02-14T15:30:00Z"
+    },
+    {
+      "id": "user-2",
+      "email": "anna.sokolova@gmail.com",
+      "name": "Анна Соколова",
+      "birthDate": "1995-07-22",
+      "gender": "female",
+      "city": "Москва",
+      "avatar": "https://randomuser.me/api/portraits/women/2.jpg",
+      "aboutMe": "Фотограф и путешественница. Верю что каждый момент заслуживает красивого кадра",
+      "likesSkillsIds": [
+        "skill-1",
+        "skill-5"
+      ],
+      "userSkill": "skill-2",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-3",
+        "sub-2-3",
+        "sub-5-1",
+        "sub-6-4",
+        "sub-1-4"
+      ],
+      "createdAt": "2025-01-11T09:15:00Z",
+      "updatedAt": "2025-03-18T11:40:00Z"
+    },
+    {
+      "id": "user-3",
+      "email": "dmitry.volkov@yandex.ru",
+      "name": "Дмитрий Волков",
+      "birthDate": "1988-11-05",
+      "gender": "male",
+      "city": "Екатеринбург",
+      "avatar": "https://randomuser.me/api/portraits/men/3.jpg",
+      "aboutMe": "Предприниматель в третьем запуске. Люблю спорт и честные разговоры о деньгах",
+      "likesSkillsIds": [],
+      "userSkill": "skill-3",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-5",
+        "sub-6-1",
+        "sub-4-1",
+        "sub-5-3"
+      ],
+      "createdAt": "2025-01-14T11:40:00Z",
+      "updatedAt": "2025-03-02T08:20:00Z"
+    },
+    {
+      "id": "user-4",
+      "email": "maria.kuznetsova@mail.ru",
+      "name": "Мария Кузнецова",
+      "birthDate": "1993-04-18",
+      "gender": "female",
+      "city": "Казань",
+      "avatar": "https://randomuser.me/api/portraits/women/4.jpg",
+      "aboutMe": "Нутрициолог и йога-инструктор. Помогаю людям находить баланс между едой и жизнью",
+      "likesSkillsIds": [
+        "skill-3"
+      ],
+      "userSkill": "skill-4",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-2",
+        "sub-4-2",
+        "sub-5-6",
+        "sub-2-2",
+        "sub-6-4"
+      ],
+      "createdAt": "2025-01-17T14:05:00Z",
+      "updatedAt": "2025-04-05T16:20:00Z"
+    },
+    {
+      "id": "user-5",
+      "email": "alexey.morozov@gmail.com",
+      "name": "Алексей Морозов",
+      "birthDate": "1991-09-30",
+      "gender": "male",
+      "city": "Новосибирск",
+      "avatar": "https://randomuser.me/api/portraits/men/5.jpg",
+      "aboutMe": "Разработчик в международной команде. Увлекаюсь музыкой и хочу научиться готовить",
+      "likesSkillsIds": [
+        "skill-1",
+        "skill-2",
+        "skill-4"
+      ],
+      "userSkill": "skill-5",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-4",
+        "sub-1-4",
+        "sub-3-3",
+        "sub-6-5"
+      ],
+      "createdAt": "2025-01-20T16:30:00Z",
+      "updatedAt": "2025-04-10T12:00:00Z"
+    },
+    {
+      "id": "user-6",
+      "email": "anastasia.egorova@yandex.ru",
+      "name": "Анастасия Егорова",
+      "birthDate": "1994-01-16",
+      "gender": "female",
+      "city": "Саратов",
+      "avatar": "https://randomuser.me/api/portraits/women/6.jpg",
+      "aboutMe": "Инструктор по йоге. Верю что тело и разум работают вместе",
+      "likesSkillsIds": [
+        "skill-5",
+        "skill-12"
+      ],
+      "userSkill": "skill-6",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-2",
+        "sub-4-6",
+        "sub-2-4",
+        "sub-5-1"
+      ],
+      "createdAt": "2025-01-23T10:10:00Z",
+      "updatedAt": "2025-03-10T09:00:00Z"
+    },
+    {
+      "id": "user-7",
+      "email": "pavel.kozlov@yandex.ru",
+      "name": "Павел Козлов",
+      "birthDate": "1989-08-25",
+      "gender": "male",
+      "city": "Нижний Новгород",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "aboutMe": "Видеограф и монтажёр. Снимаю свадьбы, клипы и всё что движется",
+      "likesSkillsIds": [
+        "skill-3",
+        "skill-9"
+      ],
+      "userSkill": "skill-7",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-3",
+        "sub-2-6",
+        "sub-6-5",
+        "sub-5-3"
+      ],
+      "createdAt": "2025-02-03T09:00:00Z",
+      "updatedAt": "2025-04-12T14:00:00Z"
+    },
+    {
+      "id": "user-8",
+      "email": "natalia.popova@gmail.com",
+      "name": "Наталья Попова",
+      "birthDate": "1994-12-01",
+      "gender": "female",
+      "city": "Санкт-Петербург",
+      "avatar": "https://randomuser.me/api/portraits/women/8.jpg",
+      "aboutMe": "Преподаватель французского. Влюблена в язык и культуру Франции",
+      "likesSkillsIds": [
+        "skill-6",
+        "skill-10"
+      ],
+      "userSkill": "skill-8",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-1",
+        "sub-6-4",
+        "sub-5-1",
+        "sub-3-3",
+        "sub-1-4"
+      ],
+      "createdAt": "2025-01-29T13:20:00Z",
+      "updatedAt": "2025-02-15T10:00:00Z"
+    },
+    {
+      "id": "user-9",
+      "email": "artem.sorokin@mail.ru",
+      "name": "Артём Сорокин",
+      "birthDate": "1991-06-11",
+      "gender": "male",
+      "city": "Барнаул",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "aboutMe": "Проектный менеджер в IT. Люблю порядок в процессах и хаос в путешествиях",
+      "likesSkillsIds": [
+        "skill-2",
+        "skill-8"
+      ],
+      "userSkill": "skill-9",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-4",
+        "sub-2-5",
+        "sub-6-7",
+        "sub-3-3"
+      ],
+      "createdAt": "2025-02-06T11:00:00Z",
+      "updatedAt": "2025-03-20T16:30:00Z"
+    },
+    {
+      "id": "user-10",
+      "email": "elena.novikova@mail.ru",
+      "name": "Елена Новикова",
+      "birthDate": "1997-01-19",
+      "gender": "female",
+      "city": "Краснодар",
+      "avatar": "https://randomuser.me/api/portraits/women/10.jpg",
+      "aboutMe": "Художник и иллюстратор. Рисую акварелью и мечтаю объездить весь мир",
+      "likesSkillsIds": [
+        "skill-4",
+        "skill-7"
+      ],
+      "userSkill": "skill-10",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-3",
+        "sub-5-6",
+        "sub-1-2",
+        "sub-6-1"
+      ],
+      "createdAt": "2025-02-09T14:40:00Z",
+      "updatedAt": "2025-04-22T09:30:00Z"
+    },
+    {
+      "id": "user-11",
+      "email": "sergey.ivanov@mail.ru",
+      "name": "Сергей Иванов",
+      "birthDate": "1987-06-08",
+      "gender": "male",
+      "city": "Ростов-на-Дону",
+      "avatar": "https://randomuser.me/api/portraits/men/11.jpg",
+      "aboutMe": "Тренер по фитнесу. Помогаю людям влюбиться в спорт а не возненавидеть его",
+      "likesSkillsIds": [
+        "skill-8",
+        "skill-15"
+      ],
+      "userSkill": "skill-11",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-4",
+        "sub-1-1",
+        "sub-5-2",
+        "sub-4-8"
+      ],
+      "createdAt": "2025-01-26T08:45:00Z",
+      "updatedAt": "2025-03-15T17:00:00Z"
+    },
+    {
+      "id": "user-12",
+      "email": "tatiana.fedorova@yandex.ru",
+      "name": "Татьяна Фёдорова",
+      "birthDate": "1992-10-07",
+      "gender": "female",
+      "city": "Уфа",
+      "avatar": "https://randomuser.me/api/portraits/women/12.jpg",
+      "aboutMe": "Пишу рассказы и веду литературный блог. Слова — моя стихия",
+      "likesSkillsIds": [
+        "skill-6",
+        "skill-17"
+      ],
+      "userSkill": "skill-12",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-3",
+        "sub-5-4",
+        "sub-3-4",
+        "sub-6-3"
+      ],
+      "createdAt": "2025-02-12T16:15:00Z",
+      "updatedAt": "2025-05-01T10:00:00Z"
+    },
+    {
+      "id": "user-13",
+      "email": "andrey.dmitriev@mail.ru",
+      "name": "Андрей Дмитриев",
+      "birthDate": "1990-03-28",
+      "gender": "male",
+      "city": "Воронеж",
+      "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+      "aboutMe": "Мастер на все руки. Сделал ремонт в 4 квартирах и ни разу не пожалел",
+      "likesSkillsIds": [
+        "skill-9",
+        "skill-15"
+      ],
+      "userSkill": "skill-13",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-7",
+        "sub-6-5",
+        "sub-5-3",
+        "sub-2-1",
+        "sub-4-4"
+      ],
+      "createdAt": "2025-02-15T08:30:00Z",
+      "updatedAt": "2025-03-25T11:00:00Z"
+    },
+    {
+      "id": "user-14",
+      "email": "yulia.alexandrova@gmail.com",
+      "name": "Юлия Александрова",
+      "birthDate": "1998-07-03",
+      "gender": "female",
+      "city": "Пермь",
+      "avatar": "https://randomuser.me/api/portraits/women/14.jpg",
+      "aboutMe": "Актриса театра и кино. Сцена — мой второй дом",
+      "likesSkillsIds": [
+        "skill-5",
+        "skill-18"
+      ],
+      "userSkill": "skill-14",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-5-5",
+        "sub-6-2",
+        "sub-1-4",
+        "sub-2-2"
+      ],
+      "createdAt": "2025-02-18T12:00:00Z",
+      "updatedAt": "2025-03-28T14:45:00Z"
+    },
+    {
+      "id": "user-15",
+      "email": "roman.stepanov@yandex.ru",
+      "name": "Роман Степанов",
+      "birthDate": "1985-11-17",
+      "gender": "male",
+      "city": "Омск",
+      "avatar": "https://randomuser.me/api/portraits/men/15.jpg",
+      "aboutMe": "Финансовый аналитик. Считаю деньги чужие и учу считать свои",
+      "likesSkillsIds": [
+        "skill-11",
+        "skill-22"
+      ],
+      "userSkill": "skill-15",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-5-3",
+        "sub-6-7",
+        "sub-4-2",
+        "sub-2-1"
+      ],
+      "createdAt": "2025-02-21T10:20:00Z",
+      "updatedAt": "2025-04-14T09:00:00Z"
+    },
+    {
+      "id": "user-16",
+      "email": "ksenia.morozova@mail.ru",
+      "name": "Ксения Морозова",
+      "birthDate": "1995-04-22",
+      "gender": "female",
+      "city": "Челябинск",
+      "avatar": "https://randomuser.me/api/portraits/women/16.jpg",
+      "aboutMe": "Повар и нутрициолог. Готовлю вкусно и с пользой — это не противоречие",
+      "likesSkillsIds": [
+        "skill-10",
+        "skill-23"
+      ],
+      "userSkill": "skill-16",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-1",
+        "sub-1-2",
+        "sub-4-2",
+        "sub-5-1",
+        "sub-6-6"
+      ],
+      "createdAt": "2025-02-24T15:10:00Z",
+      "updatedAt": "2025-05-12T11:30:00Z"
+    },
+    {
+      "id": "user-17",
+      "email": "igor.belov@gmail.com",
+      "name": "Игорь Белов",
+      "birthDate": "1988-09-14",
+      "gender": "male",
+      "city": "Красноярск",
+      "avatar": "https://randomuser.me/api/portraits/men/17.jpg",
+      "aboutMe": "Преподаю японский онлайн. Жил в Токио — есть что рассказать",
+      "likesSkillsIds": [
+        "skill-4",
+        "skill-28"
+      ],
+      "userSkill": "skill-17",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-8",
+        "sub-6-6",
+        "sub-3-3",
+        "sub-1-7"
+      ],
+      "createdAt": "2025-03-01T09:50:00Z",
+      "updatedAt": "2025-04-08T13:00:00Z"
+    },
+    {
+      "id": "user-18",
+      "email": "vera.orlova@yandex.ru",
+      "name": "Вера Орлова",
+      "birthDate": "1993-02-28",
+      "gender": "female",
+      "city": "Тюмень",
+      "avatar": "https://randomuser.me/api/portraits/women/18.jpg",
+      "aboutMe": "Психолог и практик осознанности. Помогаю людям дружить с собственной головой",
+      "likesSkillsIds": [
+        "skill-6",
+        "skill-24"
+      ],
+      "userSkill": "skill-18",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-5-2",
+        "sub-2-1",
+        "sub-3-1",
+        "sub-4-6",
+        "sub-1-6"
+      ],
+      "createdAt": "2025-03-04T13:35:00Z",
+      "updatedAt": "2025-04-18T16:00:00Z"
+    },
+    {
+      "id": "user-19",
+      "email": "mikhail.lebedev@gmail.com",
+      "name": "Михаил Лебедев",
+      "birthDate": "1986-05-12",
+      "gender": "male",
+      "city": "Самара",
+      "avatar": "https://randomuser.me/api/portraits/men/19.jpg",
+      "aboutMe": "Маркетолог с 10-летним опытом. Знаю как сделать так чтобы тебя заметили",
+      "likesSkillsIds": [
+        "skill-14",
+        "skill-26"
+      ],
+      "userSkill": "skill-19",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-8",
+        "sub-6-3",
+        "sub-2-3",
+        "sub-5-6"
+      ],
+      "createdAt": "2025-03-07T11:00:00Z",
+      "updatedAt": "2025-04-30T10:00:00Z"
+    },
+    {
+      "id": "user-20",
+      "email": "polina.volkova@gmail.com",
+      "name": "Полина Волкова",
+      "birthDate": "1996-08-19",
+      "gender": "female",
+      "city": "Иркутск",
+      "avatar": "https://randomuser.me/api/portraits/women/20.jpg",
+      "aboutMe": "Дизайнер интерьеров. Создаю уют там где его не было",
+      "likesSkillsIds": [
+        "skill-8",
+        "skill-27"
+      ],
+      "userSkill": "skill-20",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-5",
+        "sub-5-3",
+        "sub-3-6",
+        "sub-6-4"
+      ],
+      "createdAt": "2025-03-10T14:25:00Z",
+      "updatedAt": "2025-05-20T09:15:00Z"
+    },
+    {
+      "id": "user-21",
+      "email": "nikolay.karpov@yandex.ru",
+      "name": "Николай Карпов",
+      "birthDate": "1984-12-23",
+      "gender": "male",
+      "city": "Хабаровск",
+      "avatar": "https://randomuser.me/api/portraits/men/21.jpg",
+      "aboutMe": "Тренер по переговорам. Провёл 500+ переговоров — есть чем поделиться",
+      "likesSkillsIds": [
+        "skill-18",
+        "skill-30"
+      ],
+      "userSkill": "skill-21",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-6-4",
+        "sub-4-1",
+        "sub-2-1",
+        "sub-5-1",
+        "sub-3-2"
+      ],
+      "createdAt": "2025-03-13T08:00:00Z",
+      "updatedAt": "2025-04-25T12:00:00Z"
+    },
+    {
+      "id": "user-22",
+      "email": "diana.kulikova@mail.ru",
+      "name": "Диана Куликова",
+      "birthDate": "1999-05-05",
+      "gender": "female",
+      "city": "Владивосток",
+      "avatar": "https://randomuser.me/api/portraits/women/22.jpg",
+      "aboutMe": "Студентка и репетитор. Сдала IELTS на 8.0 и помогаю другим",
+      "likesSkillsIds": [
+        "skill-6",
+        "skill-20"
+      ],
+      "userSkill": "skill-22",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-3-1",
+        "sub-5-1",
+        "sub-4-2",
+        "sub-6-1"
+      ],
+      "createdAt": "2025-03-16T16:50:00Z",
+      "updatedAt": "2025-04-05T10:40:00Z"
+    },
+    {
+      "id": "user-23",
+      "email": "evgeny.tikhonov@gmail.com",
+      "name": "Евгений Тихонов",
+      "birthDate": "1987-10-31",
+      "gender": "male",
+      "city": "Волгоград",
+      "avatar": "https://randomuser.me/api/portraits/men/23.jpg",
+      "aboutMe": "Иллюстратор и графический дизайнер. Рисую персонажей и обложки",
+      "likesSkillsIds": [
+        "skill-3",
+        "skill-29"
+      ],
+      "userSkill": "skill-23",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-8",
+        "sub-5-5",
+        "sub-2-3",
+        "sub-6-5"
+      ],
+      "createdAt": "2025-03-19T10:30:00Z",
+      "updatedAt": "2025-05-05T14:00:00Z"
+    },
+    {
+      "id": "user-24",
+      "email": "anastasia.novak@yandex.ru",
+      "name": "Анастасия Новак",
+      "birthDate": "1994-01-16",
+      "gender": "female",
+      "city": "Саратов",
+      "avatar": "https://randomuser.me/api/portraits/women/24.jpg",
+      "aboutMe": "Сертифицированный инструктор йоги. Практикую 8 лет и делюсь этим",
+      "likesSkillsIds": [
+        "skill-12",
+        "skill-19"
+      ],
+      "userSkill": "skill-24",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-2",
+        "sub-4-6",
+        "sub-2-4",
+        "sub-5-6",
+        "sub-6-3"
+      ],
+      "createdAt": "2025-03-22T12:15:00Z",
+      "updatedAt": "2025-05-08T08:00:00Z"
+    },
+    {
+      "id": "user-25",
+      "email": "maxim.nikitin@mail.ru",
+      "name": "Максим Никитин",
+      "birthDate": "1992-04-09",
+      "gender": "male",
+      "city": "Тула",
+      "avatar": "https://randomuser.me/api/portraits/men/25.jpg",
+      "aboutMe": "Музыкант и гитарист. Играю 15 лет — от дворовых посиделок до концертов",
+      "likesSkillsIds": [
+        "skill-1",
+        "skill-7"
+      ],
+      "userSkill": "skill-25",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-5",
+        "sub-4-3",
+        "sub-6-6",
+        "sub-2-1"
+      ],
+      "createdAt": "2025-03-25T09:45:00Z",
+      "updatedAt": "2025-04-15T11:00:00Z"
+    },
+    {
+      "id": "user-26",
+      "email": "svetlana.grishina@gmail.com",
+      "name": "Светлана Гришина",
+      "birthDate": "1990-07-27",
+      "gender": "female",
+      "city": "Рязань",
+      "avatar": "https://randomuser.me/api/portraits/women/26.jpg",
+      "aboutMe": "HR с 8-летним опытом. Провела 1000+ интервью и знаю что ищут работодатели",
+      "likesSkillsIds": [
+        "skill-4",
+        "skill-32"
+      ],
+      "userSkill": "skill-26",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-7",
+        "sub-2-3",
+        "sub-6-7",
+        "sub-5-1"
+      ],
+      "createdAt": "2025-03-28T15:00:00Z",
+      "updatedAt": "2025-04-30T13:20:00Z"
+    },
+    {
+      "id": "user-27",
+      "email": "alexei.kovalev@yandex.ru",
+      "name": "Алексей Ковалёв",
+      "birthDate": "1983-03-03",
+      "gender": "male",
+      "city": "Самара",
+      "avatar": "https://randomuser.me/api/portraits/men/27.jpg",
+      "aboutMe": "Читаю 400 страниц в час и обучил этому 200 человек. Скорочтение — суперсила",
+      "likesSkillsIds": [
+        "skill-11",
+        "skill-21"
+      ],
+      "userSkill": "skill-27",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-3-3",
+        "sub-6-5",
+        "sub-4-4",
+        "sub-1-3"
+      ],
+      "createdAt": "2025-04-01T11:10:00Z",
+      "updatedAt": "2025-05-02T09:00:00Z"
+    },
+    {
+      "id": "user-28",
+      "email": "irina.savelieva@mail.ru",
+      "name": "Ирина Савельева",
+      "birthDate": "1997-11-11",
+      "gender": "female",
+      "city": "Пенза",
+      "avatar": "https://randomuser.me/api/portraits/women/28.jpg",
+      "aboutMe": "Специалист по KonMari. Помогла 50+ семьям найти радость в порядке",
+      "likesSkillsIds": [
+        "skill-2",
+        "skill-30"
+      ],
+      "userSkill": "skill-28",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-1-4",
+        "sub-5-6",
+        "sub-4-2",
+        "sub-6-1",
+        "sub-2-2"
+      ],
+      "createdAt": "2025-04-04T14:00:00Z",
+      "updatedAt": "2025-05-15T10:50:00Z"
+    },
+    {
+      "id": "user-29",
+      "email": "vitaly.zuev@gmail.com",
+      "name": "Виталий Зуев",
+      "birthDate": "1989-08-08",
+      "gender": "male",
+      "city": "Липецк",
+      "avatar": "https://randomuser.me/api/portraits/men/29.jpg",
+      "aboutMe": "Руководил командами до 30 человек. Лидерство — это навык, а не дар",
+      "likesSkillsIds": [
+        "skill-6",
+        "skill-16"
+      ],
+      "userSkill": "skill-29",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-6-6",
+        "sub-4-4",
+        "sub-2-6",
+        "sub-3-2"
+      ],
+      "createdAt": "2025-04-07T08:20:00Z",
+      "updatedAt": "2025-05-18T14:00:00Z"
+    },
+    {
+      "id": "user-30",
+      "email": "alena.pavlova@yandex.ru",
+      "name": "Алёна Павлова",
+      "birthDate": "2000-02-20",
+      "gender": "female",
+      "city": "Киров",
+      "avatar": "https://randomuser.me/api/portraits/women/30.jpg",
+      "aboutMe": "Коуч ICF. Помогаю людям находить свой путь а не чужой",
+      "likesSkillsIds": [
+        "skill-7",
+        "skill-25"
+      ],
+      "userSkill": "skill-30",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-3",
+        "sub-1-2",
+        "sub-2-1",
+        "sub-6-5"
+      ],
+      "createdAt": "2025-04-10T16:40:00Z",
+      "updatedAt": "2025-05-25T12:00:00Z"
+    },
+    {
+      "id": "user-31",
+      "email": "olga.smirnova@yandex.ru",
+      "name": "Ольга Смирнова",
+      "birthDate": "1996-02-14",
+      "gender": "female",
+      "city": "Москва",
+      "avatar": "https://randomuser.me/api/portraits/women/31.jpg",
+      "aboutMe": "Жила в Испании 3 года. Испанский стал частью меня — хочу поделиться этим",
+      "likesSkillsIds": [
+        "skill-10",
+        "skill-22"
+      ],
+      "userSkill": "skill-31",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-2",
+        "sub-6-3",
+        "sub-1-6",
+        "sub-5-4"
+      ],
+      "createdAt": "2025-02-08T10:00:00Z",
+      "updatedAt": "2025-04-12T09:30:00Z"
+    },
+    {
+      "id": "user-32",
+      "email": "anna.morozova@gmail.com",
+      "name": "Анна Морозова",
+      "birthDate": "1991-05-30",
+      "gender": "female",
+      "city": "Екатеринбург",
+      "avatar": "https://randomuser.me/api/portraits/women/32.jpg",
+      "aboutMe": "Практикую медитацию 10 лет. Прошла ретрит Випассана — это изменило всё",
+      "likesSkillsIds": [
+        "skill-18",
+        "skill-28"
+      ],
+      "userSkill": "skill-32",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-2",
+        "sub-4-5",
+        "sub-1-7",
+        "sub-3-3",
+        "sub-5-2"
+      ],
+      "createdAt": "2025-03-20T14:00:00Z",
+      "updatedAt": "2025-04-28T11:00:00Z"
+    },
+    {
+      "id": "user-33",
+      "email": "kate.volkova@mail.ru",
+      "name": "Катерина Волкова",
+      "birthDate": "1993-09-12",
+      "gender": "female",
+      "city": "Новосибирск",
+      "avatar": "https://randomuser.me/api/portraits/women/33.jpg",
+      "aboutMe": "15к подписчиков в LinkedIn и это только начало. Личный бренд — моя страсть",
+      "likesSkillsIds": [
+        "skill-9",
+        "skill-20"
+      ],
+      "userSkill": "skill-33",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-3",
+        "sub-6-1",
+        "sub-2-7",
+        "sub-3-4"
+      ],
+      "createdAt": "2025-04-13T09:00:00Z",
+      "updatedAt": "2025-05-10T15:00:00Z"
+    },
+    {
+      "id": "user-34",
+      "email": "marina.sorokina@yandex.ru",
+      "name": "Марина Сорокина",
+      "birthDate": "1989-07-18",
+      "gender": "female",
+      "city": "Краснодар",
+      "avatar": "https://randomuser.me/api/portraits/women/34.jpg",
+      "aboutMe": "Коллекционирую растения — их уже больше 100. Каждое имеет имя",
+      "likesSkillsIds": [
+        "skill-16",
+        "skill-24"
+      ],
+      "userSkill": "skill-34",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-6",
+        "sub-6-1",
+        "sub-1-4",
+        "sub-5-1"
+      ],
+      "createdAt": "2025-01-28T16:00:00Z",
+      "updatedAt": "2025-03-18T08:30:00Z"
+    },
+    {
+      "id": "user-35",
+      "email": "dmitry.kuzmin@gmail.com",
+      "name": "Дмитрий Кузьмин",
+      "birthDate": "1986-03-22",
+      "gender": "male",
+      "city": "Казань",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "aboutMe": "Преподаю немецкий 7 лет. Грамматика — это не страшно если объяснить правильно",
+      "likesSkillsIds": [
+        "skill-13",
+        "skill-27"
+      ],
+      "userSkill": "skill-35",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-4",
+        "sub-6-2",
+        "sub-1-3",
+        "sub-5-3",
+        "sub-3-5"
+      ],
+      "createdAt": "2025-05-01T10:30:00Z",
+      "updatedAt": "2025-05-22T12:00:00Z"
+    },
+    {
+      "id": "user-36",
+      "email": "polina.nikiforova@mail.ru",
+      "name": "Полина Никифорова",
+      "birthDate": "1995-11-08",
+      "gender": "female",
+      "city": "Воронеж",
+      "avatar": "https://randomuser.me/api/portraits/women/36.jpg",
+      "aboutMe": "Арт-терапевт с психологическим образованием. Творчество лечит — это не метафора",
+      "likesSkillsIds": [
+        "skill-32",
+        "skill-18"
+      ],
+      "userSkill": "skill-36",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-5-6",
+        "sub-2-2",
+        "sub-6-5",
+        "sub-1-2"
+      ],
+      "createdAt": "2025-02-26T13:45:00Z",
+      "updatedAt": "2025-04-20T10:00:00Z"
+    },
+    {
+      "id": "user-37",
+      "email": "alexey.chen@yandex.ru",
+      "name": "Алексей Чен",
+      "birthDate": "1988-04-05",
+      "gender": "male",
+      "city": "Хабаровск",
+      "avatar": "https://randomuser.me/api/portraits/men/37.jpg",
+      "aboutMe": "Жил в Китае 4 года. Китайский открыл мне совершенно другой мир",
+      "likesSkillsIds": [
+        "skill-17",
+        "skill-25"
+      ],
+      "userSkill": "skill-37",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-4",
+        "sub-1-8",
+        "sub-6-4",
+        "sub-3-3"
+      ],
+      "createdAt": "2025-03-08T09:15:00Z",
+      "updatedAt": "2025-04-16T14:30:00Z"
+    },
+    {
+      "id": "user-38",
+      "email": "ivan.sobolev@gmail.com",
+      "name": "Иван Соболев",
+      "birthDate": "1985-08-17",
+      "gender": "male",
+      "city": "Самара",
+      "avatar": "https://randomuser.me/api/portraits/men/38.jpg",
+      "aboutMe": "Выступаю на конференциях 8 лет. Страх сцены победим — проверено на себе",
+      "likesSkillsIds": [
+        "skill-21",
+        "skill-33"
+      ],
+      "userSkill": "skill-38",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-6-6",
+        "sub-3-2",
+        "sub-2-5",
+        "sub-4-7",
+        "sub-5-4"
+      ],
+      "createdAt": "2025-04-18T15:00:00Z",
+      "updatedAt": "2025-05-19T09:00:00Z"
+    },
+    {
+      "id": "user-39",
+      "email": "natasha.zimina@mail.ru",
+      "name": "Наташа Зимина",
+      "birthDate": "1994-06-25",
+      "gender": "female",
+      "city": "Тюмень",
+      "avatar": "https://randomuser.me/api/portraits/women/39.jpg",
+      "aboutMe": "Прошла путь от выгорания до баланса. Теперь помогаю другим не повторять мои ошибки",
+      "likesSkillsIds": [
+        "skill-4",
+        "skill-32"
+      ],
+      "userSkill": "skill-39",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-4-2",
+        "sub-1-4",
+        "sub-2-3",
+        "sub-5-1"
+      ],
+      "createdAt": "2025-05-08T08:30:00Z",
+      "updatedAt": "2025-05-24T11:00:00Z"
+    },
+    {
+      "id": "user-40",
+      "email": "vera.stepanova@yandex.ru",
+      "name": "Вера Степанова",
+      "birthDate": "1992-12-03",
+      "gender": "female",
+      "city": "Иркутск",
+      "avatar": "https://randomuser.me/api/portraits/women/40.jpg",
+      "aboutMe": "Организовала 50+ домов. Порядок — это не перфекционизм, это свобода",
+      "likesSkillsIds": [
+        "skill-28",
+        "skill-6"
+      ],
+      "userSkill": "skill-40",
+      "interestedSkillsSubcategoriesIds": [
+        "sub-2-1",
+        "sub-5-6",
+        "sub-4-5",
+        "sub-6-2",
+        "sub-1-6"
+      ],
+      "createdAt": "2025-04-23T12:00:00Z",
+      "updatedAt": "2025-05-26T10:00:00Z"
+    }
+  ]
+}

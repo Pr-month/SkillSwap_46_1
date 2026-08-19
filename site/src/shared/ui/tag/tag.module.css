@@ -1,0 +1,109 @@
+.group {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.tag {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: fit-content;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-round, 100px);
+  padding: 8px 12px;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-weight: var(--font-weight-regular, 400);
+  font-size: var(--fs-caption, 12px);
+  line-height: var(--lh-caption, 16px);
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.categoryMore {
+  background: var(--color-tag-plus, #e8ecf7);
+  cursor: pointer;
+}
+
+.categoryMore:hover {
+  color: var(--color-olive, #69735d);
+}
+
+.categoryMore:hover .text {
+  color: var(--color-olive, #69735d);
+}
+
+.categoryMore:active {
+  transform: scale(0.95);
+}
+
+.categoryMore:focus-visible {
+  outline: 2px solid var(--color-text-primary, #253017);
+  outline-offset: 2px;
+}
+
+.text {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-weight: var(--font-weight-regular, 400);
+  font-size: var(--fs-caption, 12px);
+  line-height: var(--lh-caption, 16px);
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  width: fit-content;
+  min-width: fit-content;
+  max-width: 280px;
+  margin-top: 8px;
+  border: 1px solid rgba(37, 48, 23, 0.1);
+  border-radius: var(--radius-s, 12px);
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-bg-card, #ffffff);
+  animation: fadeIn 0.2s ease forwards;
+}
+
+.hiddenTagsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: fit-content;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.moreTagContainer {
+  position: relative;
+  display: inline-block;
+}

@@ -1,0 +1,66 @@
+.menu {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: var(--space-12) var(--space-16);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-weight: 500;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.menuItem:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.menuItem:active {
+  background-color: var(--color-bg-active);
+}
+
+.menuItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-secondary);
+}
+
+.menuItemText {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  .menu {
+    padding: 24px;
+    max-width: calc(100vw - 32px);
+  }
+  .menuItemText {
+    white-space: normal;
+    word-break: break-word;
+  }
+}

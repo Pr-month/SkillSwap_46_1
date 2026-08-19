@@ -1,0 +1,53 @@
+.button {
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  display: inline-flex;
+  border-radius: 999px;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-accent-strong, #508826);
+  outline-offset: 2px;
+}
+
+.button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconButton {
+  border-radius: 0;
+}
+
+.iconButton svg {
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.iconButton:not(.disabled):hover svg {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+.button:not(.iconButton) svg rect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button:not(.iconButton) svg rect:last-child {
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    x 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+}
+
+.button:not(.iconButton) svg rect:first-child {
+  transition: fill 0.3s ease;
+}
+
+.button.disabled svg rect {
+  transition: none;
+}

@@ -1,0 +1,71 @@
+.popover {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  animation: backdrop-fade-in 0.2s ease;
+  &.transparent {
+    background: transparent;
+    backdrop-filter: none;
+  }
+}
+
+.panel {
+  width: fit-content;
+  min-width: 200px;
+  max-width: calc(100vw - 120px);
+  max-height: calc(100vh - 140px);
+  border-radius: var(--radius-s, 12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: auto;
+  background: var(--color-bg-card, #fff);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.panel[data-closed] {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.panel[data-enter] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panel[data-anchor="bottom"] {
+  transform-origin: top center;
+}
+
+.panel[data-anchor="top"] {
+  transform-origin: bottom center;
+}
+
+.panel[data-anchor="left"] {
+  transform-origin: right center;
+}
+
+.panel[data-anchor="right"] {
+  transform-origin: left center;
+}
+
+@keyframes backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

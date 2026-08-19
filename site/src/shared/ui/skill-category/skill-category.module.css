@@ -1,0 +1,51 @@
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconWrapper {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-round, 100px);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-heading, "Jost", sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--fs-h2, 24px);
+  line-height: 28px;
+  letter-spacing: -1.1%;
+}
+
+.skillsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-left: 52px;
+  padding: 0;
+  list-style: none;
+}
+
+.skillItem {
+  margin: 0;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-weight: var(--font-weight-regular, 400);
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+  letter-spacing: 0.02em;
+}

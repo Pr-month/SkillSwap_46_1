@@ -1,0 +1,105 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32, 32px);
+  padding-block: 40px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16, 16px);
+}
+
+.avatar {
+  align-self: center;
+}
+
+.birthDate__sex__fields {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-24, 24px);
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+}
+
+.selectedSkills {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+  width: 100%;
+}
+
+.selectedSkillsTitle {
+  font-weight: var(--font-weight-regular, 400);
+  font-size: var(--fs-body, 16px);
+  line-height: var(--lh-body, 24px);
+  color: var(--color-text-primary, #253017);
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8, 8px);
+  max-width: 500px;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.skillTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6, 6px);
+  padding: var(--space-4, 4px) var(--space-10, 10px) var(--space-4, 4px)
+    var(--space-8, 8px);
+  border-radius: 20px;
+  color: var(--color-text-primary, #253017);
+  font-family: var(--font-family-base, "Roboto", sans-serif);
+  font-size: var(--fs-caption, 12px);
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.skillTagName {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skillTagRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.15);
+  color: white;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+  margin-left: var(--space-4, 4px);
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-20, 20px);
+}
+
+.button {
+  width: 100%;
+}

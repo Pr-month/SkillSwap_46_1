@@ -1,0 +1,55 @@
+.selectedFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-24);
+  overflow-y: auto;
+  max-width: 1020px;
+  max-height: 96px;
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-accent-strong);
+}
+
+.resetButton:hover {
+  opacity: 0.8;
+}
+
+.filtersList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 48px;
+  padding: 0 var(--space-24);
+  border: none;
+  border-radius: var(--radius-s);
+  background-color: var(--color-bg-card);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+}
+
+.filterChip:hover {
+  background-color: var(--color-accent-hover);
+}
