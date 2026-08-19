@@ -157,6 +157,7 @@ export class AuthService {
         },
         {
           expiresIn: this.configService.jwtAccessExpiresIn as StringValue,
+          secret: this.configService.jwtAccessSecret,
         },
       ),
       this.jwtService.signAsync(

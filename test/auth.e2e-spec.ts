@@ -1,12 +1,19 @@
 import { AppModule } from '@/app.module';
+import { City } from '@/cities/entities/city.entity';
+import { User } from '@/users/entities/user.entity';
 import { UserGender } from '@/users/enums/user.enums';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import cookieParser from 'cookie-parser';
 import request from 'supertest';
+import { Repository } from 'typeorm';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let accessToken: string;
+  let cityRepository: Repository<City>;
+  let userRepository: Repository<User>;
 
   const testUser = {
     email: 'e2e-test@example.com',
@@ -14,7 +21,7 @@ describe('AuthController (e2e)', () => {
     name: 'E2E Test User',
     birthdate: '1990-01-01',
     gender: UserGender.MALE,
-    cityId: '00000000-0000-0000-0000-000000000001',
+    cityId: '',
     avatar: 'https://example.com/avatar.jpg',
   };
 
@@ -27,6 +34,8 @@ describe('AuthController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
+    app.use(cookieParser());
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -36,10 +45,41 @@ describe('AuthController (e2e)', () => {
     );
 
     await app.init();
+
+    cityRepository = app.get(getRepositoryToken(City));
+    userRepository = app.get(getRepositoryToken(User));
+
+    const city = await cityRepository.findOne({
+      where: { name: 'Москва' },
+    });
+
+    if (!city) {
+      throw new Error('Город Москва не найден. Запустите сидинг городов.');
+    }
+
+    testUser.cityId = city.id;
+
+    // Удаляем тестового пользователя, если он остался от предыдущих запусков
+    const existingUser = await userRepository.findOne({
+      where: { email: testUser.email },
+    });
+
+    if (existingUser) {
+      await userRepository.delete(existingUser.id);
+    }
   });
 
   afterAll(async () => {
     if (app) {
+      // Удаляем тестового пользователя
+      const user = await userRepository.findOne({
+        where: { email: testUser.email },
+      });
+
+      if (user) {
+        await userRepository.delete(user.id);
+      }
+
       await app.close();
     }
   });

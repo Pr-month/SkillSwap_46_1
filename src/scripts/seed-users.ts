@@ -1,10 +1,11 @@
+import { adminSeedData } from '@/scripts/data/admin.data';
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 
+import { City } from '../cities/entities/city.entity';
 import { nodeEnvValue } from '../module/configuration/const';
 import { User } from '../users/entities/user.entity';
 import { getAppDataSource } from './data-source';
-import { adminSeedData } from './data/admin.data';
 
 async function seed() {
   if (process.env.NODE_ENV !== nodeEnvValue.Development) {
@@ -19,6 +20,7 @@ async function seed() {
   await AppDataSource.initialize();
 
   const userRepo = AppDataSource.getRepository(User);
+  const cityRepo = AppDataSource.getRepository(City);
 
   const existingAdmin = await userRepo.findOne({
     where: { email: adminSeedData.email },
@@ -30,13 +32,26 @@ async function seed() {
     return;
   }
 
+  const city = await cityRepo.findOne({
+    where: { name: adminSeedData.city },
+  });
+
+  if (!city) {
+    throw new Error(`Город "${adminSeedData.city}" не найден в базе данных`);
+  }
+
   const saltRounds = Number(process.env.HASH_SALT) || 10;
   const hashedPassword = await bcrypt.hash(adminSeedData.password, saltRounds);
 
   const admin = await userRepo.save(
     userRepo.create({
-      ...adminSeedData,
+      email: adminSeedData.email,
       password: hashedPassword,
+      name: adminSeedData.name,
+      birthdate: adminSeedData.birthdate,
+      gender: adminSeedData.gender,
+      role: adminSeedData.role,
+      city,
     }),
   );
 

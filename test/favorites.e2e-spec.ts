@@ -57,16 +57,21 @@ describe('Favorites (e2e)', () => {
     favoriteRepository = app.get(getRepositoryToken(Favorite));
     userRepository = app.get(getRepositoryToken(User));
 
-    const city = await cityRepository.save(
-      cityRepository.create({
-        name: 'Москва',
-        district: 'Центральный',
-        subject: 'Москва',
-        population: 12678079,
-        lat: 55.7558,
-        lon: 37.6173,
-      }),
-    );
+    let city = await cityRepository.findOneBy({ name: 'Москва' });
+
+    if (!city) {
+      city = await cityRepository.save(
+        cityRepository.create({
+          name: 'Москва',
+          district: 'Центральный',
+          subject: 'Москва',
+          population: 12678079,
+          lat: 55.7558,
+          lon: 37.6173,
+        }),
+      );
+    }
+
     cityId = city.id;
 
     const category = await categoryRepository.save(
@@ -138,9 +143,6 @@ describe('Favorites (e2e)', () => {
       }
       if (categoryId) {
         await categoryRepository.delete(categoryId).catch(() => undefined);
-      }
-      if (cityId) {
-        await cityRepository.delete(cityId).catch(() => undefined);
       }
       await app.close();
     }

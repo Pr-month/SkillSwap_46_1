@@ -14,9 +14,11 @@ export class EnvironmentVariables {
   @Max(65535)
   [EnvKey.Port]: number;
 
-  @IsString()
-  @IsNotEmpty()
-  [EnvKey.HashSalt]: string;
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(4)
+  @Max(31)
+  [EnvKey.HashSalt]: number;
 
   @IsString()
   @IsNotEmpty()
