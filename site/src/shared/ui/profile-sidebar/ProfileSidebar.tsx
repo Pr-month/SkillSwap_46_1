@@ -1,8 +1,6 @@
 import { SidebarItem } from "../sidebar-item";
 import type { TSidebarItemProps } from "../sidebar-item/types";
 import styles from "./ProfileSidebar.module.css";
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const profileSidebarItems: TSidebarItemProps[] = [
   {
     key: "requests",

@@ -316,7 +316,6 @@ export const DatePicker = ({
   const [internalErrorText, setInternalErrorText] = useState<string>("");
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraftDate(selectedDate);
     setInputValue(selectedDate ? formatDisplayDateValue(selectedDate) : "");
     setViewDate(selectedDate ?? new Date());

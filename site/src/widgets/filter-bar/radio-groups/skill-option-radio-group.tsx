@@ -1,8 +1,6 @@
 import React from "react";
 import type { TSkillOption, TSkillOptionRadioGroupProps } from "./types";
 import styles from "./radio-group.module.css";
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const skillOptions: { value: TSkillOption; label: string }[] = [
   { value: "all", label: "Всё" },
   { value: "want-to-learn", label: "Хочу научиться" },
