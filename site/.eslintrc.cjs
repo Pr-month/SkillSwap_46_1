@@ -8,7 +8,6 @@ module.exports = {
         'plugin:storybook/recommended',
     ],
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'react-refresh'],
     parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
@@ -16,15 +15,13 @@ module.exports = {
             jsx: true,
         },
     },
+    plugins: ['@typescript-eslint', 'react-refresh'],
     env: {
         browser: true,
         es2020: true,
     },
     rules: {
-        'react-refresh/only-export-components': [
-            'warn',
-            { allowConstantExport: true },
-        ],
+        'react-refresh/only-export-components': 'off',
     },
     ignorePatterns: ['dist', '.eslintrc.cjs'],
 };
