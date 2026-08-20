@@ -3,12 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "server"
+    "server",
+    "site"
   ],
   "scripts": {
     "start:dev": "npm run start:dev --workspace server",
+    "start:client": "npm run dev --workspace site",
+    "build:server": "npm run build --workspace server",
+    "build:client": "npm run build --workspace site",
+    "build": "npm run build:server && npm run build:client",
+    "test:server": "npm run test --workspace server",
+    "test:client": "npm run test --workspace site",
+    "test": "npm run test:server && npm run test:client",
     "test:e2e": "npm run test:e2e --workspace server",
+    "lint:server": "npm run lint --workspace server",
+    "lint:client": "npm run lint --workspace site",
+    "lint": "npm run lint:server && npm run lint:client",
     "seeding:cities": "npm run seeding:cities --workspace server",
-    "build": "npm run build --workspace server"
+    "seeding:categories": "npm run seeding:categories --workspace server",
+    "seeding:users": "npm run seeding:users --workspace server"
   }
 }
