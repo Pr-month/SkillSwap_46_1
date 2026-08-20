@@ -39,9 +39,7 @@ async function seed() {
     });
 
     if (!city) {
-      throw new Error(
-        `Город "${adminSeedData.city}" не найден в базе данных.`,
-      );
+      throw new Error(`Город "${adminSeedData.city}" не найден в базе данных.`);
     }
 
     const saltRounds = Number(process.env.HASH_SALT) || 10;
@@ -63,9 +61,7 @@ async function seed() {
 
     const savedAdmin = await userRepo.save(admin);
 
-    console.log(
-      `Сид администратора успешно выполнен: ${savedAdmin.email}`,
-    );
+    console.log(`Сид администратора успешно выполнен: ${savedAdmin.email}`);
   } finally {
     await AppDataSource.destroy();
   }

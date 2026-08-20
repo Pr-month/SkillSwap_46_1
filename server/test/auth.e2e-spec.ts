@@ -17,21 +17,21 @@ describe('AuthController (e2e)', () => {
   let userId: string;
 
   const testUser: {
-  email: string;
-  password: string;
-  name: string;
-  birthdate: string;
-  gender: UserGender;
-  avatar: string;
-  cityId?: string;
-} = {
-  email: `e2e-test-${Date.now()}@example.com`,
-  password: 'password123',
-  name: 'E2E Test User',
-  birthdate: '1990-01-01',
-  gender: UserGender.MALE,
-  avatar: 'https://example.com/avatar.jpg',
-};
+    email: string;
+    password: string;
+    name: string;
+    birthdate: string;
+    gender: UserGender;
+    avatar: string;
+    cityId?: string;
+  } = {
+    email: `e2e-test-${Date.now()}@example.com`,
+    password: 'password123',
+    name: 'E2E Test User',
+    birthdate: '1990-01-01',
+    gender: UserGender.MALE,
+    avatar: 'https://example.com/avatar.jpg',
+  };
 
   const newPassword = 'newPassword123';
 

@@ -4,6 +4,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { UpdateResult } from 'typeorm';
 
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginatedResponseDto } from '../common/dto/response.dto';
 import { BusinessException } from '../common/errors/business.exception';
 import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -24,6 +26,7 @@ describe('UsersService', () => {
     create: jest.Mock;
     save: jest.Mock;
     findOne: jest.Mock;
+    findAndCount: jest.Mock;
     update: jest.Mock;
     preload: jest.Mock;
   };
@@ -71,6 +74,7 @@ describe('UsersService', () => {
       create: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
+      findAndCount: jest.fn(),
       update: jest.fn(),
       preload: jest.fn(),
     };
@@ -262,5 +266,142 @@ describe('UsersService', () => {
     });
     expect(bcrypt.hash).not.toHaveBeenCalled();
     expect(usersRepository.update).not.toHaveBeenCalled();
+  });
+
+  describe('findAll', () => {
+    const createUserWithId = (index: number): User =>
+      Object.assign(new User(), {
+        id: `user-uuid-${index}`,
+        email: `user${index}@example.com`,
+        password: 'password-hash',
+        name: `User ${index}`,
+        about: null,
+        birthdate: new Date('1990-01-01'),
+        cityId,
+        city: mockCity,
+        gender: UserGender.OTHER,
+        avatar: null,
+        favorites: [],
+        skills: [],
+        wantToLearn: [],
+        favoriteSkills: [],
+        role: UserRole.USER,
+        refreshToken: null,
+        createdAt: new Date(`2026-08-0${index}T10:00:00.000Z`),
+        updatedAt: new Date(`2026-08-0${index}T10:00:00.000Z`),
+      });
+
+    const expectedRelations = {
+      city: true,
+      skills: true,
+      favoriteSkills: true,
+      wantToLearn: { subcategories: true },
+    };
+
+    it('returns PaginatedResponseDto with default page=1, limit=20', async () => {
+      const users = Array.from({ length: 5 }, (_, i) =>
+        createUserWithId(i + 1),
+      );
+      usersRepository.findAndCount.mockResolvedValue([users, 5]);
+
+      const query = new PaginationDto();
+      const result = await service.findAll(query);
+
+      expect(usersRepository.findAndCount).toHaveBeenCalledWith({
+        skip: 0,
+        take: 20,
+        relations: expectedRelations,
+      });
+      expect(result).toBeInstanceOf(PaginatedResponseDto);
+      expect(result.data).toHaveLength(5);
+      expect(result.data[0]).toEqual({
+        id: 'user-uuid-1',
+        email: 'user1@example.com',
+        name: 'User 1',
+        birthDate: new Date('1990-01-01'),
+        gender: UserGender.OTHER,
+        city: 'Москва',
+        avatar: null,
+        aboutMe: null,
+        likesSkillsIds: [],
+        userSkill: null,
+        interestedSkillsSubcategoriesIds: [],
+        createdAt: new Date('2026-08-01T10:00:00.000Z'),
+        updatedAt: new Date('2026-08-01T10:00:00.000Z'),
+      });
+      expect(result.page).toBe(1);
+      expect(result.totalPages).toBe(1);
+    });
+
+    it('calls findAndCount with skip=10, take=10 for page=2, limit=10', async () => {
+      const users = Array.from({ length: 10 }, (_, i) =>
+        createUserWithId(i + 11),
+      );
+      usersRepository.findAndCount.mockResolvedValue([users, 21]);
+
+      const query = new PaginationDto();
+      query.page = 2;
+      query.limit = 10;
+      const result = await service.findAll(query);
+
+      expect(usersRepository.findAndCount).toHaveBeenCalledWith({
+        skip: 10,
+        take: 10,
+        relations: expectedRelations,
+      });
+      expect(result.page).toBe(2);
+      expect(result.totalPages).toBe(3);
+    });
+
+    it('maps users with relations to profile list items', async () => {
+      const skillId = 'skill-uuid-1';
+      const subcategoryId = 'subcategory-uuid-1';
+      const user = createUserWithId(1);
+      Object.assign(user, {
+        skills: [{ id: skillId }],
+        favoriteSkills: [{ id: skillId }],
+        wantToLearn: [
+          { id: 'category-uuid-1', subcategories: [{ id: subcategoryId }] },
+        ],
+      });
+      usersRepository.findAndCount.mockResolvedValue([[user], 1]);
+
+      const query = new PaginationDto();
+      const result = await service.findAll(query);
+
+      expect(result.data[0]).toMatchObject({
+        userSkill: skillId,
+        likesSkillsIds: [skillId],
+        interestedSkillsSubcategoriesIds: [subcategoryId],
+        city: 'Москва',
+        birthDate: new Date('1990-01-01'),
+      });
+    });
+
+    it('throws 404 when page > totalPages and total > 0', async () => {
+      usersRepository.findAndCount.mockResolvedValue([[], 5]);
+
+      const query = new PaginationDto();
+      query.page = 999;
+      query.limit = 2;
+
+      const promise = service.findAll(query);
+
+      await expect(promise).rejects.toBeInstanceOf(BusinessException);
+      await expect(promise).rejects.toMatchObject({
+        status: HttpStatus.NOT_FOUND,
+      });
+    });
+
+    it('returns empty data when total === 0 without error', async () => {
+      usersRepository.findAndCount.mockResolvedValue([[], 0]);
+
+      const query = new PaginationDto();
+      const result = await service.findAll(query);
+
+      expect(result.data).toHaveLength(0);
+      expect(result.totalPages).toBe(0);
+      expect(result.page).toBe(1);
+    });
   });
 });

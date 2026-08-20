@@ -38,12 +38,16 @@ describe("user thunks", () => {
   //fetchUsers
   describe("fetchUsers", () => {
     it("fulfilled: загружает список пользователей", async () => {
-      mockedUserApi.getUsers.mockResolvedValue([mockUser]);
+      mockedUserApi.getUsers.mockResolvedValue({
+        data: [mockUser],
+        page: 1,
+        totalPages: 1,
+      });
 
       const store = createTestStore();
-      await store.dispatch(fetchUsers());
+      await store.dispatch(fetchUsers({ page: 1, limit: 20 }));
 
-      expect(mockedUserApi.getUsers).toHaveBeenCalled();
+      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({ page: 1, limit: 20 });
       expect(store.getState().user.list).toEqual([mockUser]);
       expect(store.getState().user.loading).toBe(false);
     });
@@ -52,7 +56,7 @@ describe("user thunks", () => {
       mockedUserApi.getUsers.mockRejectedValue("Network error");
 
       const store = createTestStore();
-      const result = await store.dispatch(fetchUsers());
+      const result = await store.dispatch(fetchUsers({ page: 1, limit: 20 }));
 
       expect(result.meta.requestStatus).toBe("rejected");
       expect(store.getState().user.list).toEqual([]);

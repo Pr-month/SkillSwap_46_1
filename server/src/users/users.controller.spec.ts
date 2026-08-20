@@ -10,6 +10,7 @@ import { UsersService } from './users.service';
 describe('UsersController', () => {
   let controller: UsersController;
   let usersService: {
+    findAll: jest.Mock;
     getProfile: jest.Mock;
     updateProfile: jest.Mock;
     changePassword: jest.Mock;
@@ -38,6 +39,7 @@ describe('UsersController', () => {
 
   beforeEach(async () => {
     usersService = {
+      findAll: jest.fn(),
       getProfile: jest.fn(),
       updateProfile: jest.fn(),
       changePassword: jest.fn(),
@@ -104,5 +106,18 @@ describe('UsersController', () => {
       userId,
       changePasswordDto,
     );
+  });
+
+  it('findAll calls usersService.findAll with query and returns result', async () => {
+    const query = { page: 1, limit: 20, skip: 0, search: '' };
+    const paginatedResult = {
+      data: [profile],
+      page: 1,
+      totalPages: 1,
+    };
+    usersService.findAll.mockResolvedValue(paginatedResult);
+
+    await expect(controller.findAll(query)).resolves.toBe(paginatedResult);
+    expect(usersService.findAll).toHaveBeenCalledWith(query);
   });
 });

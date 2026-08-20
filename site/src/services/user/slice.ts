@@ -7,6 +7,9 @@ interface UserState {
   selectedUser: IUserProfile | null;
   loading: boolean;
   error: string | null;
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
 }
 
 const initialState: UserState = {
@@ -14,6 +17,9 @@ const initialState: UserState = {
   selectedUser: null,
   loading: false,
   error: null,
+  page: 0,
+  totalPages: 0,
+  hasMore: false,
 };
 
 const handlePending = (state: UserState) => {
@@ -51,7 +57,21 @@ export const userSlice = createSlice({
       .addCase(fetchUsers.pending, handlePending)
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
+        state.error = null;
+
+        const { data, page, totalPages } = action.payload;
+
+        if (page <= 1) {
+          state.list = data;
+        } else {
+          const existingIds = new Set(state.list.map((user) => user.id));
+          const newUsers = data.filter((user) => !existingIds.has(user.id));
+          state.list = state.list.concat(newUsers);
+        }
+
+        state.page = page;
+        state.totalPages = totalPages;
+        state.hasMore = page < totalPages;
       })
       .addCase(fetchUsers.rejected, handleRejected)
       // fetchUserById

@@ -1,17 +1,24 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getUsers, getUserById, deleteUser } from "../../api/userApi.ts";
+import {
+  getUsers,
+  getUserById,
+  deleteUser,
+  type GetUsersParams,
+  type PaginatedUsersResponse,
+} from "../../api/userApi.ts";
 import type { TId } from "../../utils/types.ts";
 
-export const fetchUsers = createAsyncThunk(
-  "user/fetchAll",
-  async (_, { rejectWithValue }) => {
-    try {
-      return await getUsers();
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  },
-);
+export const fetchUsers = createAsyncThunk<
+  PaginatedUsersResponse,
+  GetUsersParams | void
+>("user/fetchAll", async (arg, { rejectWithValue }) => {
+  const { page = 1, limit = 20 } = arg ?? {};
+  try {
+    return await getUsers({ page, limit });
+  } catch (err) {
+    return rejectWithValue(err);
+  }
+});
 
 export const fetchUserById = createAsyncThunk(
   "user/fetchById",

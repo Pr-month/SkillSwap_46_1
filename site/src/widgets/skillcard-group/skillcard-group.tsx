@@ -27,6 +27,10 @@ export const SkillCardGroup = ({
   const [visibleCount, setVisibleCount] = useState(
     infiniteScroll ? PAGE_SIZE * 2 : initialVisibleCount,
   );
+  const [prevCardsLength, setPrevCardsLength] = useState(cards.length);
+  const [prevInitialVisibleCount, setPrevInitialVisibleCount] =
+    useState(initialVisibleCount);
+  const [prevInfiniteScroll, setPrevInfiniteScroll] = useState(infiniteScroll);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -34,10 +38,18 @@ export const SkillCardGroup = ({
   const shouldShowAction = !hideAction && shouldCollapse;
   const scrollEnabled = infiniteScroll || isExpanded;
 
-  useEffect(() => {
+  // Сбрасываем состояние при изменении входящих параметров (adjusting state during render)
+  if (
+    cards.length !== prevCardsLength ||
+    initialVisibleCount !== prevInitialVisibleCount ||
+    infiniteScroll !== prevInfiniteScroll
+  ) {
+    setPrevCardsLength(cards.length);
+    setPrevInitialVisibleCount(initialVisibleCount);
+    setPrevInfiniteScroll(infiniteScroll);
     setVisibleCount(infiniteScroll ? PAGE_SIZE * 2 : initialVisibleCount);
     setIsExpanded(false);
-  }, [cards.length, initialVisibleCount, infiniteScroll]);
+  }
 
   // Чистим nodeRefs от удалённых карточек
   useEffect(() => {

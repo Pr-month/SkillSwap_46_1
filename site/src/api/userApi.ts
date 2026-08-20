@@ -8,16 +8,49 @@ interface ApiResponse<T> {
   data: T;
 }
 
-// GET /users
-export const getUsers = (): Promise<IUserProfile[]> => {
+export interface PaginatedUsersResponse {
+  data: IUserProfile[];
+  page: number;
+  totalPages: number;
+}
+
+export interface GetUsersParams {
+  page?: number;
+  limit?: number;
+}
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+
+// GET /users?page=...&limit=...
+export const getUsers = ({
+  page = DEFAULT_PAGE,
+  limit = DEFAULT_LIMIT,
+}: GetUsersParams = {}): Promise<PaginatedUsersResponse> => {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
   if (USE_MOCKS) {
     return fetch("/users.json")
       .then((res) => res.json())
-      .then((response) => response.data);
+      .then((response) => {
+        const all: IUserProfile[] = response.data ?? [];
+        const start = (page - 1) * limit;
+        return {
+          data: all.slice(start, start + limit),
+          page,
+          totalPages: Math.max(1, Math.ceil(all.length / limit)),
+        };
+      });
   }
-  return request<ApiResponse<IUserProfile[]>>("/users").then(
-    (response: { status: boolean; data: IUserProfile[] }) => response.data,
-  );
+
+  return request<ApiResponse<PaginatedUsersResponse>>(
+    `/users?${query.toString()}`,
+  ).then((response: { status: boolean; data: PaginatedUsersResponse }) => {
+    return response.data;
+  });
 };
 
 // GET /users/:id
