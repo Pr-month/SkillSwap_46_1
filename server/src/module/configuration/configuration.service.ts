@@ -19,7 +19,7 @@ export class ConfigurationService {
   }
 
   get hashSalt(): number {
-    return this.configService.get<number>(EnvKey.HashSalt);
+    return Number(this.configService.get<string>(EnvKey.HashSalt));
   }
 
   get jwtAccessSecret(): string {
