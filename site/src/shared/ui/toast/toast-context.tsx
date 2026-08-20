@@ -3,7 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import type { Toast, ToastType } from "./types";
@@ -15,8 +15,6 @@ interface ToastContextValue {
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
