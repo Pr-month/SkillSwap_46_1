@@ -1,9 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request = require('supertest');
 import { App } from 'supertest/types';
 
 import { AppModule } from './../src/app.module';
+
+import request = require('supertest');
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;

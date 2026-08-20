@@ -38,6 +38,9 @@ interface UserState {
   selectedUser: IUserProfile | null;
   loading: boolean;
   error: string | null;
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
 }
 
 const initialState: UserState = {
@@ -45,6 +48,9 @@ const initialState: UserState = {
   selectedUser: null,
   loading: false,
   error: null,
+  page: 0,
+  totalPages: 0,
+  hasMore: false,
 };
 
 describe("userSlice", () => {
@@ -71,19 +77,40 @@ describe("userSlice", () => {
     it("pending: loading=true, error=null", () => {
       const state = userReducer(
         { ...initialState, error: "old error" },
-        fetchUsers.pending("", undefined),
+        fetchUsers.pending("", { page: 1, limit: 20 }),
       );
       expect(state.loading).toBe(true);
       expect(state.error).toBeNull();
     });
 
-    it("fulfilled: loading=false, list заполнен", () => {
+    it("fulfilled: loading=false, list заполнен (первая страница)", () => {
       const state = userReducer(
         { ...initialState, loading: true },
-        fetchUsers.fulfilled([mockUser1, mockUser2], "", undefined),
+        fetchUsers.fulfilled(
+          { data: [mockUser1, mockUser2], page: 1, totalPages: 2 },
+          "",
+          { page: 1, limit: 20 },
+        ),
       );
       expect(state.loading).toBe(false);
       expect(state.list).toEqual([mockUser1, mockUser2]);
+      expect(state.page).toBe(1);
+      expect(state.totalPages).toBe(2);
+      expect(state.hasMore).toBe(true);
+    });
+
+    it("fulfilled: дополняет list на последующих страницах без дублей", () => {
+      const state = userReducer(
+        { ...initialState, list: [mockUser1], page: 1, totalPages: 2 },
+        fetchUsers.fulfilled(
+          { data: [mockUser1, mockUser2], page: 2, totalPages: 2 },
+          "",
+          { page: 2, limit: 20 },
+        ),
+      );
+      expect(state.list).toEqual([mockUser1, mockUser2]);
+      expect(state.page).toBe(2);
+      expect(state.hasMore).toBe(false);
     });
 
     it("rejected: loading=false, error заполнен", () => {

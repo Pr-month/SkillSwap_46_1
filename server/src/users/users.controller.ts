@@ -5,12 +5,14 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 
 import { RequestWithUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -20,8 +22,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: PaginationDto) {
+    return this.usersService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -16,6 +16,9 @@ export const selectUsers = (state: RootState) => state.user.list;
 export const selectSelectedUser = (state: RootState) => state.user.selectedUser;
 export const selectUserLoading = (state: RootState) => state.user.loading;
 export const selectUserError = (state: RootState) => state.user.error;
+export const selectUserPage = (state: RootState) => state.user.page;
+export const selectUserTotalPages = (state: RootState) => state.user.totalPages;
+export const selectUserHasMore = (state: RootState) => state.user.hasMore;
 
 export const selectPopularUsers = createSelector(selectUsers, (users) => {
   const likesCount = users

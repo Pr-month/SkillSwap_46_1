@@ -13,6 +13,7 @@ import { UserSection } from "../widgets/user-section/user-section";
 import { selectCategories } from "../services/category/slice";
 import { getActiveFilters } from "../utils/filter/getActiveFilters";
 import { useFilterActions } from "../shared/hooks/useFilterActions";
+import { useUsersInfiniteScroll } from "../shared/hooks/useUsersInfiniteScroll";
 import { ECity } from "../shared/constants/cities";
 import { SelectedFilters } from "../widgets/filter-bar/selected-filters";
 import { genderOptions, skillOptions } from "../widgets/filter-bar";
@@ -28,6 +29,7 @@ const CITY_LABELS: Record<string, string> = Object.entries(ECity).reduce(
 
 export const HomePage: FC = () => {
   useInitialDataLoader();
+  const usersSentinelRef = useUsersInfiniteScroll();
 
   const filteredUsersSkillName = useSelector(selectFilteredBySkillTitle);
   const filteredUsersSkillDescription = useSelector(
@@ -139,6 +141,7 @@ export const HomePage: FC = () => {
     <main className={styles.main}>
       <FilterBar />
       {content}
+      <div ref={usersSentinelRef} aria-hidden="true" />
     </main>
   );
 };

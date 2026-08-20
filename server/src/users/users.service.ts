@@ -3,11 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginatedResponseDto } from '../common/dto/response.dto';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserListItemResponse } from './dto/user-list-item.response';
 import { UserProfileResponse } from './dto/user-profile.response';
 import { User } from './entities/user.entity';
 import { CreateUserData } from './users.types';
@@ -35,14 +38,63 @@ export class UsersService {
     };
   }
 
+  private toUserListItem(user: User): UserListItemResponse {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      birthDate: user.birthdate,
+      gender: user.gender,
+      city: user.city?.name ?? null,
+      avatar: user.avatar,
+      aboutMe: user.about,
+      likesSkillsIds: user.favoriteSkills?.map((skill) => skill.id) ?? [],
+      userSkill: user.skills?.[0]?.id ?? null,
+      interestedSkillsSubcategoriesIds:
+        user.wantToLearn?.flatMap(
+          (category) =>
+            category.subcategories?.map((subcategory) => subcategory.id) ?? [],
+        ) ?? [],
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
   async create(createUserData: CreateUserData): Promise<User> {
     const user = this.usersRepository.create(createUserData);
 
     return this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[] | null> {
-    return this.usersRepository.find();
+  async findAll(
+    query: PaginationDto,
+  ): Promise<PaginatedResponseDto<UserListItemResponse>> {
+    const [users, total] = await this.usersRepository.findAndCount({
+      skip: query.skip,
+      take: query.limit,
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearn: { subcategories: true },
+      },
+    });
+
+    const totalPages = Math.ceil(total / query.limit);
+
+    if (query.page > Math.max(totalPages, 1)) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return new PaginatedResponseDto(
+      users.map((user) => this.toUserListItem(user)),
+      query.page,
+      total,
+      query.limit,
+    );
   }
 
   async findByEmail(email: string): Promise<User | null> {
