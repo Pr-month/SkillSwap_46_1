@@ -14,23 +14,63 @@ export interface PaginatedUsersResponse {
   totalPages: number;
 }
 
+export type UserGenderFilter = "male" | "female" | "other";
+export type UserSkillOptionFilter = "all" | "can-teach" | "want-to-learn";
+
 export interface GetUsersParams {
   page?: number;
   limit?: number;
+  search?: string;
+  gender?: UserGenderFilter | "all";
+  cities?: string[];
+  subCategoryIds?: string[];
+  skillOption?: UserSkillOptionFilter;
 }
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 
-// GET /users?page=...&limit=...
+const appendArrayParams = (
+  query: URLSearchParams,
+  key: string,
+  values?: string[],
+): void => {
+  (values ?? []).forEach((value) => {
+    if (value) {
+      query.append(key, value);
+    }
+  });
+};
+
+// GET /users?page=...&limit=...&search=...&gender=...&cities=...&subCategoryIds=...&skillOption=...
 export const getUsers = ({
   page = DEFAULT_PAGE,
   limit = DEFAULT_LIMIT,
+  search,
+  gender,
+  cities,
+  subCategoryIds,
+  skillOption,
 }: GetUsersParams = {}): Promise<PaginatedUsersResponse> => {
   const query = new URLSearchParams({
     page: String(page),
     limit: String(limit),
   });
+
+  if (search?.trim()) {
+    query.set("search", search.trim());
+  }
+
+  if (gender && gender !== "all") {
+    query.set("gender", gender);
+  }
+
+  appendArrayParams(query, "cities", cities);
+  appendArrayParams(query, "subCategoryIds", subCategoryIds);
+
+  if (skillOption && skillOption !== "all") {
+    query.set("skillOption", skillOption);
+  }
 
   if (USE_MOCKS) {
     return fetch("/users.json")

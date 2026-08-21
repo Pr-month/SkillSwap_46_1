@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "../../services/store";
 import { fetchUsers } from "../../services/user/actions";
+import { buildUsersFilterParams } from "../../services/user/filters";
 import {
   selectUserHasMore,
   selectUserLoading,
@@ -19,6 +20,7 @@ export const useUsersInfiniteScroll = () => {
   const page = useSelector(selectUserPage);
   const hasMore = useSelector(selectUserHasMore);
   const loading = useSelector(selectUserLoading);
+  const filter = useSelector((state) => state.filter);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,7 +32,13 @@ export const useUsersInfiniteScroll = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          dispatch(fetchUsers({ page: page + 1, limit: USERS_PAGE_LIMIT }));
+          dispatch(
+            fetchUsers({
+              page: page + 1,
+              limit: USERS_PAGE_LIMIT,
+              ...buildUsersFilterParams(filter),
+            }),
+          );
         }
       },
       { rootMargin: "200px" },
@@ -38,7 +46,7 @@ export const useUsersInfiniteScroll = () => {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [dispatch, page, hasMore, loading]);
+  }, [dispatch, page, hasMore, loading, filter]);
 
   return sentinelRef;
 };

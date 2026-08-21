@@ -52,6 +52,37 @@ describe("user thunks", () => {
       expect(store.getState().user.loading).toBe(false);
     });
 
+    it("пробрасывает фильтры в getUsers", async () => {
+      mockedUserApi.getUsers.mockResolvedValue({
+        data: [mockUser],
+        page: 1,
+        totalPages: 1,
+      });
+
+      const store = createTestStore();
+      await store.dispatch(
+        fetchUsers({
+          page: 1,
+          limit: 20,
+          search: "JavaScript",
+          gender: "male",
+          cities: ["Moscow"],
+          subCategoryIds: ["sub-1"],
+          skillOption: "can-teach",
+        }),
+      );
+
+      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({
+        page: 1,
+        limit: 20,
+        search: "JavaScript",
+        gender: "male",
+        cities: ["Moscow"],
+        subCategoryIds: ["sub-1"],
+        skillOption: "can-teach",
+      });
+    });
+
     it("rejected: ошибка API", async () => {
       mockedUserApi.getUsers.mockRejectedValue("Network error");
 

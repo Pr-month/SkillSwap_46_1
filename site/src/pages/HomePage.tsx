@@ -2,11 +2,10 @@ import { useMemo, type FC } from "react";
 import styles from "./home-page.module.css";
 import { useInitialDataLoader } from "../shared/hooks/useInitialDataLoader";
 import {
-  selectFilteredBySkillDescription,
-  selectFilteredBySkillTitle,
   selectNewestUsers,
   selectPopularUsers,
   selectRecommendedUsers,
+  selectUsers,
 } from "../services/user/selectors";
 import { FilterBar } from "../widgets/filter-bar";
 import { UserSection } from "../widgets/user-section/user-section";
@@ -14,6 +13,7 @@ import { selectCategories } from "../services/category/slice";
 import { getActiveFilters } from "../utils/filter/getActiveFilters";
 import { useFilterActions } from "../shared/hooks/useFilterActions";
 import { useUsersInfiniteScroll } from "../shared/hooks/useUsersInfiniteScroll";
+import { useFilteredUsersFetch } from "../shared/hooks/useFilteredUsersFetch";
 import { ECity } from "../shared/constants/cities";
 import { SelectedFilters } from "../widgets/filter-bar/selected-filters";
 import { genderOptions, skillOptions } from "../widgets/filter-bar";
@@ -29,12 +29,10 @@ const CITY_LABELS: Record<string, string> = Object.entries(ECity).reduce(
 
 export const HomePage: FC = () => {
   useInitialDataLoader();
+  useFilteredUsersFetch();
   const usersSentinelRef = useUsersInfiniteScroll();
 
-  const filteredUsersSkillName = useSelector(selectFilteredBySkillTitle);
-  const filteredUsersSkillDescription = useSelector(
-    selectFilteredBySkillDescription,
-  );
+  const users = useSelector(selectUsers);
   const popular = useSelector(selectPopularUsers);
   const newest = useSelector(selectNewestUsers);
   const recommended = useSelector(selectRecommendedUsers);
@@ -56,22 +54,6 @@ export const HomePage: FC = () => {
 
   const hasSearchQuery = !!filterState.searchQuery?.trim();
 
-  const searchResults = useMemo(() => {
-    if (!hasSearchQuery) return [];
-
-    const uniqueUsers = new Map();
-
-    [...filteredUsersSkillName, ...filteredUsersSkillDescription].forEach(
-      (user) => {
-        if (!uniqueUsers.has(user.id)) {
-          uniqueUsers.set(user.id, user);
-        }
-      },
-    );
-
-    return Array.from(uniqueUsers.values());
-  }, [filteredUsersSkillName, filteredUsersSkillDescription, hasSearchQuery]);
-
   const { handleResetFilters, handleRemoveFilter } =
     useFilterActions(activeFilters);
 
@@ -88,8 +70,8 @@ export const HomePage: FC = () => {
           />
         )}
         <UserSection
-          title={`Подходящие предложения: ${searchResults.length}`}
-          users={searchResults}
+          title={`Подходящие предложения: ${users.length}`}
+          users={users}
           emptyMessage="Ничего не найдено по вашему запросу"
           isSorted={true}
         />
@@ -104,8 +86,8 @@ export const HomePage: FC = () => {
           onRemove={handleRemoveFilter}
         />
         <UserSection
-          title={`Подходящие предложения: ${filteredUsersSkillName.length}`}
-          users={filteredUsersSkillName}
+          title={`Подходящие предложения: ${users.length}`}
+          users={users}
           emptyMessage="Не найдено пользователей по выбранным фильтрам"
           isSorted={true}
         />
