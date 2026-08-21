@@ -147,6 +147,19 @@ export class AuthService {
     return user;
   }
 
+  async checkUser(email: string): Promise<{ available: true }> {
+    const existingUser = await this.usersService.findByEmail(email);
+
+    if (existingUser) {
+      throw new BusinessException(
+        exceptionCodes.users.alreadyExists,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    return { available: true };
+  }
+
   private async generateTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(

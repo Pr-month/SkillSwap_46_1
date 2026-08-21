@@ -24,6 +24,7 @@ describe('AuthController', () => {
     register: jest.fn(),
     login: jest.fn(),
     logout: jest.fn(),
+    checkUser: jest.fn(),
     getProfile: jest.fn(),
     updatePassword: jest.fn(),
   };
@@ -136,6 +137,34 @@ describe('AuthController', () => {
       expect(mockAuthService.logout).toHaveBeenCalledWith(
         'user-id',
         mockResponse,
+      );
+    });
+  });
+
+  describe('checkUser', () => {
+    const loginDto: LoginDto = {
+      email: 'test@example.com',
+      password: 'password123',
+    };
+
+    it('should return available if email is free', async () => {
+      mockAuthService.checkUser.mockResolvedValue({ available: true });
+
+      const result = await controller.checkUser(loginDto);
+
+      expect(result).toEqual({ available: true });
+      expect(mockAuthService.checkUser).toHaveBeenCalledWith(loginDto.email);
+    });
+
+    it('should rethrow BusinessException if user already exists', async () => {
+      const error = new BusinessException(
+        exceptionCodes.users.alreadyExists,
+        HttpStatus.CONFLICT,
+      );
+      mockAuthService.checkUser.mockRejectedValue(error);
+
+      await expect(controller.checkUser(loginDto)).rejects.toThrow(
+        BusinessException,
       );
     });
   });

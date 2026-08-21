@@ -1,4 +1,3 @@
-import { AppModule } from '@/app.module';
 import { City } from '@/cities/entities/city.entity';
 import { UserGender } from '@/users/enums/user.enums';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -36,6 +35,9 @@ describe('AuthController (e2e)', () => {
   const newPassword = 'newPassword123';
 
   beforeAll(async () => {
+    process.env.HASH_SALT = '10';
+
+    const { AppModule } = await import('@/app.module');
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -108,6 +110,34 @@ describe('AuthController (e2e)', () => {
         .post('/auth/register')
         .send(testUser)
         .expect(409);
+    });
+  });
+
+  describe('/auth/check-user (POST)', () => {
+    it('should allow registration when email is free', () => {
+      return request(app.getHttpServer())
+        .post('/auth/check-user')
+        .send({
+          email: `free-${Date.now()}@example.com`,
+          password: 'password123',
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.available).toBe(true);
+        });
+    });
+
+    it('should fail when email is already taken', () => {
+      return request(app.getHttpServer())
+        .post('/auth/check-user')
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        })
+        .expect(409)
+        .expect((res) => {
+          expect(res.body.code).toBe('user:already-exists');
+        });
     });
   });
 

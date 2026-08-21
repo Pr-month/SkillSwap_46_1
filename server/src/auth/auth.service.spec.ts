@@ -278,6 +278,30 @@ describe('AuthService', () => {
     });
   });
 
+  describe('checkUser', () => {
+    it('should return available if email is free', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
+
+      const result = await service.checkUser('new@example.com');
+
+      expect(result).toEqual({ available: true });
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        'new@example.com',
+      );
+    });
+
+    it('should throw ConflictException if user already exists', async () => {
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'existing-user-id',
+        email: 'test@example.com',
+      });
+
+      await expect(service.checkUser('test@example.com')).rejects.toThrow(
+        BusinessException,
+      );
+    });
+  });
+
   describe('getProfile', () => {
     const mockUser = {
       id: 'user-id',
