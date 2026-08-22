@@ -58,6 +58,15 @@ export class AuthController {
     return await this.authService.logout(req.user.id, res);
   }
 
+  @Post('check-user')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Проверка, свободен ли email для регистрации',
+  })
+  async checkUser(@Body() loginDto: LoginDto) {
+    return await this.authService.checkUser(loginDto.email);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
