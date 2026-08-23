@@ -40,6 +40,18 @@ export interface ISkillsCategory {
   subcategories: ISkillsSubcategory[];
 }
 
+/** ГОРОД */
+export interface ICity {
+  id: TId;
+  name: string;
+  district: string;
+  subject: string;
+  population: number;
+  lat: number;
+  lon: number;
+}
+
+
 /** НАВЫК
  *
  * Ограничения:
