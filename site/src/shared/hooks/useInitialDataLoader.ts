@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "../../services/store";
-import { fetchUsers } from "../../services/user/actions";
 import { fetchSkills } from "../../services/skill/actions";
 import {
   fetchCategories,
@@ -15,7 +14,6 @@ export const useInitialDataLoader = () => {
   const receivedRequests = useSelector((state) => state.requests.received);
 
   useEffect(() => {
-    dispatch(fetchUsers({ page: 1, limit: 20 }));
     dispatch(fetchSkills());
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());

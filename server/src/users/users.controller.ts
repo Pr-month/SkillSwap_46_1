@@ -12,9 +12,9 @@ import {
 
 import { RequestWithUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersQueryDto } from './dto/users-query.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -22,7 +22,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(@Query() query: PaginationDto) {
+  findAll(@Query() query: UsersQueryDto) {
     return this.usersService.findAll(query);
   }
 
