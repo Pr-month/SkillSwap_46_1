@@ -105,23 +105,27 @@ export class UsersService {
 
     if (query.subCategoryIds?.length) {
       const skillOption = query.skillOption ?? 'all';
-
       if (skillOption === 'can-teach') {
-        builder.andWhere('userSkill.subcategoryId::text IN (:...subCategoryIds)', {
-          subCategoryIds: query.subCategoryIds,
-        });
+        builder.andWhere(
+          '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
+          {
+            subCategoryIds: query.subCategoryIds,
+          },
+        );
       } else if (skillOption === 'want-to-learn') {
         builder.andWhere(
-          'wantToLearnSubcategory.id::text IN (:...subCategoryIds)',
+          '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
           { subCategoryIds: query.subCategoryIds },
         );
       } else {
         builder.andWhere(
           new Brackets((where) => {
             where
-              .where('userSkill.subcategoryId::text IN (:...subCategoryIds)')
+              .where(
+                '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
+              )
               .orWhere(
-                'wantToLearnSubcategory.id::text IN (:...subCategoryIds)',
+                '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
               );
           }),
           { subCategoryIds: query.subCategoryIds },
