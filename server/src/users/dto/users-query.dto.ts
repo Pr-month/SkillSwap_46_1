@@ -3,7 +3,11 @@ import { IsArray, IsIn, IsOptional, IsString } from 'class-validator';
 
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
-export const USER_SKILL_OPTIONS = ['all', 'want-to-learn', 'can-teach'] as const;
+export const USER_SKILL_OPTIONS = [
+  'all',
+  'want-to-learn',
+  'can-teach',
+] as const;
 export type UserSkillOption = (typeof USER_SKILL_OPTIONS)[number];
 
 /**

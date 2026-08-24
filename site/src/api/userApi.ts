@@ -30,19 +30,9 @@ export interface GetUsersParams {
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 
-const appendArrayParams = (
-  query: URLSearchParams,
-  key: string,
-  values?: string[],
-): void => {
-  (values ?? []).forEach((value) => {
-    if (value) {
-      query.append(key, value);
-    }
-  });
-};
-
-// GET /users?page=...&limit=...&search=...&gender=...&cities=...&subCategoryIds=...&skillOption=...
+// POST /users/search (JSON-body) — фильтры передаются в теле, чтобы не
+// генерировать огромные URL с массивами. Пустые/`all`/пустые массивы
+// не отправляются, чтобы бэкенд не применял фильтр.
 export const getUsers = ({
   page = DEFAULT_PAGE,
   limit = DEFAULT_LIMIT,
@@ -52,24 +42,31 @@ export const getUsers = ({
   subCategoryIds,
   skillOption,
 }: GetUsersParams = {}): Promise<PaginatedUsersResponse> => {
-  const query = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
+  const body: GetUsersParams = {
+    page,
+    limit,
+  };
 
   if (search?.trim()) {
-    query.set("search", search.trim());
+    body.search = search.trim();
   }
 
   if (gender && gender !== "all") {
-    query.set("gender", gender);
+    body.gender = gender;
   }
 
-  appendArrayParams(query, "cities", cities);
-  appendArrayParams(query, "subCategoryIds", subCategoryIds);
+  const filteredCities = (cities ?? []).filter(Boolean);
+  if (filteredCities.length) {
+    body.cities = filteredCities;
+  }
+
+  const filteredSubCategoryIds = (subCategoryIds ?? []).filter(Boolean);
+  if (filteredSubCategoryIds.length) {
+    body.subCategoryIds = filteredSubCategoryIds;
+  }
 
   if (skillOption && skillOption !== "all") {
-    query.set("skillOption", skillOption);
+    body.skillOption = skillOption;
   }
 
   if (USE_MOCKS) {
@@ -86,9 +83,11 @@ export const getUsers = ({
       });
   }
 
-  return request<ApiResponse<PaginatedUsersResponse>>(
-    `/users?${query.toString()}`,
-  ).then((response: { status: boolean; data: PaginatedUsersResponse }) => {
+  return request<ApiResponse<PaginatedUsersResponse>>("/users/search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then((response: { status: boolean; data: PaginatedUsersResponse }) => {
     return response.data;
   });
 };

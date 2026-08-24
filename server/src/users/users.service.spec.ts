@@ -461,7 +461,7 @@ describe('UsersService', () => {
       expect(builder.andWhere).toHaveBeenCalledTimes(1);
       const [condition, params] = builder.andWhere.mock.calls[0];
       expect(condition).toEqual(
-        'userSkill.subcategoryId::text IN (:...subCategoryIds)',
+        '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
       );
       expect(params).toEqual({ subCategoryIds: ['sub-1', 'sub-2'] });
     });
@@ -479,7 +479,7 @@ describe('UsersService', () => {
       expect(builder.andWhere).toHaveBeenCalledTimes(1);
       const [condition, params] = builder.andWhere.mock.calls[0];
       expect(condition).toEqual(
-        'wantToLearnSubcategory.id::text IN (:...subCategoryIds)',
+        '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
       );
       expect(params).toEqual({ subCategoryIds: ['sub-1'] });
     });

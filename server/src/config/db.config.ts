@@ -5,13 +5,25 @@ import { ConfigurationService } from '../module/configuration/configuration.serv
 
 export const dbConfig = (
   configurationService: ConfigurationService,
-): DataSourceOptions => ({
-  type: 'postgres',
-  host: configurationService.databaseHost,
-  port: configurationService.databasePort,
-  username: configurationService.databaseUsername,
-  password: configurationService.databasePassword,
-  database: configurationService.databaseName,
-  synchronize: configurationService.databaseSynchronize,
-  entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
-});
+): DataSourceOptions => {
+  // Под ts-jest (e2e/unit) файлы сущностей загружаются из `src` как `.ts`.
+  // Абсолютный glob-путь с буквой диска (из `__dirname`) под Windows ломает
+  // `require` внутри jest-resolve (возникает двойной префикс `c:\C:\`),
+  // поэтому для исходников используем относительный glob от `process.cwd()`.
+  // В собранном приложении (`dist`, `.js`) остаётся стандартный glob от `__dirname`.
+  const isTsRuntime = __filename.endsWith('.ts');
+  const entities = isTsRuntime
+    ? 'src/**/*.entity{.ts,.js}'
+    : join(__dirname, '..', '**', '*.entity{.ts,.js}');
+
+  return {
+    type: 'postgres',
+    host: configurationService.databaseHost,
+    port: configurationService.databasePort,
+    username: configurationService.databaseUsername,
+    password: configurationService.databasePassword,
+    database: configurationService.databaseName,
+    synchronize: configurationService.databaseSynchronize,
+    entities: [entities],
+  };
+};

@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
-  Query,
+  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -21,8 +23,9 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  findAll(@Query() query: UsersQueryDto) {
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  findAll(@Body() query: UsersQueryDto) {
     return this.usersService.findAll(query);
   }
 
