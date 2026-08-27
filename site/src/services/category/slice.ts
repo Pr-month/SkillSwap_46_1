@@ -50,6 +50,12 @@ export const categorySlice = createSlice({
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
         state.categories = action.payload;
+        // Подкатегории приходят вложенными в категории (`category.subcategories`),
+        // поэтому отдельный запрос `fetchSubCategories` не нужен — извлекаем их
+        // здесь, чтобы не делать лишний запрос к `/categories`.
+        state.subCategories = action.payload.flatMap(
+          (category) => category.subcategories,
+        );
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;

@@ -1,10 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "../../services/store";
 import { fetchSkills } from "../../services/skill/actions";
-import {
-  fetchCategories,
-  fetchSubCategories,
-} from "../../services/category/actions";
+import { fetchCategories } from "../../services/category/actions";
 import { fetchMyRequests } from "../../services/request/actions";
 
 export const useInitialDataLoader = () => {
@@ -13,17 +10,39 @@ export const useInitialDataLoader = () => {
   const sentRequests = useSelector((state) => state.requests.sent);
   const receivedRequests = useSelector((state) => state.requests.received);
 
+  // Справочные данные (навыки, категории, подкатегории) загружаем один раз.
+  // useRef защищает от повторного dispatch при двойном вызове эффекта
+  // в React StrictMode (dev-режим).
+  const staticDataLoaded = useRef(false);
+
   useEffect(() => {
+    if (staticDataLoaded.current) {
+      return;
+    }
+    staticDataLoaded.current = true;
+
     dispatch(fetchSkills());
     dispatch(fetchCategories());
-    dispatch(fetchSubCategories());
+  }, [dispatch]);
 
+  // Личные заявки грузим при наличии авторизованного пользователя и только
+  // пока данных нет. Дополнительно защищаемся от дублирования в StrictMode.
+  const requestsLoadedForUser = useRef<typeof currentUser | null>(null);
+
+  useEffect(() => {
     if (
-      currentUser &&
-      sentRequests.length === 0 &&
-      receivedRequests.length === 0
+      !currentUser ||
+      sentRequests.length !== 0 ||
+      receivedRequests.length !== 0
     ) {
-      dispatch(fetchMyRequests());
+      return;
     }
+
+    if (requestsLoadedForUser.current === currentUser) {
+      return;
+    }
+    requestsLoadedForUser.current = currentUser;
+
+    dispatch(fetchMyRequests());
   }, [dispatch, currentUser, sentRequests.length, receivedRequests.length]);
 };

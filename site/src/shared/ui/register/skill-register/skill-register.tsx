@@ -23,7 +23,6 @@ import {
 } from "../../../../services/category/slice";
 import {
   fetchCategories,
-  fetchSubCategories,
 } from "../../../../services/category/actions";
 import { ImagePicker } from "../../image-picker";
 import { useImageUpload } from "../../../hooks/useImageUpload";
@@ -53,7 +52,6 @@ export const SkillRegister: FC<SkillRegisterProps> = ({
 
   useEffect(() => {
     dispatch(fetchCategories());
-    dispatch(fetchSubCategories());
   }, [dispatch]);
 
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
