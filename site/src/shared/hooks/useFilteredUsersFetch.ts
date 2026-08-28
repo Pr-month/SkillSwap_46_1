@@ -18,8 +18,26 @@ export const useFilteredUsersFetch = () => {
   const cities = useSelector((state) => state.filter.cities);
   const searchQuery = useSelector((state) => state.filter.searchQuery);
 
+  const lastNonSearchKey = useRef<string | null>(null);
+  const filtersRef = useRef({ skillOption, gender, subCategoryIds, cities });
+  filtersRef.current = { skillOption, gender, subCategoryIds, cities };
+
   // Не-поисковые фильтры + первичная загрузка: выполняются сразу.
+  // Пропускаем повторный dispatch с теми же фильтрами (например, повторный
+  // вызов эффекта из-за React StrictMode в dev-режиме).
   useEffect(() => {
+    const key = JSON.stringify([
+      skillOption,
+      gender,
+      [...subCategoryIds].sort(),
+      [...cities].sort(),
+    ]);
+
+    if (lastNonSearchKey.current === key) {
+      return;
+    }
+    lastNonSearchKey.current = key;
+
     dispatch(
       fetchUsers({
         page: 1,
@@ -36,14 +54,15 @@ export const useFilteredUsersFetch = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [skillOption, gender, subCategoryIds, cities]);
 
-  const isFirstSearchRender = useRef(true);
+  const previousSearchQuery = useRef(searchQuery);
 
-  // Поиск: debounce; первичный рендер пропускаем — его уже покрывает эффект выше.
+  // Поиск: debounce. Срабатывает только при фактическом изменении searchQuery,
+  // поэтому не дублирует первичную загрузку (в т.ч. при StrictMode).
   useEffect(() => {
-    if (isFirstSearchRender.current) {
-      isFirstSearchRender.current = false;
+    if (previousSearchQuery.current === searchQuery) {
       return;
     }
+    previousSearchQuery.current = searchQuery;
 
     const handler = setTimeout(() => {
       dispatch(
@@ -51,10 +70,7 @@ export const useFilteredUsersFetch = () => {
           page: 1,
           limit: USERS_PAGE_LIMIT,
           ...buildUsersFilterParams({
-            skillOption,
-            gender,
-            subCategoryIds,
-            cities,
+            ...filtersRef.current,
             searchQuery,
           }),
         }),

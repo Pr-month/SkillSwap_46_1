@@ -16,10 +16,7 @@ import {
 } from "../../services/user/selectors";
 import { fetchUserById, fetchUsers } from "../../services/user/actions";
 import { fetchSkills } from "../../services/skill/actions";
-import {
-  fetchCategories,
-  fetchSubCategories,
-} from "../../services/category/actions";
+import { fetchCategories } from "../../services/category/actions";
 import { getSkillTitle } from "../../shared/lib/getSkillTitle";
 import { getSubcategoryNames } from "../../shared/lib/getSubcategoryNames";
 import { getLearnColors, getTeachColor } from "../../shared/lib/skillColors";
@@ -79,10 +76,6 @@ export function SkillPage() {
       dispatch(fetchCategories());
     }
 
-    if (subCategories.length === 0) {
-      dispatch(fetchSubCategories());
-    }
-
     if (id && selectedUser?.id !== id) {
       dispatch(fetchUserById(id));
     }
@@ -97,7 +90,6 @@ export function SkillPage() {
     users.length,
     skills.length,
     categories.length,
-    subCategories.length,
     currentUser,
   ]);
 

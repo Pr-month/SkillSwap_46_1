@@ -23,7 +23,6 @@ import {
 } from "../../../../services/category/slice";
 import {
   fetchCategories,
-  fetchSubCategories,
 } from "../../../../services/category/actions";
 import { useImageUpload } from "../../../hooks/useImageUpload";
 
@@ -62,7 +61,6 @@ export const AuthorRegister: FC<AuthorRegisterProps> = ({
 
   useEffect(() => {
     dispatch(fetchCategories());
-    dispatch(fetchSubCategories());
   }, [dispatch]);
 
   const { uploadSingle } = useImageUpload();
