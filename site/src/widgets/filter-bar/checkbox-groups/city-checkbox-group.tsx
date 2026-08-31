@@ -2,16 +2,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Icon } from "../../../shared/ui/icon";
 import { Search } from "../../../shared/ui/search";
 import { useDispatch, useSelector } from "../../../services/store";
-import { fetchPopularCities } from "../../../services/city/actions";
+import {
+  fetchPopularCities,
+  fetchSearchCities,
+} from "../../../services/city/actions";
 import {
   selectCityLoading,
+  selectCitySearchLoading,
+  selectCitySearchResults,
   selectPopularCities,
 } from "../../../services/city/slice";
-import { findMatchingIdsByTitle } from "../../../utils/search";
 import type { TCityCheckboxGroupProps } from "./types";
 import styles from "./checkbox-group.module.css";
 
-// Сколько городов показывать до включения скролла/раскрытия списка
 const VISIBLE_CITIES_COUNT = 5;
 
 export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
@@ -21,14 +24,15 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
   const dispatch = useDispatch();
 
   const popularCities = useSelector(selectPopularCities);
+  const citySearchResults = useSelector(selectCitySearchResults);
   const loading = useSelector(selectCityLoading);
+  const searchLoading = useSelector(selectCitySearchLoading);
 
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const isSearching = searchQuery.trim().length > 0;
 
-  // Загружаем список самых популярных городов (топ-20 по населению) один раз при монтировании
   useEffect(() => {
     if (popularCities.length === 0) {
       dispatch(fetchPopularCities());
@@ -36,23 +40,21 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Поиск по загруженному списку городов через существующую на фронте
-  // утилиту нечёткого (триграммного) поиска — без обращения к бэкенду
-  const filteredCities = useMemo(() => {
-    if (!isSearching) {
-      return popularCities;
-    }
+  useEffect(() => {
+    const query = searchQuery.trim();
 
-    const searchableCities = popularCities.map((city) => ({
-      id: city.id,
-      title: city.name,
-      description: city.name,
-    }));
+    if (!query) return;
 
-    const matchingIds = findMatchingIdsByTitle(searchableCities, searchQuery);
+    const timeoutId = window.setTimeout(() => {
+      dispatch(fetchSearchCities(query));
+    }, 300);
 
-    return popularCities.filter((city) => matchingIds.includes(city.id));
-  }, [popularCities, searchQuery, isSearching]);
+    return () => window.clearTimeout(timeoutId);
+  }, [searchQuery, dispatch]);
+
+  const displayedCities = useMemo(() => {
+    return isSearching ? citySearchResults : popularCities;
+  }, [isSearching, citySearchResults, popularCities]);
 
   const handleCityChange = (city: string) => {
     const newValue = value.includes(city)
@@ -67,10 +69,10 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
 
   const visibleCities =
     isSearching || showAll
-      ? filteredCities
-      : filteredCities.slice(0, VISIBLE_CITIES_COUNT);
+      ? displayedCities
+      : displayedCities.slice(0, VISIBLE_CITIES_COUNT);
   const hasMoreCities =
-    !isSearching && filteredCities.length > VISIBLE_CITIES_COUNT;
+    !isSearching && displayedCities.length > VISIBLE_CITIES_COUNT;
 
   return (
     <div className={styles.container}>
@@ -88,7 +90,11 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
           <span className={styles.label}>Загрузка городов…</span>
         )}
 
-        {isSearching && visibleCities.length === 0 && (
+        {isSearching && searchLoading && (
+          <span className={styles.label}>Поиск городов…</span>
+        )}
+
+        {isSearching && !searchLoading && visibleCities.length === 0 && (
           <span className={styles.label}>Города не найдены</span>
         )}
 
@@ -116,8 +122,6 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
           );
         })}
       </div>
-
-      {/* Кнопка "Все города" — показываем, если городов больше чем VISIBLE_CITIES_COUNT и поиск не активен */}
       {hasMoreCities && (
         <button
           type="button"
