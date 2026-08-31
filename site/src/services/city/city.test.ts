@@ -1,6 +1,15 @@
 import { describe, test, expect } from "@jest/globals";
-import { citySlice, selectPopularCities } from "./slice";
-import { fetchPopularCities } from "./actions";
+import {
+  citySlice,
+  setCitySearchQuery,
+  clearCitySearch,
+  selectPopularCities,
+  selectCitySearchResults,
+  selectCitySearchQuery,
+  selectDisplayedCities,
+  MIN_CITY_SEARCH_LENGTH,
+} from "./slice";
+import { fetchPopularCities, fetchCitiesBySearch } from "./actions";
 import type { ICity } from "../../utils/types";
 
 const cityReducer = citySlice.reducer;
@@ -57,14 +66,122 @@ describe("citySlice reducer", () => {
     expect(newState.error).toBe("Error occurred");
   });
 
+  test("устанавливает результаты поиска при успешном запросе (fulfilled)", () => {
+    const initialState = citySlice.getInitialState();
+    const newState = cityReducer(
+      initialState,
+      fetchCitiesBySearch.fulfilled([kazan], "", "каза"),
+    );
+    expect(newState.loading).toBe(false);
+    expect(newState.searchResults).toEqual([kazan]);
+  });
+
+  test("сохраняет ошибку при неудачном поиске городов (rejected)", () => {
+    const initialState = citySlice.getInitialState();
+    const error = new Error("Search error");
+    const newState = cityReducer(
+      initialState,
+      fetchCitiesBySearch.rejected(error, "", "каза"),
+    );
+    expect(newState.loading).toBe(false);
+    expect(newState.error).toBe("Search error");
+  });
+
+  test("устанавливает поисковый запрос (setCitySearchQuery)", () => {
+    const initialState = citySlice.getInitialState();
+    const newState = cityReducer(initialState, setCitySearchQuery("каза"));
+    expect(newState.searchQuery).toBe("каза");
+  });
+
+  test("очищает поиск (clearCitySearch)", () => {
+    const initialState = {
+      ...citySlice.getInitialState(),
+      searchQuery: "каза",
+      searchResults: [kazan],
+    };
+    const newState = cityReducer(initialState, clearCitySearch());
+    expect(newState.searchQuery).toBe("");
+    expect(newState.searchResults).toEqual([]);
+  });
+
   test("возвращает список популярных городов (selectPopularCities)", () => {
     const state = {
       city: {
         popularCities: [moscow],
+        searchResults: [],
+        searchQuery: "",
         loading: false,
         error: null,
       },
     };
     expect(selectPopularCities(state)).toEqual([moscow]);
+  });
+
+  test("возвращает результаты поиска (selectCitySearchResults)", () => {
+    const state = {
+      city: {
+        popularCities: [],
+        searchResults: [kazan],
+        searchQuery: "каза",
+        loading: false,
+        error: null,
+      },
+    };
+    expect(selectCitySearchResults(state)).toEqual([kazan]);
+  });
+
+  test("возвращает текущий поисковый запрос (selectCitySearchQuery)", () => {
+    const state = {
+      city: {
+        popularCities: [],
+        searchResults: [],
+        searchQuery: "каза",
+        loading: false,
+        error: null,
+      },
+    };
+    expect(selectCitySearchQuery(state)).toBe("каза");
+  });
+
+  describe("selectDisplayedCities", () => {
+    test("возвращает популярные города, если запрос короче MIN_CITY_SEARCH_LENGTH", () => {
+      const shortQuery = "к".repeat(MIN_CITY_SEARCH_LENGTH - 1);
+      const state = {
+        city: {
+          popularCities: [moscow],
+          searchResults: [kazan],
+          searchQuery: shortQuery,
+          loading: false,
+          error: null,
+        },
+      };
+      expect(selectDisplayedCities(state)).toEqual([moscow]);
+    });
+
+    test("возвращает результаты поиска, если запрос не короче MIN_CITY_SEARCH_LENGTH", () => {
+      const state = {
+        city: {
+          popularCities: [moscow],
+          searchResults: [kazan],
+          searchQuery: "каза",
+          loading: false,
+          error: null,
+        },
+      };
+      expect(selectDisplayedCities(state)).toEqual([kazan]);
+    });
+
+    test("возвращает популярные города при пустом запросе", () => {
+      const state = {
+        city: {
+          popularCities: [moscow],
+          searchResults: [kazan],
+          searchQuery: "",
+          loading: false,
+          error: null,
+        },
+      };
+      expect(selectDisplayedCities(state)).toEqual([moscow]);
+    });
   });
 });
