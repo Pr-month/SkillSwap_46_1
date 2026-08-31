@@ -37,7 +37,7 @@ export const SexRadioGroup: React.FC<TGenderFilterProps> = ({
               className={styles.input}
             />
             <span className={styles.radio} aria-hidden="true" />
-            <span className={styles.label}>{option.label}</span>
+            <span className={styles.label}>{option.title}</span>
           </label>
         ))}
       </div>
