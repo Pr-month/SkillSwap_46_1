@@ -3,7 +3,7 @@
 export type TId = string;
 
 /** ПОЛ ПОЛЬЗОВАТЕЛЯ */
-export type TGender = "male" | "female" | "unspecified";
+export type TGender = "MALE" | "FEMALE" | "OTHER";
 
 /** ПОЛЬЗОВАТЕЛЬ */
 export interface IUser {
@@ -77,11 +77,17 @@ export type TServerResponse<T> = {
 //* === ПОЛЬЗОВАТЕЛЬ ===
 
 /** ДАННЫЕ ДЛЯ ЗАПРОСА РЕГИСТРАЦИИ */
-export type IRegisterUserData = Pick<
-  IUserProfile,
-  "email" | "name" | "birthDate" | "gender" | "city" | "avatar"
-> & {
+export type IRegisterUserData = {
+  email: string;
   password: string;
+  name: string;
+  birthdate: string;
+  gender?: TGender;
+  cityId: string;
+  avatar: string;
+  about?: string;
+  wantToLearn?: string[];
+  skills?: string[];
 };
 
 /** ДАННЫЕ ДЛЯ ЗАПРОСА АВТОРИЗАЦИИ */
@@ -164,9 +170,12 @@ export interface ISkillExchange {
 }
 
 export type UploadResponse = {
-  url: string;
-  filename: string;
-  size: number; // в байтах
+  status: boolean;
+  data: {
+    url: string;
+    filename: string;
+    size: number;
+  };
 };
 
 export interface IMyRequests {

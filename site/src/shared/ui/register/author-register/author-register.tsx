@@ -21,9 +21,7 @@ import {
   selectCategories,
   selectSubCategoriesByCategoryId,
 } from "../../../../services/category/slice";
-import {
-  fetchCategories,
-} from "../../../../services/category/actions";
+import { fetchCategories } from "../../../../services/category/actions";
 import {
   fetchPopularCities,
   fetchSearchCities,

@@ -6,17 +6,22 @@ import {
 } from "../../shared/ui/register";
 import type { OptionType } from "../../shared/ui/dropdown/types";
 import { handleError } from "../../utils/errors/errorUtils";
+import type { Error as ApiError } from "../../utils/errors/types";
 import { useNavigate, useLocation } from "react-router-dom";
-import type { IRegisterUserData, TGender, TSkillData } from "../../utils/types";
+import type { IRegisterUserData, TGender } from "../../utils/types";
 import {
   fetchCheckUser,
   fetchLogin,
   fetchRegister,
   fetchUpdateCurrentUser,
 } from "../../services/auth/actions";
-import { appendSkill } from "../../services/skill/actions";
-import { useDispatch } from "../../services/store";
+import { useDispatch, useSelector } from "../../services/store";
 import { tokenService } from "../../utils/tokenService";
+import { fetchCategories } from "../../services/category/actions";
+import {
+  selectCategories,
+  selectSubCategoriesByCategoryId,
+} from "../../services/category/slice";
 
 export const Register: FC = () => {
   const [step, setStep] = useState(1);
@@ -47,6 +52,35 @@ export const Register: FC = () => {
 
   const dispatch = useDispatch();
 
+  const categories = useSelector(selectCategories);
+  const getSubcategoriesByCategoryId = useSelector(
+    selectSubCategoriesByCategoryId,
+  );
+
+  useState(() => {
+    dispatch(fetchCategories());
+  });
+
+  const convertSubcategoriesToCategories = (
+    subcategoryIds: string[],
+  ): string[] => {
+    const categoryIds = new Set<string>();
+
+    subcategoryIds.forEach((subcategoryId) => {
+      for (const category of categories) {
+        const subcategory = getSubcategoriesByCategoryId(category.id).find(
+          (sub) => sub.id === subcategoryId,
+        );
+        if (subcategory) {
+          categoryIds.add(category.id);
+          break;
+        }
+      }
+    });
+
+    return Array.from(categoryIds);
+  };
+
   const attemptRecovery = async (): Promise<boolean> => {
     setRegistrationError(null);
 
@@ -57,20 +91,10 @@ export const Register: FC = () => {
 
       tokenService.set(loginResult.access_token);
 
-      const skillData: TSkillData = {
-        title: skillName,
-        description: skillDescription,
-        skillSubcategory: String(skillSubcategory?.value),
-        images: skillImages,
-      };
-
-      const skillResult = await dispatch(appendSkill(skillData)).unwrap();
-      const skillId = skillResult.data.id;
-
       await dispatch(
         fetchUpdateCurrentUser({
-          userSkill: skillId,
           interestedSkillsSubcategoriesIds: learningSkills,
+          userSkill: String(skillSubcategory?.value),
         }),
       ).unwrap();
 
@@ -90,46 +114,36 @@ export const Register: FC = () => {
     if (!skillSubcategory) return;
 
     try {
+      const categoryIds = convertSubcategoriesToCategories(learningSkills);
+
       const registerData: IRegisterUserData = {
         email,
         password,
         name,
-        birthDate,
-        gender: gender?.value as TGender,
-        city: city?.title as string,
-        avatar,
+        birthdate: birthDate,
+        gender: (gender?.value as TGender) || "OTHER",
+        cityId: city?.value as string,
+        avatar: avatar,
+        wantToLearn: categoryIds,
+        skills: [String(skillSubcategory.value)],
       };
 
-      await dispatch(fetchRegister(registerData));
+      console.log("Register data:", registerData);
 
-      const skillData: TSkillData = {
-        title: skillName,
-        description: skillDescription,
-        skillSubcategory: String(skillSubcategory.value),
-        images: skillImages,
-      };
-
-      const skillResult = await dispatch(appendSkill(skillData)).unwrap();
-      const skillId = skillResult.data.id;
-
-      await dispatch(
-        fetchUpdateCurrentUser({
-          userSkill: skillId,
-          interestedSkillsSubcategoriesIds: learningSkills,
-        }),
-      );
+      await dispatch(fetchRegister(registerData)).unwrap();
 
       navigate(from, {
         replace: true,
         state: { showRegistrationSuccess: true },
       });
     } catch (err) {
+      console.error("Registration error:", err);
+
       try {
         await dispatch(fetchCheckUser({ email, password })).unwrap();
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-      } catch (error: any) {
-        const status =
-          error?.status || error?.statusCode || error?.response?.status;
+      } catch (error) {
+        const apiError = error as ApiError;
+        const status = apiError?.statusCode;
         if (status === 409) {
           const recoverySuccess = await attemptRecovery();
           if (recoverySuccess) {
@@ -137,10 +151,11 @@ export const Register: FC = () => {
               replace: true,
               state: { showRegistrationSuccess: true },
             });
+            return;
           }
         }
       }
-      /* eslint-enable @typescript-eslint/no-explicit-any */
+
       setRegistrationError(handleError(err).message);
     }
   };
