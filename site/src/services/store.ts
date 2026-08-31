@@ -2,6 +2,7 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { userSlice } from "./user/slice";
 import { skillSlice } from "./skill/slice";
 import { categorySlice } from "./category/slice";
+import { citySlice } from "./city/slice";
 import { authSlice } from "./auth/slice";
 import { filterSlice } from "./filter/slice.ts";
 import { requestSlice } from "./request/slice.ts";
@@ -14,6 +15,7 @@ import {
 export const rootReducer = combineSlices(
   skillSlice,
   categorySlice,
+  citySlice,
   userSlice,
   authSlice,
   filterSlice,

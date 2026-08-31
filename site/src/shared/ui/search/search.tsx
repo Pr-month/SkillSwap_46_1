@@ -9,6 +9,8 @@ export interface SearchProps extends Omit<
 > {
   /** Обработчик поиска (вызывается по enter) */
   onSearch?: (value: string) => void;
+  /** Обработчик живого ввода (вызывается на каждое изменение значения) */
+  onChange?: (value: string) => void;
   /** Обработчик очистки поля */
   onClear?: () => void;
   /** Плейсхолдер */
@@ -19,6 +21,7 @@ export interface SearchProps extends Omit<
 
 export const Search = ({
   onSearch,
+  onChange,
   onClear,
   placeholder = "Искать навык",
   className,
@@ -32,12 +35,13 @@ export const Search = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setInputValue(newValue);
+      onChange?.(newValue);
 
       if (newValue.trim() === "") {
         onSearch?.("");
       }
     },
-    [onSearch],
+    [onSearch, onChange],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -56,9 +60,10 @@ export const Search = ({
 
   const handleClear = useCallback(() => {
     setInputValue("");
+    onChange?.("");
     onSearch?.("");
     inputRef.current?.focus();
-  }, [onSearch]);
+  }, [onSearch, onChange]);
 
   const showClear = inputValue.length > 0 && !disabled;
 

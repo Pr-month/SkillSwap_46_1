@@ -40,6 +40,17 @@ export interface ISkillsCategory {
   subcategories: ISkillsSubcategory[];
 }
 
+/** ГОРОД */
+export interface ICity {
+  id: TId;
+  name: string;
+  district: string;
+  subject: string;
+  population: number;
+  lat: number;
+  lon: number;
+}
+
 /** НАВЫК
  *
  * Ограничения:
@@ -112,7 +123,10 @@ export type TSkillResponse = TServerResponse<{
 
 /** ДАННЫЕ МАССИВА НАВЫКОВ В ОТВЕТЕ */
 export type TSkillsResponse = TServerResponse<{
-  data: (ISkill & { id: TId })[];
+  status: boolean;
+  data: ISkill[];
+  page: number;
+  totalPages: number;
 }>;
 
 /** ДАННЫЕ ДЛЯ ЗАПРОСА ДОБАВЛЕНИЯ НАВЫКА */
@@ -135,11 +149,7 @@ export interface ISkillExchangeData {
 
 /** ОТВЕТ НА ЗАПРОС ОБМЕНА НАВЫКАМИ */
 export type TRequestStatus =
-  | "pending"
-  | "accepted"
-  | "rejected"
-  | "inProgress"
-  | "done";
+  "pending" | "accepted" | "rejected" | "inProgress" | "done";
 
 export interface ISkillExchange {
   id: TId;

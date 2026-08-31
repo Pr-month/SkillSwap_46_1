@@ -21,6 +21,7 @@ type DropdownProps = {
   error?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
+  onSearchChange?: (query: string) => void;
 };
 
 export const Dropdown = (props: DropdownProps) => {
@@ -36,6 +37,7 @@ export const Dropdown = (props: DropdownProps) => {
     error = false,
     searchable = false,
     searchPlaceholder = "Начните вводить...",
+    onSearchChange,
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -168,7 +170,11 @@ export const Dropdown = (props: DropdownProps) => {
                 className={styles.inlineSearchInput}
                 type="text"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  const query = event.target.value;
+                  setSearchQuery(query);
+                  onSearchChange?.(query);
+                }}
                 placeholder={searchPlaceholder}
                 autoFocus
               />
