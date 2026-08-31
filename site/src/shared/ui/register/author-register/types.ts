@@ -18,9 +18,8 @@ export type AuthorRegisterProps = {
   onBack: () => void;
 };
 
-export const genderOptions: OptionType[] = [
-  { value: "male", title: "Мужской" },
-  { value: "female", title: "Женский" },
+export const genderOptions = [
+  { value: "MALE", title: "Мужской" },
+  { value: "FEMALE", title: "Женский" },
+  { value: "OTHER", title: "Другой" },
 ];
-
-

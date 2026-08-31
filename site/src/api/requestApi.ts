@@ -14,7 +14,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-//POST create
+//POST
 export const createRequest = (
   data: ISkillExchangeData,
 ): Promise<ISkillExchange> => {
@@ -45,7 +45,7 @@ export const createRequest = (
 };
 
 //GET my
-export const getMyRequests = (): Promise<IMyRequests> => {
+export const getMyRequests = async (): Promise<IMyRequests> => {
   const token = tokenService.get();
 
   if (USE_MOCKS) {
@@ -54,11 +54,23 @@ export const getMyRequests = (): Promise<IMyRequests> => {
       .then((res) => res.data);
   }
 
-  return request<ApiResponse<IMyRequests>>("/requests/my", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res: { status: boolean; data: IMyRequests }) => res.data);
+  const [incoming, outgoing] = await Promise.all([
+    request<ApiResponse<ISkillExchange[]>>("/requests/incoming", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((res) => res.data),
+    request<ApiResponse<ISkillExchange[]>>("/requests/outgoing", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((res) => res.data),
+  ]);
+
+  return {
+    sent: outgoing,
+    received: incoming,
+  };
 };
 
 //GET by id
@@ -91,7 +103,7 @@ export const updateRequestStatus = (
         updatedAt: new Date().toISOString(),
       }));
   }
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}/status`, {
+  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -114,10 +126,12 @@ export const completeRequest = (id: TId): Promise<ISkillExchange> => {
       }));
   }
 
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}/complete`, {
+  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ status: "done" }),
   }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
 };

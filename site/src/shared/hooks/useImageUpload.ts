@@ -6,11 +6,14 @@ export const useImageUpload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const uploadSingle = async (file: File): Promise<UploadResponse | null> => {
+  const uploadSingle = async (
+    file: File,
+  ): Promise<UploadResponse["data"] | null> => {
     setIsLoading(true);
     setError(null);
     try {
-      return await uploadImage(file);
+      const response = await uploadImage(file);
+      return response.data;
     } catch {
       setError("Ошибка загрузки");
       return null;
@@ -19,7 +22,9 @@ export const useImageUpload = () => {
     }
   };
 
-  const uploadMany = async (files: File[]): Promise<UploadResponse[]> => {
+  const uploadMany = async (
+    files: File[],
+  ): Promise<UploadResponse["data"][]> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -29,7 +34,7 @@ export const useImageUpload = () => {
           (r): r is PromiseFulfilledResult<UploadResponse> =>
             r.status === "fulfilled",
         )
-        .map((r) => r.value);
+        .map((r) => r.value.data);
 
       if (responses.length < files.length) {
         setError(`Загружено ${responses.length} из ${files.length} файлов`);

@@ -1,10 +1,10 @@
 import React from "react";
 import type { TGenderOption, TGenderFilterProps } from "./types";
 import styles from "./radio-group.module.css";
-export const genderOptions: { value: TGenderOption; label: string }[] = [
-  { value: "all", label: "Не имеет значения" },
-  { value: "male", label: "Мужской" },
-  { value: "female", label: "Женский" },
+export const genderOptions = [
+  { value: "MALE", title: "Мужской" },
+  { value: "FEMALE", title: "Женский" },
+  { value: "OTHER", title: "Другой" },
 ];
 
 export const SexRadioGroup: React.FC<TGenderFilterProps> = ({
