@@ -7,12 +7,14 @@ import { City } from './entities/city.entity';
 const mockQueryBuilder = {
   where: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
+  addOrderBy: jest.fn().mockReturnThis(),
   take: jest.fn().mockReturnThis(),
   getMany: jest.fn(),
 };
 
 const mockCityRepo = {
   find: jest.fn(),
+  query: jest.fn(),
   createQueryBuilder: jest.fn(() => mockQueryBuilder),
 };
 
@@ -41,6 +43,24 @@ describe('CitiesService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('onModuleInit', () => {
+    it('должен создавать расширение pg_trgm, если его ещё нет', async () => {
+      mockCityRepo.query.mockResolvedValue(undefined);
+
+      await service.onModuleInit();
+
+      expect(mockCityRepo.query).toHaveBeenCalledWith(
+        'CREATE EXTENSION IF NOT EXISTS pg_trgm;',
+      );
+    });
+
+    it('не должен падать, если создание расширения завершилось ошибкой', async () => {
+      mockCityRepo.query.mockRejectedValue(new Error('нет прав'));
+
+      await expect(service.onModuleInit()).resolves.not.toThrow();
+    });
+  });
+
   describe('findPopular', () => {
     it('должен возвращать города, отсортированные по населению', async () => {
       const mockResult = [
@@ -59,25 +79,40 @@ describe('CitiesService', () => {
   });
 
   describe('search', () => {
-    it('должен искать города по подстроке в названии без учёта регистра', async () => {
+    it('должен искать города через триграммное сходство (pg_trgm)', async () => {
       const mockResult = [
         { id: 'city-1', name: 'Казань', population: 1300000 },
       ];
       mockQueryBuilder.getMany.mockResolvedValue(mockResult);
 
-      const result = await service.search('КаЗа', 20);
+      const result = await service.search('Каза', 20);
 
       expect(mockCityRepo.createQueryBuilder).toHaveBeenCalledWith('city');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith(
-        'LOWER(city.name) LIKE :query',
-        { query: '%каза%' },
+        'similarity(city.name, :query) > :threshold',
+        { query: 'Каза', threshold: 0.2 },
       );
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'similarity(city.name, :query)',
+        'DESC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
         'city.population',
         'DESC',
       );
       expect(mockQueryBuilder.take).toHaveBeenCalledWith(20);
       expect(result).toEqual(mockResult);
+    });
+
+    it('должен обрезать пробелы в поисковом запросе', async () => {
+      mockQueryBuilder.getMany.mockResolvedValue([]);
+
+      await service.search('  Москва  ', 20);
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'similarity(city.name, :query) > :threshold',
+        { query: 'Москва', threshold: 0.2 },
+      );
     });
   });
 });

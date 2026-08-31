@@ -5,13 +5,19 @@ import { ConfigurationService } from '../module/configuration/configuration.serv
 
 export const dbConfig = (
   configurationService: ConfigurationService,
-): DataSourceOptions => ({
-  type: 'postgres',
-  host: configurationService.databaseHost,
-  port: configurationService.databasePort,
-  username: configurationService.databaseUsername,
-  password: configurationService.databasePassword,
-  database: configurationService.databaseName,
-  synchronize: configurationService.databaseSynchronize,
-  entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
-});
+): DataSourceOptions => {
+  const options: DataSourceOptions = {
+    type: 'postgres',
+    host: configurationService.databaseHost,
+    port: configurationService.databasePort,
+    username: configurationService.databaseUsername,
+    password: configurationService.databasePassword,
+    database: configurationService.databaseName,
+    synchronize: configurationService.databaseSynchronize,
+    entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
+  };
+
+  console.log('DEBUG LIVE SERVER DB CONFIG:', options);
+
+  return options;
+};

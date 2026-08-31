@@ -1,18 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/ui/icon";
 import { Search } from "../../../shared/ui/search";
 import { useDispatch, useSelector } from "../../../services/store";
-import { fetchPopularCities } from "../../../services/city/actions";
 import {
+  fetchCitiesBySearch,
+  fetchPopularCities,
+} from "../../../services/city/actions";
+import {
+  MIN_CITY_SEARCH_LENGTH,
+  clearCitySearch,
   selectCityLoading,
+  selectDisplayedCities,
   selectPopularCities,
 } from "../../../services/city/slice";
-import { findMatchingIdsByTitle } from "../../../utils/search";
 import type { TCityCheckboxGroupProps } from "./types";
 import styles from "./checkbox-group.module.css";
 
 // Сколько городов показывать до включения скролла/раскрытия списка
 const VISIBLE_CITIES_COUNT = 5;
+// Задержка перед отправкой поискового запроса на бэкенд, мс —
+// чтобы не спамить запросами на каждую введённую букву
+const SEARCH_DEBOUNCE_MS = 400;
 
 export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
   value = [],
@@ -21,38 +29,60 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
   const dispatch = useDispatch();
 
   const popularCities = useSelector(selectPopularCities);
+  const displayedCities = useSelector(selectDisplayedCities);
   const loading = useSelector(selectCityLoading);
 
   const [showAll, setShowAll] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isSearching = searchQuery.trim().length > 0;
+  const isSearching = inputValue.trim().length >= MIN_CITY_SEARCH_LENGTH;
 
   // Загружаем список самых популярных городов (топ-20 по населению) один раз при монтировании
   useEffect(() => {
     if (popularCities.length === 0) {
       dispatch(fetchPopularCities());
     }
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Поиск по загруженному списку городов через существующую на фронте
-  // утилиту нечёткого (триграммного) поиска — без обращения к бэкенду
-  const filteredCities = useMemo(() => {
-    if (!isSearching) {
-      return popularCities;
+  // Живой поиск с debounce: запрос на бэкенд (/cities/search) уходит только
+  // если введено от MIN_CITY_SEARCH_LENGTH символов и не чаще, чем раз в
+  // SEARCH_DEBOUNCE_MS — иначе показываем список популярных городов.
+  const handleSearchChange = (query: string) => {
+    setInputValue(query);
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
 
-    const searchableCities = popularCities.map((city) => ({
-      id: city.id,
-      title: city.name,
-      description: city.name,
-    }));
+    const trimmed = query.trim();
 
-    const matchingIds = findMatchingIdsByTitle(searchableCities, searchQuery);
+    if (trimmed.length < MIN_CITY_SEARCH_LENGTH) {
+      dispatch(clearCitySearch());
+      return;
+    }
 
-    return popularCities.filter((city) => matchingIds.includes(city.id));
-  }, [popularCities, searchQuery, isSearching]);
+    debounceTimer.current = setTimeout(() => {
+      dispatch(fetchCitiesBySearch(trimmed));
+    }, SEARCH_DEBOUNCE_MS);
+  };
+
+  const handleClearSearch = () => {
+    setInputValue("");
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    dispatch(clearCitySearch());
+  };
 
   const handleCityChange = (city: string) => {
     const newValue = value.includes(city)
@@ -67,10 +97,10 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
 
   const visibleCities =
     isSearching || showAll
-      ? filteredCities
-      : filteredCities.slice(0, VISIBLE_CITIES_COUNT);
+      ? displayedCities
+      : displayedCities.slice(0, VISIBLE_CITIES_COUNT);
   const hasMoreCities =
-    !isSearching && filteredCities.length > VISIBLE_CITIES_COUNT;
+    !isSearching && displayedCities.length > VISIBLE_CITIES_COUNT;
 
   return (
     <div className={styles.container}>
@@ -78,8 +108,8 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
 
       <Search
         placeholder="Искать город"
-        onChange={setSearchQuery}
-        onClear={() => setSearchQuery("")}
+        onChange={handleSearchChange}
+        onClear={handleClearSearch}
         aria-label="Поиск города"
       />
 
@@ -88,7 +118,11 @@ export const CityCheckboxGroup: React.FC<TCityCheckboxGroupProps> = ({
           <span className={styles.label}>Загрузка городов…</span>
         )}
 
-        {isSearching && visibleCities.length === 0 && (
+        {isSearching && loading && (
+          <span className={styles.label}>Идёт поиск…</span>
+        )}
+
+        {isSearching && !loading && visibleCities.length === 0 && (
           <span className={styles.label}>Города не найдены</span>
         )}
 
