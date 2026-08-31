@@ -6,7 +6,7 @@ import {
   type SyntheticEvent,
 } from "react";
 import { format, subYears, isBefore, isAfter, parse } from "date-fns";
-import { cityOptions, genderOptions, type AuthorRegisterProps } from "./types";
+import { genderOptions, type AuthorRegisterProps } from "./types";
 import styles from "./author-register.module.css";
 import userInfo from "../../../../assets/images/user-info.svg";
 import { Button } from "../../button";
@@ -25,6 +25,14 @@ import {
   fetchCategories,
   fetchSubCategories,
 } from "../../../../services/category/actions";
+import {
+  fetchPopularCities,
+  fetchSearchCities,
+} from "../../../../services/city/actions";
+import {
+  selectPopularCities,
+  selectCitySearchResults,
+} from "../../../../services/city/slice";
 import { useImageUpload } from "../../../hooks/useImageUpload";
 
 const CATEGORY_CSS_VARS: Record<string, string> = {
@@ -60,10 +68,37 @@ export const AuthorRegister: FC<AuthorRegisterProps> = ({
     selectSubCategoriesByCategoryId,
   );
 
+  const popularCities = useSelector(selectPopularCities);
+  const citySearchResults = useSelector(selectCitySearchResults);
+
+  const [citySearchQuery, setCitySearchQuery] = useState("");
+
   useEffect(() => {
+    dispatch(fetchPopularCities());
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
   }, [dispatch]);
+
+  useEffect(() => {
+    const query = citySearchQuery.trim();
+
+    if (!query) return;
+
+    const timeoutId = window.setTimeout(() => {
+      dispatch(fetchSearchCities(query));
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [citySearchQuery, dispatch]);
+
+  const cityOptions = useMemo(() => {
+    const cities = citySearchQuery.trim() ? citySearchResults : popularCities;
+
+    return cities.map((city) => ({
+      value: city.id,
+      title: city.name,
+    }));
+  }, [citySearchQuery, citySearchResults, popularCities]);
 
   const { uploadSingle } = useImageUpload();
 
@@ -254,6 +289,7 @@ export const AuthorRegister: FC<AuthorRegisterProps> = ({
             onChange={setCity}
             searchable
             searchPlaceholder="Введите город"
+            onSearchChange={setCitySearchQuery}
           />
           <Dropdown
             title="Категория навыка, которому хотите научиться"
