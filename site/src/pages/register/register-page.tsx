@@ -6,6 +6,7 @@ import {
 } from "../../shared/ui/register";
 import type { OptionType } from "../../shared/ui/dropdown/types";
 import { handleError } from "../../utils/errors/errorUtils";
+import type { Error as ApiError } from "../../utils/errors/types";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { IRegisterUserData, TGender } from "../../utils/types";
 import {
@@ -140,9 +141,9 @@ export const Register: FC = () => {
 
       try {
         await dispatch(fetchCheckUser({ email, password })).unwrap();
-      } catch (error: any) {
-        const status =
-          error?.status || error?.statusCode || error?.response?.status;
+      } catch (error) {
+        const apiError = error as ApiError;
+        const status = apiError?.statusCode;
         if (status === 409) {
           const recoverySuccess = await attemptRecovery();
           if (recoverySuccess) {
