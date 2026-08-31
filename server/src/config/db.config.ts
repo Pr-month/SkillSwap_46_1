@@ -16,7 +16,7 @@ export const dbConfig = (
     ? 'src/**/*.entity{.ts,.js}'
     : join(__dirname, '..', '**', '*.entity{.ts,.js}');
 
-  return {
+  const options: DataSourceOptions = {
     type: 'postgres',
     host: configurationService.databaseHost,
     port: configurationService.databasePort,
@@ -26,4 +26,8 @@ export const dbConfig = (
     synchronize: configurationService.databaseSynchronize,
     entities: [entities],
   };
+
+  console.log('DEBUG LIVE SERVER DB CONFIG:', options);
+
+  return options;
 };
