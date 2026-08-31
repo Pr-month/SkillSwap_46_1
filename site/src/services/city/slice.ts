@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchCitiesBySearch, fetchPopularCities } from "./actions";
+import { fetchPopularCities, fetchSearchCities } from "./actions";
 import type { ICity } from "../../utils/types";
 
 /**
@@ -15,6 +15,7 @@ type CityState = {
   searchResults: ICity[];
   searchQuery: string;
   loading: boolean;
+  searchLoading: boolean;
   error: string | null;
 };
 
@@ -23,6 +24,7 @@ export const initialState: CityState = {
   searchResults: [],
   searchQuery: "",
   loading: false,
+  searchLoading: false,
   error: null,
 };
 
@@ -43,6 +45,7 @@ export const citySlice = createSlice({
     selectCitySearchResults: (state) => state.searchResults,
     selectCitySearchQuery: (state) => state.searchQuery,
     selectCityLoading: (state) => state.loading,
+    selectCitySearchLoading: (state) => state.searchLoading,
     selectDisplayedCities: (state) =>
       state.searchQuery.trim().length >= MIN_CITY_SEARCH_LENGTH
         ? state.searchResults
@@ -62,17 +65,17 @@ export const citySlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "PopularCities rejected";
       })
-      .addCase(fetchCitiesBySearch.pending, (state) => {
-        state.loading = true;
+      .addCase(fetchSearchCities.pending, (state) => {
+        state.searchLoading = true;
         state.error = null;
       })
-      .addCase(fetchCitiesBySearch.fulfilled, (state, action) => {
-        state.loading = false;
+      .addCase(fetchSearchCities.fulfilled, (state, action) => {
+        state.searchLoading = false;
         state.searchResults = action.payload;
       })
-      .addCase(fetchCitiesBySearch.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "CitiesSearch rejected";
+      .addCase(fetchSearchCities.rejected, (state, action) => {
+        state.searchLoading = false;
+        state.error = action.error.message || "City search rejected";
       });
   },
 });
@@ -83,6 +86,7 @@ export const {
   selectCitySearchResults,
   selectCitySearchQuery,
   selectCityLoading,
+  selectCitySearchLoading,
   selectDisplayedCities,
 } = citySlice.selectors;
 

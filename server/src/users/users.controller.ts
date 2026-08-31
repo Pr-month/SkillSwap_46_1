@@ -2,27 +2,30 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
-  Query,
+  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
 
 import { RequestWithUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersQueryDto } from './dto/users-query.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  findAll(@Query() query: PaginationDto) {
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  findAll(@Body() query: UsersQueryDto) {
     return this.usersService.findAll(query);
   }
 

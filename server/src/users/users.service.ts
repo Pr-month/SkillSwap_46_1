@@ -1,9 +1,8 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedResponseDto } from '../common/dto/response.dto';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
@@ -12,6 +11,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserListItemResponse } from './dto/user-list-item.response';
 import { UserProfileResponse } from './dto/user-profile.response';
+import { UsersQueryDto } from './dto/users-query.dto';
 import { User } from './entities/user.entity';
 import { CreateUserData } from './users.types';
 
@@ -67,19 +67,73 @@ export class UsersService {
   }
 
   async findAll(
-    query: PaginationDto,
+    query: UsersQueryDto,
   ): Promise<PaginatedResponseDto<UserListItemResponse>> {
-    const [users, total] = await this.usersRepository.findAndCount({
-      skip: query.skip,
-      take: query.limit,
-      relations: {
-        city: true,
-        skills: true,
-        favoriteSkills: true,
-        wantToLearn: { subcategories: true },
-      },
-    });
+    const builder = this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.city', 'city')
+      .leftJoinAndSelect('user.skills', 'userSkill')
+      .leftJoinAndSelect('user.favoriteSkills', 'favoriteSkill')
+      .leftJoinAndSelect('user.wantToLearn', 'wantToLearn')
+      .leftJoinAndSelect('wantToLearn.subcategories', 'wantToLearnSubcategory')
+      .orderBy('user.createdAt', 'DESC')
+      .skip(query.skip)
+      .take(query.limit);
 
+    if (query.search) {
+      builder.andWhere(
+        new Brackets((where) => {
+          where
+            .where('LOWER(user.name) LIKE :search')
+            .orWhere('LOWER(user.email) LIKE :search')
+            .orWhere('LOWER(userSkill.title) LIKE :search')
+            .orWhere('LOWER(userSkill.description) LIKE :search');
+        }),
+        { search: `%${query.search.toLowerCase()}%` },
+      );
+    }
+
+    if (query.gender && query.gender.toLowerCase() !== 'all') {
+      builder.andWhere('CAST(user.gender AS text) = :gender', {
+        gender: query.gender.toUpperCase(),
+      });
+    }
+
+    if (query.cities?.length) {
+      builder.andWhere('city.name IN (:...cities)', { cities: query.cities });
+    }
+
+    if (query.subCategoryIds?.length) {
+      const skillOption = query.skillOption ?? 'all';
+      if (skillOption === 'can-teach') {
+        builder.andWhere(
+          '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
+          {
+            subCategoryIds: query.subCategoryIds,
+          },
+        );
+      } else if (skillOption === 'want-to-learn') {
+        builder.andWhere(
+          '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+          { subCategoryIds: query.subCategoryIds },
+        );
+      } else {
+        builder.andWhere(
+          new Brackets((where) => {
+            where
+              .where(
+                '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
+              )
+              .orWhere(
+                '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+              );
+          }),
+          { subCategoryIds: query.subCategoryIds },
+        );
+      }
+    }
+
+    const [users, total] = await builder.getManyAndCount();
     const totalPages = Math.ceil(total / query.limit);
 
     if (query.page > Math.max(totalPages, 1)) {

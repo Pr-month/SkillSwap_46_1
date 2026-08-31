@@ -12,9 +12,8 @@ export const fetchUsers = createAsyncThunk<
   PaginatedUsersResponse,
   GetUsersParams | void
 >("user/fetchAll", async (arg, { rejectWithValue }) => {
-  const { page = 1, limit = 20 } = arg ?? {};
   try {
-    return await getUsers({ page, limit });
+    return await getUsers(arg ?? {});
   } catch (err) {
     return rejectWithValue(err);
   }

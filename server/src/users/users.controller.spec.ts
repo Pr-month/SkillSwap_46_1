@@ -108,8 +108,17 @@ describe('UsersController', () => {
     );
   });
 
-  it('findAll calls usersService.findAll with query and returns result', async () => {
-    const query = { page: 1, limit: 20, skip: 0, search: '' };
+  it('findAll calls usersService.findAll with body and returns result', async () => {
+    const body = {
+      page: 1,
+      limit: 20,
+      skip: 0,
+      search: '',
+      gender: 'female',
+      cities: ['Москва', 'Казань'],
+      subCategoryIds: ['sub-1', 'sub-2'],
+      skillOption: 'can-teach' as const,
+    };
     const paginatedResult = {
       data: [profile],
       page: 1,
@@ -117,7 +126,7 @@ describe('UsersController', () => {
     };
     usersService.findAll.mockResolvedValue(paginatedResult);
 
-    await expect(controller.findAll(query)).resolves.toBe(paginatedResult);
-    expect(usersService.findAll).toHaveBeenCalledWith(query);
+    await expect(controller.findAll(body)).resolves.toBe(paginatedResult);
+    expect(usersService.findAll).toHaveBeenCalledWith(body);
   });
 });

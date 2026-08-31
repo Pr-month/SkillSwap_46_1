@@ -12,7 +12,7 @@ export const fetchPopularCities = createAsyncThunk(
   },
 );
 
-export const fetchCitiesBySearch = createAsyncThunk(
+export const fetchSearchCities = createAsyncThunk(
   "city/search",
   async (query: string, { rejectWithValue }) => {
     try {

@@ -162,6 +162,55 @@ describe('UsersController (e2e)', () => {
     });
   });
 
+  describe('/users/search (POST)', () => {
+    it('возвращает список пользователей с пагинацией по умолчанию', () => {
+      return request(httpServer)
+        .post('/users/search')
+        .send({})
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.page).toBe(1);
+          expect(res.body.totalPages).toBeGreaterThanOrEqual(1);
+        });
+    });
+
+    it('фильтрует по городу', () => {
+      const cityName = `E2E Users City ${unique}`;
+
+      return request(httpServer)
+        .post('/users/search')
+        .send({ cities: [cityName] })
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(
+            res.body.data.some((user: { id: string }) => user.id === userId),
+          ).toBe(true);
+        });
+    });
+
+    it('соблюдает пагинацию limit', () => {
+      return request(httpServer)
+        .post('/users/search')
+        .send({ page: 1, limit: 1 })
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeLessThanOrEqual(1);
+          expect(res.body.page).toBe(1);
+        });
+    });
+
+    it('отклоняет недопустимое значение skillOption', () => {
+      return request(httpServer)
+        .post('/users/search')
+        .send({ skillOption: 'invalid-option' })
+        .expect(400)
+        .expect(expectValidationError);
+    });
+  });
+
   describe('/users/me (PATCH)', () => {
     it('обновляет профиль текущего пользователя', () => {
       return request(httpServer)
