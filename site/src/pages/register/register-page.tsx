@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 import {
   AccountRegister,
   AuthorRegister,
@@ -57,9 +57,15 @@ export const Register: FC = () => {
     selectSubCategoriesByCategoryId,
   );
 
-  useState(() => {
+  const categoriesRequested = useRef(false);
+
+  useEffect(() => {
+    if (categoriesRequested.current || categories.length !== 0) {
+      return;
+    }
+    categoriesRequested.current = true;
     dispatch(fetchCategories());
-  });
+  }, [dispatch, categories.length]);
 
   const convertSubcategoriesToCategories = (
     subcategoryIds: string[],
@@ -126,6 +132,10 @@ export const Register: FC = () => {
         avatar: avatar,
         wantToLearn: categoryIds,
         skills: [String(skillSubcategory.value)],
+        title: skillName,
+        description: skillDescription,
+        images: skillImages,
+        interestedSkillsSubcategoriesIds: learningSkills,
       };
 
       console.log("Register data:", registerData);

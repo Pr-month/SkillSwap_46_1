@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 
 import { Category } from '../../categories/entities/category.entity';
+import { Subcategory } from '../../categories/entities/subcategory.entity';
 import { City } from '../../cities/entities/city.entity';
 import { Favorite } from '../../skills/entities/favorite.entity';
 import { Skill } from '../../skills/entities/skills.entity';
@@ -64,6 +65,10 @@ export class User {
   @ManyToMany(() => Category)
   @JoinTable({ name: 'user_want_to_learn' })
   wantToLearn: Relation<Category>[];
+
+  @ManyToMany(() => Subcategory)
+  @JoinTable({ name: 'user_want_to_learn_subcategories' })
+  wantToLearnSubcategories: Relation<Subcategory>[];
 
   @ManyToMany(() => Skill)
   @JoinTable({ name: 'user_favorite_skills' })

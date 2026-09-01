@@ -88,6 +88,10 @@ export type IRegisterUserData = {
   about?: string;
   wantToLearn?: string[];
   skills?: string[];
+  title?: string;
+  description?: string;
+  images?: string[];
+  interestedSkillsSubcategoriesIds?: string[];
 };
 
 /** ДАННЫЕ ДЛЯ ЗАПРОСА АВТОРИЗАЦИИ */
@@ -148,9 +152,8 @@ export type TModifySkillData = Partial<
 
 /** ДАННЫЕ ЗАПРОСА НА ОБМЕН НАВЫКАМИ */
 export interface ISkillExchangeData {
-  userSkill: TId; // навык, которому пользователь может научить
-  requiredSkillUserId: TId; // id пользователя с необходимым навыком
-  message: string; // сообщение
+  offeredSkillId: TId; // навык, которому пользователь может научить
+  requestedSkillId: TId; // навык, которому пользователь хочет научиться
 }
 
 /** ОТВЕТ НА ЗАПРОС ОБМЕНА НАВЫКАМИ */

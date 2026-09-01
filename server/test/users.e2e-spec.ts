@@ -115,7 +115,8 @@ describe('UsersController (e2e)', () => {
             about: testUser.about,
             avatar: testUser.avatar,
           });
-          expect(res.body.city).toMatchObject({ id: cityId });
+          expect(typeof res.body.city).toBe('string');
+          expect(res.body.city).toBeTruthy();
           expect(res.body).not.toHaveProperty('password');
           expect(res.body).not.toHaveProperty('refreshToken');
         });

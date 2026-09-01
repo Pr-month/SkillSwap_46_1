@@ -12,7 +12,6 @@ import type {
   TModifySkillData,
   TSkillData,
   TSkillResponse,
-  TSkillsResponse,
 } from "../../utils/types";
 import {
   appendSkill,
@@ -39,6 +38,7 @@ import {
   getSkills,
   modifySkill,
 } from "../../api/skillApi";
+import type { PaginatedSkillsResponse } from "../../api/skillApi";
 
 // Типизируем моки
 const mockedAddSkill = addSkill as jest.MockedFunction<typeof addSkill>;
@@ -122,8 +122,9 @@ describe("ПРОВЕРКА РЕДЮСЕРА СЛАЙСА НАВЫКА [skillSlic
   //* ТЕСТ 1: ПОЛУЧЕНИЕ НАВЫКОВ
   test("Тест получения навыков [fetchSkills]", async () => {
     mockedGetSkills.mockResolvedValue({
-      status: true,
       data: requestedSkills,
+      page: 1,
+      totalPages: 1,
     });
 
     const store = configureStore({
@@ -485,8 +486,9 @@ describe("ПРОВЕРКА РЕДЮСЕРА СЛАЙСА НАВЫКА [skillSlic
     consoleErrorSpy.mockClear();
 
     mockedGetSkills.mockResolvedValue({
-      status: true,
       data: requestedSkills,
+      page: 1,
+      totalPages: 1,
     });
 
     const store = configureStore({
@@ -500,8 +502,8 @@ describe("ПРОВЕРКА РЕДЮСЕРА СЛАЙСА НАВЫКА [skillSlic
 
   //* ТЕСТ 14: ПРОВЕРКА СОСТОЯНИЯ PENDING ДЛЯ fetchSkills
   test("Тест состояния loading при получении навыков [fetchSkills pending]", async () => {
-    let resolvePromise: (value: TSkillsResponse) => void;
-    const promise = new Promise<TSkillsResponse>((resolve) => {
+    let resolvePromise: (value: PaginatedSkillsResponse) => void;
+    const promise = new Promise<PaginatedSkillsResponse>((resolve) => {
       resolvePromise = resolve;
     });
 
@@ -520,8 +522,9 @@ describe("ПРОВЕРКА РЕДЮСЕРА СЛАЙСА НАВЫКА [skillSlic
     expect(state.skills.loading).toBe(true);
 
     resolvePromise!({
-      status: true,
       data: requestedSkills,
+      page: 1,
+      totalPages: 1,
     });
 
     await dispatchPromise;

@@ -73,11 +73,12 @@ export const UserSection: FC<UserSectionProps> = ({
       return;
     }
 
-    const isLiked = currentUser.likesSkillsIds.includes(skillId);
+    const likesSkillsIds = currentUser.likesSkillsIds ?? [];
+    const isLiked = likesSkillsIds.includes(skillId);
 
     const nextLikesSkillsIds = isLiked
-      ? currentUser.likesSkillsIds.filter((id) => id !== skillId)
-      : [...currentUser.likesSkillsIds, skillId];
+      ? likesSkillsIds.filter((id) => id !== skillId)
+      : [...likesSkillsIds, skillId];
 
     // Асинхронное обновление пользователей для автообновления selectPopularUsers в HomePage
     (async () => {
@@ -151,7 +152,7 @@ export const UserSection: FC<UserSectionProps> = ({
     canTeach: user.canTeach,
     wantsToLearn: user.wantsToLearn,
     isFavorite: currentUser
-      ? currentUser.likesSkillsIds.includes(user.userSkill)
+      ? (currentUser.likesSkillsIds ?? []).includes(user.userSkill)
       : false,
     onFavoriteClick: () => handleFavoriteClick(user.userSkill),
     teachColor: getTeachColor(

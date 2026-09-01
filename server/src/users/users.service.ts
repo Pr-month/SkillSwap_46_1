@@ -29,10 +29,15 @@ export class UsersService {
       name: user.name,
       birthDate: user.birthdate,
       gender: user.gender,
-      city: user.city,
+      city: user.city?.name ?? null,
       avatar: user.avatar,
       about: user.about,
       role: user.role,
+      likesSkillsIds: user.favoriteSkills?.map((skill) => skill.id) ?? [],
+      userSkill: user.skills?.[0]?.id ?? null,
+      interestedSkillsSubcategoriesIds:
+        user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
+        [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -51,10 +56,8 @@ export class UsersService {
       likesSkillsIds: user.favoriteSkills?.map((skill) => skill.id) ?? [],
       userSkill: user.skills?.[0]?.id ?? null,
       interestedSkillsSubcategoriesIds:
-        user.wantToLearn?.flatMap(
-          (category) =>
-            category.subcategories?.map((subcategory) => subcategory.id) ?? [],
-        ) ?? [],
+        user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
+        [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -76,6 +79,10 @@ export class UsersService {
       .leftJoinAndSelect('user.favoriteSkills', 'favoriteSkill')
       .leftJoinAndSelect('user.wantToLearn', 'wantToLearn')
       .leftJoinAndSelect('wantToLearn.subcategories', 'wantToLearnSubcategory')
+      .leftJoinAndSelect(
+        'user.wantToLearnSubcategories',
+        'userWantToLearnSubcategory',
+      )
       .orderBy('user.createdAt', 'DESC')
       .skip(query.skip)
       .take(query.limit);
@@ -114,7 +121,7 @@ export class UsersService {
         );
       } else if (skillOption === 'want-to-learn') {
         builder.andWhere(
-          '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+          '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
           { subCategoryIds: query.subCategoryIds },
         );
       } else {
@@ -125,7 +132,7 @@ export class UsersService {
                 '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
               )
               .orWhere(
-                '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+                '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
               );
           }),
           { subCategoryIds: query.subCategoryIds },
@@ -161,7 +168,12 @@ export class UsersService {
   async findById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { id },
-      relations: { city: true },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
     });
   }
 

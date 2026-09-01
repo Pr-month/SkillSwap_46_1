@@ -6,6 +6,7 @@ import { Response } from 'express';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
+import { SkillsService } from '../skills/skills.service';
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -36,6 +37,11 @@ describe('AuthService', () => {
     updateRefreshToken: jest.fn(),
     updatePassword: jest.fn(),
     clearRefreshToken: jest.fn(),
+    getProfile: jest.fn(),
+  };
+
+  const mockSkillsService = {
+    createForRegistration: jest.fn(),
   };
 
   const mockJwtService = {
@@ -61,6 +67,10 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: SkillsService,
+          useValue: mockSkillsService,
         },
         {
           provide: JwtService,
@@ -138,7 +148,7 @@ describe('AuthService', () => {
           role: UserRole.USER,
           about: null,
           wantToLearn: [],
-          skills: [],
+          wantToLearnSubcategories: [],
         }),
       );
       expect(mockUsersService.create).toHaveBeenCalled();
@@ -316,17 +326,17 @@ describe('AuthService', () => {
     };
 
     it('should successfully return user profile', async () => {
-      mockUsersService.findById.mockResolvedValue(mockUser);
+      mockUsersService.getProfile.mockResolvedValue(mockUser);
 
       const result = await service.getProfile('user-id');
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+      expect(mockUsersService.getProfile).toHaveBeenCalledWith('user-id');
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      mockUsersService.findById.mockRejectedValue(
+      mockUsersService.getProfile.mockRejectedValue(
         new BusinessException(exceptionCodes.users.notFound, 404),
       );
 
