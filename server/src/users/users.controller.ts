@@ -37,7 +37,7 @@ export class UsersController {
 
   @Get(':id')
   getById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.getProfile(id);
+    return this.usersService.getPublicProfile(id);
   }
 
   @UseGuards(JwtAuthGuard)

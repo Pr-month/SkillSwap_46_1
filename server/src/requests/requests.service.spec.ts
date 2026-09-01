@@ -2,6 +2,8 @@ import { HttpStatus } from '@nestjs/common';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 import { exceptionCodes } from '../common/errors/error-codes';
+import { NotificationEvent } from '../gateway/gateway.types';
+import { NotificationsGateway } from '../gateway/notifications.gateway';
 import { Skill } from '../skills/entities/skills.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/enums/user.enums';
@@ -16,6 +18,7 @@ describe('RequestsService', () => {
   let usersRepository: jest.Mocked<Repository<User>>;
   let dataSource: jest.Mocked<DataSource>;
   let manager: jest.Mocked<EntityManager>;
+  let notificationsGateway: jest.Mocked<NotificationsGateway>;
 
   beforeEach(() => {
     requestsRepository = {
@@ -37,20 +40,29 @@ describe('RequestsService', () => {
     dataSource = {
       transaction: jest.fn((callback) => callback(manager)),
     } as unknown as jest.Mocked<DataSource>;
+    notificationsGateway = {
+      notifyUser: jest.fn(),
+    } as unknown as jest.Mocked<NotificationsGateway>;
 
     service = new RequestsService(
       requestsRepository,
       skillsRepository,
       usersRepository,
       dataSource,
+      notificationsGateway,
     );
   });
 
   it('определяет получателя по запрашиваемому навыку', async () => {
-    const offeredSkill = { id: 'offered-id', ownerId: 'sender-id' } as Skill;
+    const offeredSkill = {
+      id: 'offered-id',
+      ownerId: 'sender-id',
+      title: 'Игра на барабанах',
+    } as Skill;
     const requestedSkill = {
       id: 'requested-id',
       ownerId: 'receiver-id',
+      title: 'Портретная фотография',
     } as Skill;
     const request = { id: 'request-id' } as Request;
     skillsRepository.findOne
@@ -71,6 +83,16 @@ describe('RequestsService', () => {
       offeredSkill,
       requestedSkill,
     });
+    expect(notificationsGateway.notifyUser).toHaveBeenCalledWith(
+      'receiver-id',
+      NotificationEvent.NewRequest,
+      {
+        requestId: 'request-id',
+        message: 'Вам поступила новая заявка на обмен',
+        skillTitle: 'Портретная фотография',
+        fromUserId: 'sender-id',
+      },
+    );
   });
 
   it('запрещает предлагать чужой навык', async () => {

@@ -4,6 +4,8 @@ import { DataSource, In, Repository } from 'typeorm';
 
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
+import { NotificationEvent } from '../gateway/gateway.types';
+import { NotificationsGateway } from '../gateway/notifications.gateway';
 import { Skill } from '../skills/entities/skills.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/enums/user.enums';
@@ -24,6 +26,7 @@ export class RequestsService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(senderId: string, dto: CreateRequestDto): Promise<Request> {
@@ -53,7 +56,20 @@ export class RequestsService {
       requestedSkill,
     });
 
-    return this.requestsRepository.save(request);
+    const savedRequest = await this.requestsRepository.save(request);
+
+    this.notificationsGateway.notifyUser(
+      requestedSkill.ownerId,
+      NotificationEvent.NewRequest,
+      {
+        requestId: savedRequest.id,
+        message: 'Вам поступила новая заявка на обмен',
+        skillTitle: requestedSkill.title,
+        fromUserId: senderId,
+      },
+    );
+
+    return savedRequest;
   }
 
   findIncoming(userId: string): Promise<Request[]> {
