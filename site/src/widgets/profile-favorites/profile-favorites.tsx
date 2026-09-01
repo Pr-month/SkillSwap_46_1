@@ -92,7 +92,7 @@ export const ProfileFavorites: FC = () => {
   }
 
   const favoriteUsers: PreparedUser[] = users
-    .filter((user) => currentUser.likesSkillsIds.includes(user.userSkill))
+    .filter((user) => (currentUser.likesSkillsIds ?? []).includes(user.userSkill))
     .map((user) => {
       const age = getAgeFromBirthDate(user.birthDate);
       const canTeach = getSkillTitle(user.userSkill, skills);

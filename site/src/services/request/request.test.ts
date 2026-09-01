@@ -37,9 +37,8 @@ describe("requestSlice reducer", () => {
   };
 
   const requestData: ISkillExchangeData = {
-    userSkill: "skill1",
-    requiredSkillUserId: "user2",
-    message: "msg",
+    offeredSkillId: "skill1",
+    requestedSkillId: "skill2",
   };
 
   test("очищает selectedRequest (clearSelectedRequest)", () => {

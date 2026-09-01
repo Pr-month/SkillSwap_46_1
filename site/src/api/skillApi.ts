@@ -1,10 +1,10 @@
 import { USE_MOCKS } from "../config/apiConfig";
 import type {
+  ISkill,
   TId,
   TModifySkillData,
   TSkillData,
   TSkillResponse,
-  TSkillsResponse,
 } from "../utils/types";
 import { request } from "./client";
 import { tokenService } from "../utils/tokenService.ts";
@@ -14,18 +14,60 @@ interface ApiResponse<T> {
   data: T;
 }
 
+/** Сырая сущность навыка, возвращаемая бэкендом (до нормализации). */
+interface ApiSkill {
+  id: string;
+  title: string;
+  description: string;
+  images: string[] | null;
+  subcategoryId?: string | null;
+  ownerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Вложенная структура данных GET /skills (PaginatedResponseDto). */
+interface PaginatedSkillsApiData {
+  data: ApiSkill[];
+  page: number;
+  totalPages: number;
+}
+
+/** Ответ GET /skills после разворачивания вложенного `data` (аналог userApi). */
+export interface PaginatedSkillsResponse {
+  data: ISkill[];
+  page: number;
+  totalPages: number;
+}
+
+/** Приводим бэкенд-сущность Skill к фронтовому типу ISkill. */
+const normalizeSkill = (skill: ApiSkill): ISkill => ({
+  id: skill.id,
+  title: skill.title,
+  description: skill.description,
+  skillSubcategory: skill.subcategoryId ?? "",
+  images: skill.images ?? [],
+  userId: skill.ownerId ?? "",
+  createdAt: skill.createdAt,
+  updatedAt: skill.updatedAt,
+});
+
 //! ЗАПРПОСЫ БЕЗ АВТОРИЗАЦИИ
 
 /** API: ПОЛУЧЕНИЕ ВСЕХ НАВЫКОВ */
-export const getSkills = (): Promise<TSkillsResponse> => {
+export const getSkills = (): Promise<PaginatedSkillsResponse> => {
   if (USE_MOCKS) {
     return fetch("/skills.json")
       .then((res) => res.json())
       .then((response) => response);
   }
 
-  return request<TSkillsResponse>("/skills").then(
-    (response: TSkillsResponse) => response,
+  return request<ApiResponse<PaginatedSkillsApiData>>("/skills").then(
+    (response) => ({
+      page: response.data.page,
+      totalPages: response.data.totalPages,
+      data: response.data.data.map(normalizeSkill),
+    }),
   );
 };
 

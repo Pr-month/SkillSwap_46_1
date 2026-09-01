@@ -1,4 +1,5 @@
 import { Category } from '../categories/entities/category.entity';
+import { Subcategory } from '../categories/entities/subcategory.entity';
 import { Skill } from '../skills/entities/skills.entity';
 import { User } from './entities/user.entity';
 
@@ -16,12 +17,14 @@ export type CreateUserData = Omit<
   | 'updatedAt'
   | 'skills'
   | 'wantToLearn'
+  | 'wantToLearnSubcategories'
   | 'city'
 > & {
   password: string;
   cityId: string;
   wantToLearn?: Category[];
   skills?: Skill[];
+  wantToLearnSubcategories?: Subcategory[];
 };
 
 // Тип для обновления

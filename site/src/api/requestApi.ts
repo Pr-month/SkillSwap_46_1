@@ -28,7 +28,6 @@ export const createRequest = (
         ...data,
         status: "pending",
         fromUserId: "user-1",
-        toUserId: data.requiredSkillUserId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
