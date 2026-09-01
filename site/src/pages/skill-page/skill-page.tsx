@@ -155,8 +155,9 @@ export function SkillPage() {
     categories,
   );
 
-  const isFavorite =
-    (currentUser?.likesSkillsIds ?? []).includes(selectedUser.userSkill);
+  const isFavorite = (currentUser?.likesSkillsIds ?? []).includes(
+    selectedUser.userSkill,
+  );
 
   const isOwnProfile = currentUser?.id === selectedUser?.id;
 
@@ -506,8 +507,9 @@ export function SkillPage() {
               age: user.age,
               canTeach: user.canTeach,
               wantsToLearn: user.wantsToLearn,
-              isFavorite:
-                (currentUser?.likesSkillsIds ?? []).includes(user.userSkill),
+              isFavorite: (currentUser?.likesSkillsIds ?? []).includes(
+                user.userSkill,
+              ),
               onFavoriteClick: () => handleFavoriteClick(user.userSkill),
               teachColor: getTeachColor(
                 user.userSkill,

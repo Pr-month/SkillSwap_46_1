@@ -14,6 +14,7 @@ describe('UsersController', () => {
     getProfile: jest.Mock;
     updateProfile: jest.Mock;
     changePassword: jest.Mock;
+    getPublicProfile: jest.Mock;
   };
 
   const userId = 'ec9308f4-ef0a-44f5-b621-dab103719c62';
@@ -43,6 +44,7 @@ describe('UsersController', () => {
       getProfile: jest.fn(),
       updateProfile: jest.fn(),
       changePassword: jest.fn(),
+      getPublicProfile: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -69,11 +71,11 @@ describe('UsersController', () => {
     expect(usersService.getProfile).toHaveBeenCalledWith(userId);
   });
 
-  it('returns a user profile by id', async () => {
-    usersService.getProfile.mockResolvedValue(profile);
+  it('returns a public user profile by id', async () => {
+    usersService.getPublicProfile.mockResolvedValue(profile);
 
     await expect(controller.getById(userId)).resolves.toBe(profile);
-    expect(usersService.getProfile).toHaveBeenCalledWith(userId);
+    expect(usersService.getPublicProfile).toHaveBeenCalledWith(userId);
   });
 
   it('updates the current user profile', async () => {

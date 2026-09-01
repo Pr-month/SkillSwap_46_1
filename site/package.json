@@ -36,6 +36,7 @@
     "reactjs-popup": "^2.0.6",
     "redux-thunk": "^3.1.0",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.3",
     "swiper": "^12.1.2"
   },
   "devDependencies": {
