@@ -8,12 +8,44 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { ConfigurationService } from './module/configuration/configuration.service';
 
 import cookieParser = require('cookie-parser');
+import { csrfMiddleware } from './common/middleware/csrf.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigurationService);
+  const expressApp = app.getHttpAdapter().getInstance();
+
+  expressApp.set('trust proxy', 1);
+
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(cookieParser());
+
+  app.enableCors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      let hostname: string;
+      try {
+        hostname = new URL(origin).hostname;
+      } catch {
+        callback(null, false);
+        return;
+      }
+
+      const allowedOrigins = configService.corsOrigins;
+      const isAllowed =
+        allowedOrigins.includes(origin) || allowedOrigins.includes(hostname);
+
+      callback(null, isAllowed);
+    },
+  });
+
+  app.use(csrfMiddleware);
   app.useGlobalPipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
@@ -36,7 +68,6 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, swaggerConfig);
 
   SwaggerModule.setup('docs', app, documentFactory);
-  const configService = app.get(ConfigurationService);
 
   app.setGlobalPrefix('api');
 
