@@ -2,7 +2,9 @@ import { CitiesModule } from '@/cities/cities.module';
 import { S3Module } from '@/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StringValue } from 'ms';
 
@@ -50,6 +52,19 @@ import { UsersModule } from './users/users.module';
       inject: [ConfigurationService],
       useFactory: dbConfig,
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => ({
+        throttlers: [
+          {
+            ttl: configService.throttleTtl * 1000,
+            limit: configService.throttleLimit,
+          },
+        ],
+        skipIf: () => process.env.NODE_ENV === 'test',
+      }),
+    }),
     UsersModule,
     AuthModule,
     CategoriesModule,
@@ -62,6 +77,12 @@ import { UsersModule } from './users/users.module';
     S3Module,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

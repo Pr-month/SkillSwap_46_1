@@ -1,6 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { AppService } from './app.service';
+import { getOrCreateCsrfToken } from './common/middleware/csrf.middleware';
 
 @Controller()
 export class AppController {
@@ -14,5 +16,13 @@ export class AppController {
   @Get('health')
   getHealth(): { status: string; timestamp: string } {
     return this.appService.getHealth();
+  }
+
+  @Get('csrf-token')
+  getCsrfToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): { csrfToken: string } {
+    return { csrfToken: getOrCreateCsrfToken(req, res) };
   }
 }
