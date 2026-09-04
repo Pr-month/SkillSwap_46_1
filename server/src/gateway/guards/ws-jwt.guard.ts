@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   JsonWebTokenError,
   JwtService,
@@ -19,6 +24,8 @@ import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
+  private readonly logger = new Logger(WsJwtGuard.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configurationService: ConfigurationService,
@@ -75,6 +82,11 @@ export class WsJwtGuard implements CanActivate {
       if (error instanceof JsonWebTokenError) {
         throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
       }
+
+      this.logger.error(
+        'Неожиданная ошибка при аутентификации WebSocket-клиента',
+        error instanceof Error ? error.stack : undefined,
+      );
 
       throw this.createWsException(exceptionCodes.common.internal);
     }

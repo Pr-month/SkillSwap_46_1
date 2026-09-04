@@ -4,6 +4,7 @@ import {
   Controller,
   HttpStatus,
   Post,
+  Logger,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { memoryStorage } from 'multer';
 
 import { S3Service } from './s3.service';
 
+
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const UPLOAD_FOLDER = 'images';
@@ -19,6 +21,8 @@ const UPLOAD_FIELD_NAME = 'image';
 
 @Controller('upload')
 export class S3Controller {
+  private readonly logger = new Logger(S3Controller.name);
+
   constructor(private readonly s3Service: S3Service) {}
 
   @Post()
@@ -43,36 +47,37 @@ export class S3Controller {
         filename: result.filename,
         size: result.size,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown upload error';
+
+      const stack =
+        error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        `Ошибка при загрузке файла: ${message}`,
+        stack,
+      );
+
       throw new BusinessException(
         exceptionCodes.upload.uploadFailed,
         HttpStatus.INTERNAL_SERVER_ERROR,
-        { error: error.message },
+        { error: message },
       );
     }
   }
-
-  private validateFile(file: Express.Multer.File): void {
+    private validateFile(file: Express.Multer.File): void {
     if (!file) {
       throw new BusinessException(
         exceptionCodes.upload.fileRequired,
         HttpStatus.BAD_REQUEST,
-        { field: UPLOAD_FIELD_NAME },
       );
     }
 
-    if (
-      !ALLOWED_IMAGE_TYPES.includes(
-        file.mimetype as (typeof ALLOWED_IMAGE_TYPES)[number],
-      )
-    ) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype as (typeof ALLOWED_IMAGE_TYPES)[number])) {
       throw new BusinessException(
         exceptionCodes.upload.invalidImageType,
         HttpStatus.BAD_REQUEST,
-        {
-          providedType: file.mimetype,
-          allowedTypes: ALLOWED_IMAGE_TYPES.join(', '),
-        },
       );
     }
   }

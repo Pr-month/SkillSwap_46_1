@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -34,6 +35,8 @@ export class NotificationsGateway
   @WebSocketServer()
   private server!: Server;
 
+  private readonly logger = new Logger(NotificationsGateway.name);
+
   private readonly connections = new Map<string, Set<string>>();
 
   constructor(private readonly wsJwtGuard: WsJwtGuard) {}
@@ -44,7 +47,22 @@ export class NotificationsGateway
 
       await client.join(this.getUserRoom(user.id));
       this.addConnection(user.id, client.id);
-    } catch {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Unknown WebSocket connection error';
+
+      const stack =
+        error instanceof Error
+          ? error.stack
+          : undefined;
+
+      this.logger.error(
+        `Ошибка подключения WebSocket клиента ${client.id}: ${message}`,
+        stack,
+      );
+
       client.disconnect(true);
     }
   }
