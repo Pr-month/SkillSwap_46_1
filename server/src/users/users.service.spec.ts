@@ -140,7 +140,12 @@ describe('UsersService', () => {
     await expect(service.findById(userId)).resolves.toBe(user);
     expect(usersRepository.findOne).toHaveBeenCalledWith({
       where: { id: userId },
-      relations: { city: true },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
     });
   });
 
@@ -178,10 +183,13 @@ describe('UsersService', () => {
       name: 'Иван Иванов',
       birthDate: new Date('1990-01-01'),
       gender: UserGender.OTHER,
-      city: mockCity,
+      city: mockCity.name,
       avatar: null,
       about: null,
       role: UserRole.USER,
+      likesSkillsIds: [],
+      userSkill: null,
+      interestedSkillsSubcategoriesIds: [],
       createdAt,
       updatedAt,
     });
@@ -350,9 +358,8 @@ describe('UsersService', () => {
       Object.assign(user, {
         skills: [{ id: skillId }],
         favoriteSkills: [{ id: skillId }],
-        wantToLearn: [
-          { id: 'category-uuid-1', subcategories: [{ id: subcategoryId }] },
-        ],
+        wantToLearn: [{ id: 'category-uuid-1' }],
+        wantToLearnSubcategories: [{ id: subcategoryId }],
       });
       const builder = createQueryBuilderMock([[user], 1]);
       usersRepository.createQueryBuilder.mockReturnValue(builder);
@@ -479,7 +486,7 @@ describe('UsersService', () => {
       expect(builder.andWhere).toHaveBeenCalledTimes(1);
       const [condition, params] = builder.andWhere.mock.calls[0];
       expect(condition).toEqual(
-        '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+        '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
       );
       expect(params).toEqual({ subCategoryIds: ['sub-1'] });
     });

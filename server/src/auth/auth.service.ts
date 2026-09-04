@@ -5,10 +5,11 @@ import { Response } from 'express';
 import ms, { StringValue } from 'ms';
 
 import { Category } from '../categories/entities/category.entity';
+import { Subcategory } from '../categories/entities/subcategory.entity';
 import { BusinessException } from '../common/errors/business.exception';
 import { exceptionCodes } from '../common/errors/error-codes';
 import { ConfigurationService } from '../module/configuration/configuration.service';
-import { Skill } from '../skills/entities/skills.entity';
+import { SkillsService } from '../skills/skills.service';
 import { UserGender, UserRole } from '../users/enums/user.enums';
 import { UsersService } from '../users/users.service';
 import { CreateUserData } from '../users/users.types';
@@ -20,6 +21,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly skillsService: SkillsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigurationService,
   ) {}
@@ -43,13 +45,17 @@ export class AuthService {
       ? registerDto.wantToLearn.map((id) => ({ id }) as Category)
       : [];
 
-    const skills = registerDto.skills
-      ? registerDto.skills.map((id) => ({ id }) as Skill)
-      : [];
+    const selectedSubcategoryIds =
+      registerDto.interestedSkillsSubcategoriesIds ?? registerDto.skills ?? [];
+
+    const wantToLearnSubcategories = selectedSubcategoryIds.map(
+      (id) => ({ id }) as Subcategory,
+    );
 
     const createUserData: CreateUserData = {
-      ...registerDto,
+      email: registerDto.email,
       password: hashedPassword,
+      name: registerDto.name,
       birthdate: new Date(registerDto.birthdate),
       gender: registerDto.gender ?? UserGender.OTHER,
       cityId: registerDto.cityId,
@@ -57,10 +63,22 @@ export class AuthService {
       role: UserRole.USER,
       about: registerDto.about ?? null,
       wantToLearn,
-      skills,
+      wantToLearnSubcategories,
     };
 
     const user = await this.usersService.create(createUserData);
+
+    const skillSubcategoryId =
+      registerDto.skills?.[0] ?? selectedSubcategoryIds[0];
+
+    if (skillSubcategoryId) {
+      await this.skillsService.createForRegistration(user.id, {
+        title: registerDto.title,
+        description: registerDto.description,
+        subcategoryId: skillSubcategoryId,
+        images: registerDto.images,
+      });
+    }
 
     const tokens = await this.generateTokens(user.id, user.email);
 
@@ -142,9 +160,7 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await this.usersService.findById(userId);
-
-    return user;
+    return this.usersService.getProfile(userId);
   }
 
   async checkUser(email: string): Promise<{ available: true }> {

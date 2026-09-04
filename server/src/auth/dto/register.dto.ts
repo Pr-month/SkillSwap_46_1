@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsString,
   MinLength,
+  MaxLength,
   IsOptional,
   IsDateString,
   IsEnum,
@@ -69,7 +70,6 @@ export class RegisterDto {
     require_valid_protocol: true,
     protocols: ['http', 'https'],
     require_host: true,
-    host_whitelist: ['localhost', '127.0.0.1'],
   })
   avatar: string;
 
@@ -100,6 +100,54 @@ export class RegisterDto {
   @IsUUID('all', { each: true })
   @IsOptional()
   skills?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Название навыка пользователя',
+    example: 'Игра на гитаре',
+  })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  @IsOptional()
+  title?: string;
+
+  @ApiPropertyOptional({
+    description: 'Описание навыка пользователя',
+    example: 'Научу основным аккордам и ритмам',
+  })
+  @IsString()
+  @MaxLength(1000)
+  @IsOptional()
+  description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Изображения навыка пользователя',
+    type: [String],
+    example: ['https://example.com/skill.jpg'],
+  })
+  @IsArray()
+  @IsUrl(
+    {
+      require_protocol: true,
+      require_valid_protocol: true,
+      protocols: ['http', 'https'],
+      require_host: true,
+      require_tld: false,
+    },
+    { each: true },
+  )
+  @IsOptional()
+  images?: string[];
+
+  @ApiPropertyOptional({
+    description: 'ID подкатегорий, которым пользователь хочет научиться',
+    type: [String],
+    example: ['550e8400-e29b-41d4-a716-446655440002'],
+  })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  interestedSkillsSubcategoriesIds?: string[];
 }
 
 // Ответ на регистрацию

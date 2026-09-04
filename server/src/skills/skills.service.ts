@@ -38,6 +38,42 @@ export class SkillsService {
     return this.skillsRepository.save(skill);
   }
 
+  async createForRegistration(
+    ownerId: string,
+    data: {
+      title?: string;
+      description?: string;
+      subcategoryId?: string;
+      images?: string[];
+    },
+  ): Promise<Skill | null> {
+    const subcategoryId = data.subcategoryId?.trim();
+
+    if (!subcategoryId) {
+      return null;
+    }
+
+    const subcategory = await this.subcategoriesRepository.findOneBy({
+      id: subcategoryId,
+    });
+
+    if (!subcategory) {
+      return null;
+    }
+
+    const skill = this.skillsRepository.create({
+      title: data.title?.trim() || subcategory.name || 'Мой навык',
+      description: data.description?.trim() || 'Навык пользователя',
+      images: data.images ?? null,
+      categoryId: subcategory.categoryId,
+      subcategoryId: subcategory.id,
+      ownerId,
+      owner: { id: ownerId } as User,
+    });
+
+    return this.skillsRepository.save(skill);
+  }
+
   async findAll(query: PaginationDto): Promise<PaginatedResponseDto<Skill>> {
     const builder = this.skillsRepository
       .createQueryBuilder('skill')
