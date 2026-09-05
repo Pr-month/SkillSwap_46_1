@@ -27,22 +27,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const http = host.switchToHttp();
-    const response = http.getResponse<Response>();
-    const request = http.getRequest<Request>();
-    const { status, body } = this.toHttpError(exception);
+  const http = host.switchToHttp();
+  const response = http.getResponse<Response>();
+  const request = http.getRequest<Request>();
 
-    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.error(exception);
-    }
+  const { status, body } = this.toHttpError(exception);
 
-    response.status(status).json({
-      ...body,
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.originalUrl ?? request.url,
-    });
+  if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    this.logError(exception, request, status);
   }
+
+  response.status(status).json({
+    ...body,
+    statusCode: status,
+    timestamp: new Date().toISOString(),
+    path: request.originalUrl ?? request.url,
+  });
+}
 
   private toHttpError(exception: unknown): {
     status: HttpStatus;
@@ -121,4 +122,38 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const driverError = exception.driverError as { code?: string };
     return driverError.code === '23505';
   }
+private logError(
+  exception: unknown,
+  request: Request,
+  status: number,
+): void {
+  const path = request.originalUrl ?? request.url;
+  const method = request.method;
+  const ip = this.getClientIp(request);
+
+  const message =
+    exception instanceof Error
+      ? exception.message
+      : 'Unknown server error';
+
+  const stack =
+    exception instanceof Error
+      ? exception.stack
+      : undefined;
+
+  this.logger.error(
+    `${method} ${path} | ${status} | IP: ${ip} | ${message}`,
+    stack,
+  );
+}
+
+private getClientIp(request: Request): string {
+  const forwardedFor = request.headers['x-forwarded-for'];
+
+  if (typeof forwardedFor === 'string') {
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  return request.ip ?? request.socket.remoteAddress ?? 'unknown';
+}
 }
