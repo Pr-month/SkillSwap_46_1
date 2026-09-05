@@ -14,6 +14,35 @@ interface ApiResponse<T> {
   data: T;
 }
 
+interface ApiRequest {
+  id: TId;
+  createdAt: string;
+  status: TRequestStatus;
+  isRead: boolean;
+  sender: {
+    id: TId;
+  };
+  receiver: {
+    id: TId;
+  };
+  offeredSkill: {
+    id: TId;
+  };
+  requestedSkill: {
+    id: TId;
+  };
+}
+
+const mapApiRequest = (apiRequest: ApiRequest): ISkillExchange => ({
+  id: apiRequest.id,
+  userSkill: apiRequest.offeredSkill.id,
+  requiredSkillUserId: apiRequest.receiver.id,
+  createdAt: apiRequest.createdAt,
+  status: apiRequest.status,
+  fromUserId: apiRequest.sender.id,
+  toUserId: apiRequest.receiver.id,
+});
+
 //POST
 export const createRequest = (
   data: ISkillExchangeData,
@@ -22,25 +51,25 @@ export const createRequest = (
 
   if (USE_MOCKS) {
     return fetch("/request-single.json")
-      .then((r) => r.json())
-      .then((res) => ({
-        ...res.data,
-        ...data,
-        status: "pending",
+      .then((response) => response.json())
+      .then((response) => ({
+        ...response.data,
+        userSkill: data.offeredSkillId,
+        status: "pending" as const,
         fromUserId: "user-1",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }));
   }
 
-  return request<ApiResponse<ISkillExchange>>("/requests", {
+  return request<ApiResponse<ApiRequest>>("/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };
 
 //GET my
@@ -54,16 +83,17 @@ export const getMyRequests = async (): Promise<IMyRequests> => {
   }
 
   const [incoming, outgoing] = await Promise.all([
-    request<ApiResponse<ISkillExchange[]>>("/requests/incoming", {
+    request<ApiResponse<ApiRequest[]>>("/requests/incoming", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }).then((res) => res.data),
-    request<ApiResponse<ISkillExchange[]>>("/requests/outgoing", {
+    }).then((res) => res.data.map(mapApiRequest)),
+
+    request<ApiResponse<ApiRequest[]>>("/requests/outgoing", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }).then((res) => res.data),
+    }).then((res) => res.data.map(mapApiRequest)),
   ]);
 
   return {
@@ -80,11 +110,11 @@ export const getRequestById = (id: TId): Promise<ISkillExchange> => {
       .then((r) => r.json())
       .then((res) => res.data);
   }
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };
 
 //PATCH status
@@ -102,14 +132,14 @@ export const updateRequestStatus = (
         updatedAt: new Date().toISOString(),
       }));
   }
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ status }),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };
 
 //PATCH complete
@@ -125,12 +155,12 @@ export const completeRequest = (id: TId): Promise<ISkillExchange> => {
       }));
   }
 
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ status: "done" }),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };

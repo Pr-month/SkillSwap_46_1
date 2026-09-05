@@ -4,9 +4,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, UpdateResult } from 'typeorm';
 
+import { Subcategory } from '../categories/entities/subcategory.entity';
 import { PaginatedResponseDto } from '../common/dto/response.dto';
 import { BusinessException } from '../common/errors/business.exception';
 import { ConfigurationService } from '../module/configuration/configuration.service';
+import { Skill } from '../skills/entities/skills.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
@@ -61,6 +63,7 @@ describe('UsersService', () => {
       favorites: [],
       skills: [],
       wantToLearn: [],
+      wantToLearnSubcategories: [],
       favoriteSkills: [],
       role: UserRole.USER,
       refreshToken: null,
@@ -201,6 +204,59 @@ describe('UsersService', () => {
     usersRepository.findOne.mockResolvedValue(null);
 
     await expect(service.getProfile(userId)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('returns a public profile with skill and interest identifiers', async () => {
+    const taughtSkill = Object.assign(new Skill(), {
+      id: 'skill-uuid-1',
+    });
+
+    const favoriteSkill = Object.assign(new Skill(), {
+      id: 'favorite-skill-uuid-1',
+    });
+
+    const subcategory = Object.assign(new Subcategory(), {
+      id: 'subcategory-uuid-1',
+    });
+
+    const user = createUser({
+      skills: [taughtSkill],
+      favoriteSkills: [favoriteSkill],
+      wantToLearnSubcategories: [subcategory],
+    });
+
+    usersRepository.findOne.mockResolvedValue(user);
+
+    const profile = await service.getPublicProfile(userId);
+
+    expect(usersRepository.findOne).toHaveBeenCalledWith({
+      where: { id: userId },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
+    });
+
+    expect(profile).toMatchObject({
+      id: userId,
+      city: 'Москва',
+      likesSkillsIds: ['favorite-skill-uuid-1'],
+      userSkill: 'skill-uuid-1',
+      interestedSkillsSubcategoriesIds: ['subcategory-uuid-1'],
+    });
+
+    expect(profile).not.toHaveProperty('password');
+    expect(profile).not.toHaveProperty('refreshToken');
+  });
+
+  it('throws when getting a missing public profile', async () => {
+    usersRepository.findOne.mockResolvedValue(null);
+
+    await expect(service.getPublicProfile(userId)).rejects.toMatchObject({
       status: HttpStatus.NOT_FOUND,
     });
   });

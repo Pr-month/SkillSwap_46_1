@@ -218,6 +218,28 @@ export class UsersService {
 
     return this.toProfileResponse(user);
   }
+
+  async getPublicProfile(id: string): Promise<UserListItemResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
+    });
+
+    if (!user) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.toUserListItem(user);
+  }
+
   async updateProfile(
     id: string,
     updateUserDto: UpdateUserDto,
