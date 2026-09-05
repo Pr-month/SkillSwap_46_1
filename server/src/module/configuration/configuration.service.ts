@@ -85,4 +85,16 @@ export class ConfigurationService {
   get s3Bucket(): string {
     return this.configService.get<string>(EnvKey.S3Bucket);
   }
+
+  get corsOrigins(): string[] {
+    return this.configService.get<string[]>(EnvKey.CorsOrigins);
+  }
+
+  get throttleTtl(): number {
+    return this.configService.get<number>(EnvKey.ThrottleTtl);
+  }
+
+  get throttleLimit(): number {
+    return this.configService.get<number>(EnvKey.ThrottleLimit);
+  }
 }
