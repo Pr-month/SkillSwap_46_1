@@ -1,5 +1,6 @@
 import { CitiesModule } from '@/cities/cities.module';
 import { MailModule } from '@/mail/mail.module';
+import { RedisModule } from '@/redis/redis.module';
 import { S3Module } from '@/s3/s3.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -78,6 +79,7 @@ import { UsersModule } from './users/users.module';
     GatewayModule,
     S3Module,
     MailModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

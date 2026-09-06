@@ -1,14 +1,14 @@
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { City } from '@/cities/entities/city.entity';
+import { nodeEnvValue } from '@/module/configuration/const';
+import { Skill } from '@/skills/entities/skills.entity';
+import { User } from '@/users/entities/user.entity';
+import { UserRole } from '@/users/enums/user.enums';
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 import { In } from 'typeorm';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { City } from '../cities/entities/city.entity';
-import { nodeEnvValue } from '../module/configuration/const';
-import { Skill } from '../skills/entities/skills.entity';
-import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/enums/user.enums';
 import { getAppDataSource } from './data-source';
 import { adminSeedData } from './data/admin.data';
 import { demoUserPassword, demoUsersSeedData } from './data/demo-users.data';

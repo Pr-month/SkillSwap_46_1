@@ -5,6 +5,8 @@ export const exceptionCodes = {
     invalidCredentials: 'user:invalid-credentials',
     emailExists: 'user:email-exists',
     accessDenied: 'user:access-denied',
+    invalidToken: 'user:invalid-token',
+    emailAlreadyConfirmed: 'user:email-already-confirmed',
   },
   auth: {
     invalidAccessToken: 'auth:invalid-access-token',
@@ -44,6 +46,9 @@ export const exceptionCodes = {
     conflict: 'app:conflict',
     payloadTooLarge: 'app:payload-too-large',
   },
+  mail: {
+    tooManyRequests: 'mail:too-many-requests',
+  },
 } as const;
 
 type ExceptionGroup = (typeof exceptionCodes)[keyof typeof exceptionCodes];
@@ -59,6 +64,8 @@ export const exceptionMessages: Record<ExceptionCode, string> = {
   'user:invalid-credentials': 'Неверный email или пароль',
   'user:email-exists': 'Пользователь с таким email уже существует',
   'user:access-denied': 'Нет доступа к данным пользователя',
+  'user:invalid-token': 'Недействительный токен подтверждения',
+  'user:email-already-confirmed': 'Email уже подтвержден',
   'auth:invalid-access-token': 'Недействительный access token',
   'auth:expired-access-token': 'Срок действия access token истёк',
   'skill:not-found': 'Навык не найден',
@@ -83,6 +90,7 @@ export const exceptionMessages: Record<ExceptionCode, string> = {
   'app:not-found': 'Ресурс не найден',
   'app:conflict': 'Данные конфликтуют с существующей записью',
   'app:payload-too-large': 'Размер файла превышает допустимый',
+  'mail:too-many-requests': 'Письмо уже отправлено. Попробуйте позже',
 };
 
 export function isExceptionCode(value: unknown): value is ExceptionCode {

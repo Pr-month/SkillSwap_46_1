@@ -62,10 +62,6 @@ export class ConfigurationService {
     return this.configService.get<boolean>(EnvKey.DatabaseSynchronize);
   }
 
-  get loggerType(): string {
-    return this.configService.get<string>(EnvKey.LoggerType);
-  }
-
   get s3Region(): string {
     return this.configService.get<string>(EnvKey.S3Region);
   }
@@ -106,10 +102,6 @@ export class ConfigurationService {
     return this.configService.get<number>(EnvKey.MailPort);
   }
 
-  get mailSecure(): boolean {
-    return this.configService.get<boolean>(EnvKey.MailSecure);
-  }
-
   get mailUser(): string {
     return this.configService.get<string>(EnvKey.MailUser);
   }
@@ -120,5 +112,13 @@ export class ConfigurationService {
 
   get mailFrom(): string {
     return this.configService.get<string>(EnvKey.MailFrom);
+  }
+
+  get redisHost(): string {
+    return this.configService.get<string>(EnvKey.RedisHost);
+  }
+
+  get redisPort(): number {
+    return this.configService.get<number>(EnvKey.RedisPort);
   }
 }
