@@ -11,7 +11,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { IRegisterUserData, TGender } from "../../utils/types";
 import {
   fetchCheckUser,
-  fetchLogin,
   fetchRegister,
   fetchUpdateCurrentUser,
 } from "../../services/auth/actions";
@@ -90,10 +89,6 @@ export const Register: FC = () => {
     setRegistrationError(null);
 
     try {
-      const loginResult = await dispatch(
-        fetchLogin({ email, password }),
-      ).unwrap();
-
       await dispatch(
         fetchUpdateCurrentUser({
           interestedSkillsSubcategoriesIds: learningSkills,
