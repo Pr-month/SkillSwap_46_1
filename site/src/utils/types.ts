@@ -22,6 +22,7 @@ export interface IUserProfile extends IUser {
   likesSkillsIds: TId[]; // массив id навыков, которые лайкнул пользователь
   userSkill: TId; // навык пользователя, которому он может научить
   interestedSkillsSubcategoriesIds: TId[]; // id[] покатегорий, которым пользователь хочет научиться
+  isEmailConfirmed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -101,7 +102,6 @@ export type TLoginUserData = Pick<IUser, "email"> & {
 
 /** ОТВЕТ НА ЗАПРОС АВТОРИЗАЦИИ */
 export type TLoginUserResponse = TServerResponse<{
-  access_token: string;
   user: IUserProfile;
 }>;
 

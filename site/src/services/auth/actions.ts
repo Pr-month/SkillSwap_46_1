@@ -4,10 +4,10 @@ import {
   checkUser,
   getProfile,
   loginUser,
+  logoutUser,
   registerUser,
 } from "../../api/authApi.ts";
 import { updateUser } from "../../api/userApi.ts";
-import { tokenService } from "../../utils/tokenService.ts";
 import type {
   IRegisterUserData,
   TLoginUserData,
@@ -51,11 +51,17 @@ export const fetchCheckUser = createAsyncThunk(
 export const fetchProfile = createAsyncThunk(
   "auth/profile",
   async (_, { rejectWithValue }) => {
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
     try {
       return await getProfile();
     } catch (err) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "statusCode" in err &&
+        err.statusCode === 401
+      ) {
+        return null;
+      }
       return rejectWithValue(err);
     }
   },
@@ -66,11 +72,11 @@ export const fetchUpdateCurrentUser = createAsyncThunk(
   async (payload: Partial<TUpdateUserData>, { getState, rejectWithValue }) => {
     const state = getState() as { auth: AuthState };
     const { currentUser } = state.auth;
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
+
     if (!currentUser?.id) return rejectWithValue("Не найден id пользователя");
+
     try {
-      return await updateUser(currentUser.id, payload, token);
+      return await updateUser(currentUser.id, payload);
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -81,11 +87,20 @@ export const fetchUpdateCurrentUser = createAsyncThunk(
 export const updatePassword = createAsyncThunk(
   "auth/update-password",
   async (newPassword: string, { rejectWithValue }) => {
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
     try {
       await changePassword(newPassword);
       return newPassword;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchLogout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutUser();
     } catch (err) {
       return rejectWithValue(err);
     }
