@@ -68,3 +68,29 @@ export const logoutUser = async (): Promise<void> => {
     method: "POST",
   });
 };
+
+// POST /auth/forgot-password
+export const forgotPassword = async (email: string): Promise<void> => {
+  await request<void>("/mail/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+};
+
+// POST /auth/reset-password
+export const resetPassword = async (
+  token: string,
+  newPassword: string,
+): Promise<void> => {
+  await request<void>("/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+};
+
+// GET /mail/confirm-email
+export const confirmEmail = async (token: string): Promise<void> => {
+  await request<void>(`/mail/confirm-email?token=${token}`);
+};

@@ -69,10 +69,6 @@ export class EnvironmentVariables {
   [EnvKey.DatabaseSynchronize]: boolean;
 
   @IsString()
-  @IsIn(['dev', 'production', 'test', 'combined', 'console'])
-  [EnvKey.LoggerType]: string;
-
-  @IsString()
   @IsNotEmpty()
   [EnvKey.S3Region]: string;
 
@@ -106,4 +102,36 @@ export class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1)
   [EnvKey.ThrottleLimit]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailHost]: string;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  @Max(65535)
+  [EnvKey.MailPort]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailUser]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailPassword]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailFrom]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.RedisHost]: string;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  @Max(65535)
+  [EnvKey.RedisPort]: number;
 }

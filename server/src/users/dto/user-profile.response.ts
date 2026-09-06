@@ -42,6 +42,9 @@ export class UserProfileResponse {
   @ApiProperty({ type: [String] })
   interestedSkillsSubcategoriesIds: string[];
 
+  @ApiProperty({ type: Boolean })
+  isEmailConfirmed: boolean;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 

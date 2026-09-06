@@ -11,12 +11,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { IRegisterUserData, TGender } from "../../utils/types";
 import {
   fetchCheckUser,
-  fetchLogin,
   fetchRegister,
   fetchUpdateCurrentUser,
 } from "../../services/auth/actions";
 import { useDispatch, useSelector } from "../../services/store";
-import { tokenService } from "../../utils/tokenService";
 import { fetchCategories } from "../../services/category/actions";
 import {
   selectCategories,
@@ -91,12 +89,6 @@ export const Register: FC = () => {
     setRegistrationError(null);
 
     try {
-      const loginResult = await dispatch(
-        fetchLogin({ email, password }),
-      ).unwrap();
-
-      tokenService.set(loginResult.access_token);
-
       await dispatch(
         fetchUpdateCurrentUser({
           interestedSkillsSubcategoriesIds: learningSkills,

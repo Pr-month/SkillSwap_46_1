@@ -1,12 +1,12 @@
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, Repository } from 'typeorm';
 
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserListItemResponse } from './dto/user-list-item.response';
@@ -38,6 +38,7 @@ export class UsersService {
       interestedSkillsSubcategoriesIds:
         user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
         [],
+      isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -197,6 +198,20 @@ export class UsersService {
 
   async updatePassword(id: string, password: string): Promise<void> {
     const result = await this.usersRepository.update({ id }, { password });
+
+    if (!result.affected) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  async confirmEmail(userId: string): Promise<void> {
+    const result = await this.usersRepository.update(
+      { id: userId },
+      { isEmailConfirmed: true },
+    );
 
     if (!result.affected) {
       throw new BusinessException(

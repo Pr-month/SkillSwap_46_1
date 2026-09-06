@@ -19,6 +19,7 @@ export type CreateUserData = Omit<
   | 'wantToLearn'
   | 'wantToLearnSubcategories'
   | 'city'
+  | 'isEmailConfirmed'
 > & {
   password: string;
   cityId: string;

@@ -5,6 +5,9 @@ export const exceptionCodes = {
     invalidCredentials: 'user:invalid-credentials',
     emailExists: 'user:email-exists',
     accessDenied: 'user:access-denied',
+    invalidToken: 'user:invalid-token',
+    emailNotConfirmed: 'user:email-not-confirmed',
+    emailAlreadyConfirmed: 'user:email-already-confirmed',
   },
   auth: {
     invalidAccessToken: 'auth:invalid-access-token',
@@ -43,6 +46,9 @@ export const exceptionCodes = {
     notFound: 'app:not-found',
     conflict: 'app:conflict',
     payloadTooLarge: 'app:payload-too-large',
+  },
+  mail: {
+    tooManyRequests: 'mail:too-many-requests',
   },
 } as const;
 

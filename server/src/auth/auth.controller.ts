@@ -6,12 +6,15 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Request,
+  Req,
   Response,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { Response as ExpressResponse } from 'express';
+import {
+  Response as ExpressResponse,
+  Request as ExpressRequest,
+} from 'express';
 
 import { AuthService } from './auth.service';
 import { RequestWithUser } from './auth.types';
@@ -40,7 +43,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход в систему' })
   async login(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Response({ passthrough: true }) res: ExpressResponse,
     @Body() _loginDto: LoginDto,
   ) {
@@ -52,7 +55,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Выход из системы (очистка токенов)' })
   async logout(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
     return await this.authService.logout(req.user.id, res);
@@ -70,7 +73,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
-  async getProfile(@Request() req: RequestWithUser) {
+  async getProfile(@Req() req: RequestWithUser) {
     return await this.authService.getProfile(req.user.id);
   }
 
@@ -79,12 +82,26 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Смена пароля' })
   async updatePassword(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     return await this.authService.updatePassword(
       req.user.id,
       updatePasswordDto,
+    );
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Сбросить пароль по токену' })
+  async resetPassword(
+    @Body() body: { token: string; newPassword: string },
+    @Req() req: ExpressRequest,
+  ) {
+    return await this.authService.resetPassword(
+      body.token,
+      body.newPassword,
+      req,
     );
   }
 }

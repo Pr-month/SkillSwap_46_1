@@ -1,29 +1,34 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { SkillsService } from '@/skills/skills.service';
+import { UserGender, UserRole } from '@/users/enums/user.enums';
+import { UsersService } from '@/users/users.service';
+import { CreateUserData } from '@/users/users.types';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Response } from 'express';
+import { createHash } from 'crypto';
+import { Response, Request } from 'express';
+import { Redis } from 'ioredis';
 import ms, { StringValue } from 'ms';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { SkillsService } from '../skills/skills.service';
-import { UserGender, UserRole } from '../users/enums/user.enums';
-import { UsersService } from '../users/users.service';
-import { CreateUserData } from '../users/users.types';
 import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly usersService: UsersService,
     private readonly skillsService: SkillsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigurationService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   async register(registerDto: RegisterDto, res: Response) {
@@ -113,9 +118,7 @@ export class AuthService {
 
     this.setAuthCookies(res, tokens);
 
-    const fullUser = await this.usersService.findById(user.id);
-
-    return fullUser;
+    return await this.usersService.findById(user.id);
   }
 
   async logout(userId: string, res: Response) {
@@ -157,6 +160,52 @@ export class AuthService {
     await this.usersService.updatePassword(userId, hashedPassword);
 
     return { message: 'Пароль успешно обновлен' };
+  }
+
+  async resetPassword(token: string, newPassword: string, request?: Request) {
+    try {
+      if (await this.isTokenUsed(token)) {
+        throw new BusinessException(
+          exceptionCodes.users.invalidToken,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.jwtAccessSecret,
+      });
+
+      if (payload.tokenType !== 'reset-password') {
+        throw new BusinessException(
+          exceptionCodes.users.invalidToken,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(
+        newPassword,
+        this.configService.hashSalt,
+      );
+
+      await this.usersService.updatePassword(payload.sub, hashedPassword);
+
+      // Помечаем токен как использованный
+      await this.markTokenAsUsed(token, 60 * 60); // 1 час
+
+      // Удалить троттлинг
+      const ip = request?.ip || request?.socket?.remoteAddress;
+      if (ip) {
+        await this.redis.del(`mail:reset-password:${ip}`);
+      }
+
+      return { message: 'Пароль успешно сброшен' };
+    } catch (error) {
+      this.logger.warn('Не удалось сбросить пароль', error);
+      throw new BusinessException(
+        exceptionCodes.users.invalidToken,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   async getProfile(userId: string) {
@@ -230,5 +279,23 @@ export class AuthService {
       sameSite: 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
+  }
+
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
+  private async markTokenAsUsed(
+    token: string,
+    ttlSeconds: number,
+  ): Promise<void> {
+    const tokenHash = this.hashToken(token);
+    await this.redis.set(`used_token:${tokenHash}`, '1', 'EX', ttlSeconds);
+  }
+
+  private async isTokenUsed(token: string): Promise<boolean> {
+    const tokenHash = this.hashToken(token);
+    const result = await this.redis.get(`used_token:${tokenHash}`);
+    return !!result;
   }
 }

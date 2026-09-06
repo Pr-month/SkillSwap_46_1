@@ -2,10 +2,12 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   changePassword,
   checkUser,
+  forgotPassword,
   getProfile,
   loginUser,
   logoutUser,
   registerUser,
+  resetPassword,
 } from "../../api/authApi.ts";
 import { updateUser } from "../../api/userApi.ts";
 import type {
@@ -101,6 +103,31 @@ export const fetchLogout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await logoutUser();
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchForgotPassword = createAsyncThunk(
+  "auth/forgot-password",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      await forgotPassword(email);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchResetPassword = createAsyncThunk(
+  "auth/reset-password",
+  async (
+    payload: { token: string; newPassword: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      await resetPassword(payload.token, payload.newPassword);
     } catch (err) {
       return rejectWithValue(err);
     }
