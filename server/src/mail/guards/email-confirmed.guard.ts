@@ -1,3 +1,4 @@
+import { RequestWithUser } from '@/auth/auth.types';
 import { BusinessException } from '@/common/errors/business.exception';
 import { exceptionCodes } from '@/common/errors/error-codes';
 import { UsersService } from '@/users/users.service';
@@ -7,15 +8,14 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { Request } from 'express';
 
 @Injectable()
 export class EmailConfirmedGuard implements CanActivate {
   constructor(private readonly usersService: UsersService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const userId = (request as any).user?.id;
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const userId = request.user?.id;
 
     if (!userId) {
       throw new BusinessException(
