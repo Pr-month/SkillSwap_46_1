@@ -14,10 +14,9 @@ import { logout } from "../../services/auth/slice";
 import { HeaderIcons } from "../../shared/ui/header-icons";
 import { developers } from "../../shared/constants/developers";
 import { fetchLogout } from "../../services/auth/actions";
-<<<<<<< HEAD
 import { fetchSendConfirmationEmail } from "../../services/user/actions";
-=======
->>>>>>> dev
+import { showToast } from "../../utils/toast";
+import { handleError } from "../../utils/errors/errorUtils";
 
 export function Header() {
   const dispatch = useDispatch();
@@ -46,8 +45,12 @@ export function Header() {
   };
 
   const handleConfirmEmailClick = async () => {
-    console.log("handleConfirmEmailClick called");
-    await dispatch(fetchSendConfirmationEmail());
+    try {
+      await dispatch(fetchSendConfirmationEmail()).unwrap();
+      showToast("Письмо отправлено! Проверьте вашу почту", "success");
+    } catch (err) {
+      showToast(handleError(err).message, "error");
+    }
   };
 
   return (

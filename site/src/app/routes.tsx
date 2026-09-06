@@ -10,6 +10,8 @@ import { ProfilePage } from "../pages/profil-page/profile-page";
 import { FavoritesPage } from "../pages/favorites-page/favorites-page";
 import { ProtectedLayout, PublicLayout } from "./route-layout";
 import { ScrollToTop } from "./scroll-to-top";
+import { ForgotPassword } from "../pages/password-recovery/forgot-password";
+import { ResetPassword } from "../pages/password-recovery/reset-password";
 
 /** КОНФИГУРАЦИЯ РОУТЕРА */
 export const router = createBrowserRouter([
@@ -86,6 +88,14 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPassword />,
       },
     ],
   },

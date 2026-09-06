@@ -13,6 +13,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 
 import { MailService } from './mail.service';
 
@@ -25,14 +26,18 @@ export class MailController {
   @Post('send-confirmation')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Отправить письмо подтверждения email' })
-  async sendConfirmationEmail(@Request() req: { user: { id: string } }) {
-    return await this.mailService.sendConfirmationEmail(req.user.id);
+  async sendConfirmationEmail(
+    @Request() req: { user: { id: string } } & ExpressRequest,
+  ) {
+    return await this.mailService.sendConfirmationEmail(req.user.id, req);
   }
 
   @Get('confirm-email')
-  @ApiOperation({ summary: 'Подтверждение email по токену' })
-  async confirmEmail(@Query('token') token: string) {
-    return await this.mailService.confirmEmail(token);
+  async confirmEmail(
+    @Query('token') token: string,
+    @Request() req: ExpressRequest,
+  ) {
+    return await this.mailService.confirmEmail(token, req);
   }
 
   @UseGuards(MailThrottleGuard)
@@ -40,7 +45,10 @@ export class MailController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Отправить письмо для сброса пароля' })
-  async forgotPassword(@Body() body: { email: string }) {
-    return await this.mailService.sendResetPasswordEmail(body.email);
+  async forgotPassword(
+    @Body() body: { email: string },
+    @Request() req: ExpressRequest,
+  ) {
+    return await this.mailService.sendResetPasswordEmail(body.email, req);
   }
 }

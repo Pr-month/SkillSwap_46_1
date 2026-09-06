@@ -1,4 +1,5 @@
 import { CitiesModule } from '@/cities/cities.module';
+import { HttpLoggerMiddleware } from '@/common/middleware/http-logger.middleware';
 import { MailModule } from '@/mail/mail.module';
 import { RedisModule } from '@/redis/redis.module';
 import { S3Module } from '@/s3/s3.module';
@@ -15,12 +16,10 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
-import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
 import { FavoritesModule } from './favorites/favorites.module';
 import { GatewayModule } from './gateway/gateway.module';
-import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
 import { ConfigurationModule } from './module/configuration/configuration.module';
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';

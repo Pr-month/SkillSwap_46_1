@@ -14,11 +14,25 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Redis } from 'ioredis';
 
+interface ThrottleConfig {
+  ttl: number;
+  maxAttempts: number;
+}
+
+const THROTTLE_CONFIGS: Record<string, ThrottleConfig> = {
+  confirmation: {
+    ttl: 60 * 60,
+    maxAttempts: 10,
+  },
+  'reset-password': {
+    ttl: 60 * 60,
+    maxAttempts: 10,
+  },
+};
+
 @Injectable()
 export class MailThrottleGuard implements CanActivate {
   private readonly logger = new Logger(MailThrottleGuard.name);
-  private readonly TTL_SECONDS = 24 * 60 * 60; // 24h
-  private readonly MAX_ATTEMPTS = 5;
 
   @Inject(REDIS_CLIENT) private readonly redis: Redis;
 
@@ -39,6 +53,11 @@ export class MailThrottleGuard implements CanActivate {
       return true;
     }
 
+    const config = THROTTLE_CONFIGS[throttleKey];
+    if (!config) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
     const ip = request.ip || request.socket.remoteAddress || 'unknown';
 
@@ -48,19 +67,19 @@ export class MailThrottleGuard implements CanActivate {
       const attempts = await this.redis.get(key);
       const currentAttempts = attempts ? parseInt(attempts, 10) : 0;
 
-      if (currentAttempts >= this.MAX_ATTEMPTS) {
+      if (currentAttempts >= config.maxAttempts) {
         const ttl = await this.redis.ttl(key);
-        const hoursLeft = Math.ceil(ttl / 3600);
+        const minutesLeft = Math.ceil(ttl / 60);
 
         throw new BusinessException(
           exceptionCodes.mail.tooManyRequests,
           HttpStatus.TOO_MANY_REQUESTS,
-          `Превышен лимит отправки писем. Повторите через ${hoursLeft} ч.`,
+          `Превышен лимит отправки писем. Повторите через ${minutesLeft} мин.`,
         );
       }
 
       if (currentAttempts === 0) {
-        await this.redis.set(key, '1', 'EX', this.TTL_SECONDS);
+        await this.redis.set(key, '1', 'EX', config.ttl);
       } else {
         await this.redis.incr(key);
       }
