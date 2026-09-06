@@ -87,4 +87,11 @@ export class AuthController {
       updatePasswordDto,
     );
   }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Сбросить пароль по токену' })
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return await this.authService.resetPassword(body.token, body.newPassword);
+  }
 }

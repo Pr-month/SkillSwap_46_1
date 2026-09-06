@@ -1,5 +1,6 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { ConfirmationThrottleGuard } from '@/mail/guards/confirmation-throttle.guard';
+import { ThrottleKey } from '@/mail/decorators/throttle-key.decorator';
+import { MailThrottleGuard } from '@/mail/guards/confirmation-throttle.guard';
 import {
   Controller,
   Get,
@@ -9,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Body,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 
@@ -18,7 +20,8 @@ import { MailService } from './mail.service';
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
-  @UseGuards(JwtAuthGuard, ConfirmationThrottleGuard)
+  @UseGuards(JwtAuthGuard, MailThrottleGuard)
+  @ThrottleKey('confirmation')
   @Post('send-confirmation')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Отправить письмо подтверждения email' })
@@ -30,5 +33,14 @@ export class MailController {
   @ApiOperation({ summary: 'Подтверждение email по токену' })
   async confirmEmail(@Query('token') token: string) {
     return await this.mailService.confirmEmail(token);
+  }
+
+  @UseGuards(MailThrottleGuard)
+  @ThrottleKey('reset-password')
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Отправить письмо для сброса пароля' })
+  async forgotPassword(@Body() body: { email: string }) {
+    return await this.mailService.sendResetPasswordEmail(body.email);
   }
 }

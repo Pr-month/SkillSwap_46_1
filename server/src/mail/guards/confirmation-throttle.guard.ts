@@ -1,5 +1,6 @@
 import { BusinessException } from '@/common/errors/business.exception';
 import { exceptionCodes } from '@/common/errors/error-codes';
+import { THROTTLE_KEY } from '@/mail/decorators/throttle-key.decorator';
 import { REDIS_CLIENT } from '@/redis/redis.module';
 import {
   CanActivate,
@@ -9,26 +10,39 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Redis } from 'ioredis';
 
 @Injectable()
-export class ConfirmationThrottleGuard implements CanActivate {
-  private readonly logger = new Logger(ConfirmationThrottleGuard.name);
+export class MailThrottleGuard implements CanActivate {
+  private readonly logger = new Logger(MailThrottleGuard.name);
   private readonly TTL_SECONDS = 24 * 60 * 60; // 24h
   private readonly MAX_ATTEMPTS = 5;
 
   @Inject(REDIS_CLIENT) private readonly redis: Redis;
 
-  constructor(@Inject(REDIS_CLIENT) redis: Redis) {
+  constructor(
+    @Inject(REDIS_CLIENT) redis: Redis,
+    private readonly reflector: Reflector,
+  ) {
     this.redis = redis;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const throttleKey = this.reflector.get<string>(
+      THROTTLE_KEY,
+      context.getHandler(),
+    );
+
+    if (!throttleKey) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
     const ip = request.ip || request.socket.remoteAddress || 'unknown';
 
-    const key = `mail:confirmation:${ip}`;
+    const key = `mail:${throttleKey}:${ip}`;
 
     try {
       const attempts = await this.redis.get(key);

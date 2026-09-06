@@ -70,7 +70,7 @@ export class RegisterDto {
     require_valid_protocol: true,
     protocols: ['http', 'https'],
     require_host: true,
-    host_whitelist: ['localhost', '127.0.0.1'],
+    host_whitelist: ['localhost', '127.0.0.1'], // todo удалить перед настройкой s3
   })
   avatar: string;
 

@@ -1,5 +1,5 @@
 import { createMailerOptions } from '@/config/mail.config';
-import { ConfirmationThrottleGuard } from '@/mail/guards/confirmation-throttle.guard';
+import { MailThrottleGuard } from '@/mail/guards/confirmation-throttle.guard';
 import { ConfigurationModule } from '@/module/configuration/configuration.module';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { UsersModule } from '@/users/users.module';
@@ -23,7 +23,7 @@ import { MailService } from './mail.service';
     }),
   ],
   controllers: [MailController],
-  providers: [MailService, ConfirmationThrottleGuard],
+  providers: [MailService, MailThrottleGuard],
   exports: [MailService],
 })
 export class MailModule {}

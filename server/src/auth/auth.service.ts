@@ -7,7 +7,7 @@ import { SkillsService } from '@/skills/skills.service';
 import { UserGender, UserRole } from '@/users/enums/user.enums';
 import { UsersService } from '@/users/users.service';
 import { CreateUserData } from '@/users/users.types';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
@@ -19,6 +19,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly usersService: UsersService,
     private readonly skillsService: SkillsService,
@@ -155,6 +156,36 @@ export class AuthService {
     await this.usersService.updatePassword(userId, hashedPassword);
 
     return { message: 'Пароль успешно обновлен' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.jwtAccessSecret,
+      });
+
+      if (payload.tokenType !== 'reset-password') {
+        throw new BusinessException(
+          exceptionCodes.users.invalidToken,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(
+        newPassword,
+        this.configService.hashSalt,
+      );
+
+      await this.usersService.updatePassword(payload.sub, hashedPassword);
+
+      return { message: 'Пароль успешно сброшен' };
+    } catch (error) {
+      this.logger.warn('Не удалось сбросить пароль', error);
+      throw new BusinessException(
+        exceptionCodes.users.invalidToken,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   async getProfile(userId: string) {

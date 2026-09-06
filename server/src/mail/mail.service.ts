@@ -92,4 +92,30 @@ export class MailService {
       );
     }
   }
+
+  async sendResetPasswordEmail(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const resetToken = await this.jwtService.signAsync(
+      { sub: user.id, email: user.email, tokenType: 'reset-password' },
+      {
+        expiresIn: '1h',
+        secret: this.configService.jwtAccessSecret,
+      },
+    );
+
+    const resetLink = `http://localhost:4567/api/auth/reset-password?token=${resetToken}`; // todo переделать
+
+    await this.sendUserNotification(user.email, {
+      subject: MAIL_TEMPLATES.resetPassword.subject,
+      message: MAIL_TEMPLATES.resetPassword.getText(resetLink),
+    });
+  }
 }
