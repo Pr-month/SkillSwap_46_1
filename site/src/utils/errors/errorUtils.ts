@@ -1,16 +1,5 @@
 import type { ErrorResponse, Error } from "./types";
-import { ErrorCodes, ErrorMessages } from "./errors";
-
-const handleBuisnesError = (error: Error): ErrorResponse => {
-  const message = ErrorMessages[error.code] || "Что-то пошло не так";
-  const errorCode = `${error.statusCode}${ErrorCodes[error.code]}` || "5000000";
-
-  return {
-    message,
-    errorCode,
-    originalError: error,
-  };
-};
+import { ErrorMessages } from "./errors";
 
 export const handleError = (error: unknown): ErrorResponse => {
   if (
@@ -19,17 +8,24 @@ export const handleError = (error: unknown): ErrorResponse => {
     "code" in error &&
     "statusCode" in error
   ) {
-    return handleBuisnesError(error as Error);
+    const apiError = error as Error;
+
+    return {
+      message: ErrorMessages[apiError.code] || "Что-то пошло не так",
+      errorCode: apiError.code,
+      originalError: apiError,
+    };
   }
 
   return {
     message: "Ошибка соединения с сервером",
-    errorCode: "0000000",
+    errorCode: "network:error",
     originalError: {
       code: "network:error",
       path: "",
       statusCode: 0,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
+      message: "Ошибка соединения с сервером",
     } as Error,
   };
 };

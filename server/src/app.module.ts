@@ -1,6 +1,5 @@
 import { CitiesModule } from '@/cities/cities.module';
 import { S3Module } from '@/s3/s3.module';
-import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -14,6 +13,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
+import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
 import { FavoritesModule } from './favorites/favorites.module';
@@ -24,9 +24,6 @@ import { validate } from './module/configuration/validation/env.validation';
 import { RequestsModule } from './requests/requests.module';
 import { SkillsModule } from './skills/skills.module';
 import { UsersModule } from './users/users.module';
-
-
-
 
 @Module({
   imports: [
@@ -89,7 +86,6 @@ import { UsersModule } from './users/users.module';
     },
   ],
 })
-
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(HttpLoggerMiddleware).forRoutes('*');
