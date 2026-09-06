@@ -69,7 +69,7 @@ export async function request<T>(
     const errorData = await parseErrorResponse(response);
 
     if (showErrorToast) {
-      const { message, errorCode } = handleError(
+      const { message } = handleError(
         errorData || {
           code: "unknown",
           statusCode: response.status,
@@ -81,7 +81,7 @@ export async function request<T>(
       if (response.status >= 500) {
         showToast("Ошибка сервера. Попробуйте позже.", "error");
       } else {
-        showToast(message, "error", errorCode);
+        showToast(message, "error");
       }
     }
 
