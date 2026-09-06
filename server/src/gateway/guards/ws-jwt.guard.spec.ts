@@ -1,3 +1,5 @@
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { ExecutionContext } from '@nestjs/common';
 import {
   JsonWebTokenError,
@@ -7,11 +9,6 @@ import {
 } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 
-import {
-  exceptionCodes,
-  exceptionMessages,
-} from '../../common/errors/error-codes';
-import { ConfigurationService } from '../../module/configuration/configuration.service';
 import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 import { WsJwtGuard } from './ws-jwt.guard';
 
@@ -68,7 +65,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.common.unauthorized,
-        message: exceptionMessages[exceptionCodes.common.unauthorized],
+        message: exceptionCodes.common.unauthorized,
       },
     });
 
@@ -81,7 +78,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.common.unauthorized,
-        message: exceptionMessages[exceptionCodes.common.unauthorized],
+        message: exceptionCodes.common.unauthorized,
       },
     });
 
@@ -100,7 +97,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.auth.invalidAccessToken,
-        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+        message: exceptionCodes.auth.invalidAccessToken,
       },
     });
   });
@@ -115,7 +112,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.auth.expiredAccessToken,
-        message: exceptionMessages[exceptionCodes.auth.expiredAccessToken],
+        message: exceptionCodes.auth.expiredAccessToken,
       },
     });
   });
@@ -130,7 +127,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.auth.invalidAccessToken,
-        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+        message: exceptionCodes.auth.invalidAccessToken,
       },
     });
   });
@@ -145,7 +142,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.auth.invalidAccessToken,
-        message: exceptionMessages[exceptionCodes.auth.invalidAccessToken],
+        message: exceptionCodes.auth.invalidAccessToken,
       },
     });
   });
@@ -158,7 +155,7 @@ describe('WsJwtGuard', () => {
     await expect(guard.authenticate(client)).rejects.toMatchObject({
       error: {
         code: exceptionCodes.common.internal,
-        message: exceptionMessages[exceptionCodes.common.internal],
+        message: exceptionCodes.common.internal,
       },
     });
   });
