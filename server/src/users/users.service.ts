@@ -38,6 +38,7 @@ export class UsersService {
       interestedSkillsSubcategoriesIds:
         user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
         [],
+      isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

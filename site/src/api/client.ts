@@ -45,7 +45,10 @@ export async function request<T>(
         },
       });
 
-    const response = await fetch(interceptedUrl, interceptedConfig);
+    const response = await fetch(interceptedUrl, {
+      ...interceptedConfig,
+      credentials: "include",
+    });
 
     if (response.ok) {
       let data: T;

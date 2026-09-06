@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { tokenService } from "../../utils/tokenService.ts";
 import {
   fetchCheckUser,
   fetchLogin,
@@ -35,7 +34,6 @@ export const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.currentUser = null;
-      tokenService.remove();
     },
   },
   extraReducers: (builder) => {
@@ -52,7 +50,7 @@ export const authSlice = createSlice({
       .addCase(fetchLogin.pending, handlePending)
       .addCase(fetchLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload.user;
+        state.currentUser = action.payload.data;
       })
       .addCase(fetchLogin.rejected, handleRejected)
 

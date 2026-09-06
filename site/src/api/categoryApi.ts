@@ -1,4 +1,3 @@
-import { USE_MOCKS } from "../config/apiConfig";
 import { request } from "./client";
 import type { TId, ISkillsCategory, ISkillsSubcategory } from "../utils/types";
 
@@ -27,24 +26,12 @@ const normalizeCategory = (category: ISkillsCategory): ISkillsCategory => ({
 });
 
 export const getCategories = (): Promise<ISkillsCategory[]> => {
-  if (USE_MOCKS) {
-    return fetch("/categories.json")
-      .then((res) => res.json())
-      .then((response) => response.data);
-  }
-
   return request<ApiResponse<ISkillsCategory[]>>("/categories").then(
     (response) => response.data.map(normalizeCategory),
   );
 };
 
 export const getSubCategories = (): Promise<ISkillsSubcategory[]> => {
-  if (USE_MOCKS) {
-    return fetch("/subcategories.json")
-      .then((res) => res.json())
-      .then((response) => response.data);
-  }
-
   return request<
     ApiResponse<
       {
@@ -63,22 +50,6 @@ export const getSubCategories = (): Promise<ISkillsSubcategory[]> => {
 };
 
 export const getCategoryById = (id: TId): Promise<ISkillsCategory> => {
-  if (USE_MOCKS) {
-    return fetch("/categories.json")
-      .then((res) => res.json())
-      .then((response) => {
-        const category = response.data.find(
-          (category: ISkillsCategory) => category.id === id,
-        );
-
-        if (!category) {
-          throw new Error(`Category with id ${id} not found`);
-        }
-
-        return category;
-      });
-  }
-
   return request<ApiResponse<ISkillsCategory[]>>("/categories").then(
     (response) => {
       const category = response.data.find((category) => category.id === id);
