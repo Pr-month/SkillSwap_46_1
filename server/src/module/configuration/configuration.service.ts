@@ -97,4 +97,28 @@ export class ConfigurationService {
   get throttleLimit(): number {
     return this.configService.get<number>(EnvKey.ThrottleLimit);
   }
+
+  get mailHost(): string {
+    return this.configService.get<string>(EnvKey.MailHost);
+  }
+
+  get mailPort(): number {
+    return this.configService.get<number>(EnvKey.MailPort);
+  }
+
+  get mailSecure(): boolean {
+    return this.configService.get<boolean>(EnvKey.MailSecure);
+  }
+
+  get mailUser(): string {
+    return this.configService.get<string>(EnvKey.MailUser);
+  }
+
+  get mailPassword(): string {
+    return this.configService.get<string>(EnvKey.MailPassword);
+  }
+
+  get mailFrom(): string {
+    return this.configService.get<string>(EnvKey.MailFrom);
+  }
 }

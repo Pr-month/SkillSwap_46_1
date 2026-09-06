@@ -21,4 +21,10 @@ export enum EnvKey {
   CorsOrigins = 'CORS_ORIGINS',
   ThrottleTtl = 'THROTTLE_TTL',
   ThrottleLimit = 'THROTTLE_LIMIT',
+  MailHost = 'MAIL_HOST',
+  MailPort = 'MAIL_PORT',
+  MailSecure = 'MAIL_SECURE',
+  MailUser = 'MAIL_USER',
+  MailPassword = 'MAIL_PASSWORD',
+  MailFrom = 'MAIL_FROM',
 }

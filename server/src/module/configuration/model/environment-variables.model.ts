@@ -106,4 +106,34 @@ export class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1)
   [EnvKey.ThrottleLimit]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailHost]: string;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  @Max(65535)
+  [EnvKey.MailPort]: number;
+
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === '1') return true;
+    if (value === 'false' || value === '0') return false;
+    return value;
+  })
+  [EnvKey.MailSecure]: boolean;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailUser]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailPassword]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailFrom]: string;
 }

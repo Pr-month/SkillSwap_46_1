@@ -1,18 +1,18 @@
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { SkillsService } from '@/skills/skills.service';
+import { UserGender, UserRole } from '@/users/enums/user.enums';
+import { UsersService } from '@/users/users.service';
+import { CreateUserData } from '@/users/users.types';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import ms, { StringValue } from 'ms';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { SkillsService } from '../skills/skills.service';
-import { UserGender, UserRole } from '../users/enums/user.enums';
-import { UsersService } from '../users/users.service';
-import { CreateUserData } from '../users/users.types';
 import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
@@ -113,9 +113,7 @@ export class AuthService {
 
     this.setAuthCookies(res, tokens);
 
-    const fullUser = await this.usersService.findById(user.id);
-
-    return fullUser;
+    return await this.usersService.findById(user.id);
   }
 
   async logout(userId: string, res: Response) {

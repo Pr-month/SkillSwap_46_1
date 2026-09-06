@@ -1,6 +1,6 @@
 import { CitiesModule } from '@/cities/cities.module';
+import { MailModule } from '@/mail/mail.module';
 import { S3Module } from '@/s3/s3.module';
-import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -18,15 +18,13 @@ import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
 import { FavoritesModule } from './favorites/favorites.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
 import { ConfigurationModule } from './module/configuration/configuration.module';
 import { ConfigurationService } from './module/configuration/configuration.service';
 import { validate } from './module/configuration/validation/env.validation';
 import { RequestsModule } from './requests/requests.module';
 import { SkillsModule } from './skills/skills.module';
 import { UsersModule } from './users/users.module';
-
-
-
 
 @Module({
   imports: [
@@ -79,6 +77,7 @@ import { UsersModule } from './users/users.module';
     CitiesModule,
     GatewayModule,
     S3Module,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
@@ -89,7 +88,6 @@ import { UsersModule } from './users/users.module';
     },
   ],
 })
-
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(HttpLoggerMiddleware).forRoutes('*');
