@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-import { ExceptionCode, exceptionMessages } from './error-codes';
+import { ExceptionCode } from './error-codes';
 
 export class BusinessException extends HttpException {
   constructor(
@@ -11,7 +11,7 @@ export class BusinessException extends HttpException {
     super(
       {
         code,
-        message: exceptionMessages[code],
+        message: code,
         ...(details === undefined ? {} : { details }),
       },
       status,

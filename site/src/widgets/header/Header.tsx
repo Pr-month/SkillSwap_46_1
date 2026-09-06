@@ -14,7 +14,10 @@ import { logout } from "../../services/auth/slice";
 import { HeaderIcons } from "../../shared/ui/header-icons";
 import { developers } from "../../shared/constants/developers";
 import { fetchLogout } from "../../services/auth/actions";
+<<<<<<< HEAD
 import { fetchSendConfirmationEmail } from "../../services/user/actions";
+=======
+>>>>>>> dev
 
 export function Header() {
   const dispatch = useDispatch();

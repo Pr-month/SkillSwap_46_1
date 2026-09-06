@@ -15,6 +15,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './categories/subcategories/subcategories.module';
+import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { dbConfig } from './config/db.config';
 import { jwtConfigFactory } from './config/jwt.config';
 import { FavoritesModule } from './favorites/favorites.module';

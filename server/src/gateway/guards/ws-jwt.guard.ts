@@ -1,3 +1,9 @@
+import { JwtPayload } from '@/auth/auth.types';
+import {
+  type ExceptionCode,
+  exceptionCodes,
+} from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
 import {
   CanActivate,
   ExecutionContext,
@@ -13,13 +19,6 @@ import {
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 
-import { JwtPayload } from '../../auth/auth.types';
-import {
-  type ExceptionCode,
-  exceptionCodes,
-  exceptionMessages,
-} from '../../common/errors/error-codes';
-import { ConfigurationService } from '../../module/configuration/configuration.service';
 import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 
 @Injectable()
@@ -111,7 +110,7 @@ export class WsJwtGuard implements CanActivate {
   private createWsException(code: ExceptionCode): WsException {
     return new WsException({
       code,
-      message: exceptionMessages[code],
+      message: code,
     });
   }
 }

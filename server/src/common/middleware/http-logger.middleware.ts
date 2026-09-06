@@ -6,13 +6,11 @@ export class HttpLoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger(HttpLoggerMiddleware.name);
 
   use(request: Request, response: Response, next: NextFunction): void {
-
     const startedAt = process.hrtime.bigint();
 
     response.on('finish', () => {
       const durationInNanoseconds = process.hrtime.bigint() - startedAt;
-      const durationInMilliseconds =
-        Number(durationInNanoseconds) / 1_000_000;
+      const durationInMilliseconds = Number(durationInNanoseconds) / 1_000_000;
 
       const method = request.method;
       const path = request.originalUrl ?? request.url;
