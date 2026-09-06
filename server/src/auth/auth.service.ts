@@ -220,14 +220,14 @@ export class AuthService {
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
   }

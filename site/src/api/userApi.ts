@@ -1,4 +1,3 @@
-import { USE_MOCKS } from "../config/apiConfig";
 import { request } from "./client";
 import type { IUserProfile } from "../utils/types";
 import type { TId } from "../utils/types";
@@ -30,9 +29,7 @@ export interface GetUsersParams {
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 
-// POST /users/search (JSON-body) — фильтры передаются в теле, чтобы не
-// генерировать огромные URL с массивами. Пустые/`all`/пустые массивы
-// не отправляются, чтобы бэкенд не применял фильтр.
+// POST /users/search
 export const getUsers = ({
   page = DEFAULT_PAGE,
   limit = DEFAULT_LIMIT,
@@ -69,20 +66,6 @@ export const getUsers = ({
     body.skillOption = skillOption;
   }
 
-  if (USE_MOCKS) {
-    return fetch("/users.json")
-      .then((res) => res.json())
-      .then((response) => {
-        const all: IUserProfile[] = response.data ?? [];
-        const start = (page - 1) * limit;
-        return {
-          data: all.slice(start, start + limit),
-          page,
-          totalPages: Math.max(1, Math.ceil(all.length / limit)),
-        };
-      });
-  }
-
   return request<ApiResponse<PaginatedUsersResponse>>("/users/search", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -94,62 +77,35 @@ export const getUsers = ({
 
 // GET /users/:id
 export const getUserById = (id: TId): Promise<IUserProfile> => {
-  if (USE_MOCKS) {
-    return fetch("/users.json")
-      .then((res) => res.json())
-      .then((response) => {
-        const user = response.data.find((u: IUserProfile) => u.id === id);
-        if (!user) return Promise.reject({ message: "User not found" });
-        return user;
-      });
-  }
   return request<ApiResponse<IUserProfile>>(`/users/${id}`).then(
     (response: { status: boolean; data: IUserProfile }) => response.data,
   );
 };
 
-// PATCH /users/:id (требует токен)
+// PATCH /users/:id
 export const updateUser = (
   id: string,
   payload: Partial<IUserProfile>,
-  token: string,
 ): Promise<IUserProfile> => {
-  if (USE_MOCKS) {
-    return fetch("/users.json")
-      .then((res) => res.json())
-      .then((response) => {
-        const user = response.data.find((u: IUserProfile) => u.id === id);
-        if (!user) return Promise.reject({ message: "User not found" });
-        // Эмулируем обновление — мержим payload поверх найденного юзера
-        return { ...user, ...payload, updatedAt: new Date().toISOString() };
-      });
-  }
   return request<ApiResponse<IUserProfile>>(`/users/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
   }).then((response: { status: boolean; data: IUserProfile }) => response.data);
 };
 
-// DELETE /users/:id (требует токен)
-export const deleteUser = (id: TId, token: string): Promise<void> => {
-  if (USE_MOCKS) {
-    return fetch("/users.json")
-      .then((res) => res.json())
-      .then((response) => {
-        const exists = response.data.some((u: IUserProfile) => u.id === id);
-        if (!exists) return Promise.reject({ message: "User not found" });
-        // В моках просто эмулируем успех
-        return;
-      });
-  }
+// DELETE /users/:id
+export const deleteUser = (id: TId): Promise<void> => {
   return request<void>(`/users/${id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  });
+};
+
+// POST /mail/send-confirmation
+export const sendConfirmationEmail = async (): Promise<void> => {
+  await request<void>("/mail/send-confirmation", {
+    method: "POST",
   });
 };
