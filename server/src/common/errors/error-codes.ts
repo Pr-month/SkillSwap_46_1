@@ -6,6 +6,7 @@ export const exceptionCodes = {
     emailExists: 'user:email-exists',
     accessDenied: 'user:access-denied',
     invalidToken: 'user:invalid-token',
+    emailNotConfirmed: 'user:email-not-confirmed',
     emailAlreadyConfirmed: 'user:email-already-confirmed',
   },
   auth: {
@@ -65,6 +66,7 @@ export const exceptionMessages: Record<ExceptionCode, string> = {
   'user:email-exists': 'Пользователь с таким email уже существует',
   'user:access-denied': 'Нет доступа к данным пользователя',
   'user:invalid-token': 'Недействительный токен подтверждения',
+  'user:email-not-confirmed': 'Email не подтвержден. Подтвердите ваш email',
   'user:email-already-confirmed': 'Email уже подтвержден',
   'auth:invalid-access-token': 'Недействительный access token',
   'auth:expired-access-token': 'Срок действия access token истёк',
