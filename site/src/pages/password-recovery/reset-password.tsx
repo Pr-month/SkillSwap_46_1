@@ -39,6 +39,11 @@ export const ResetPassword: FC = () => {
       await dispatch(
         fetchResetPassword({ token, newPassword: password }),
       ).unwrap();
+
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("token");
+      navigate({ search: newParams.toString() }, { replace: true });
+
       setSuccess(true);
     } catch (err) {
       setError(handleError(err).message);
