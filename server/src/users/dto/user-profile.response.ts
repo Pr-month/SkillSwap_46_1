@@ -21,6 +21,9 @@ export class UserProfileResponse {
   @ApiProperty({ type: String, nullable: true })
   city: string | null;
 
+  @ApiProperty({ format: 'uuid' })
+  cityId: string;
+
   @ApiPropertyOptional({
     example: 'https://example.com/avatar.jpg',
     nullable: true,

@@ -199,48 +199,19 @@ describe("auth thunks", () => {
 
     it("fulfilled: обновляет пользователя", async () => {
       const updatedUser = { ...mockUser, name: "New Name" };
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      mockedUserApi.updateUser.mockResolvedValue(updatedUser);
+      mockedUserApi.updateCurrentUser.mockResolvedValue(updatedUser);
 
       const store = createTestStore({ currentUser: mockUser });
       await store.dispatch(fetchUpdateCurrentUser(updatePayload));
 
-      expect(mockedUserApi.updateUser).toHaveBeenCalledWith(
-        "user-1",
+      expect(mockedUserApi.updateCurrentUser).toHaveBeenCalledWith(
         updatePayload,
-        "valid-token",
       );
       expect(store.getState().auth.currentUser).toEqual(updatedUser);
     });
 
-    it("rejected: без токена → rejectWithValue", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue(null);
-
-      const store = createTestStore({ currentUser: mockUser });
-      const result = await store.dispatch(
-        fetchUpdateCurrentUser(updatePayload),
-      );
-
-      expect(result.meta.requestStatus).toBe("rejected");
-      expect(result.payload).toBe("Токен не найден");
-    });
-
-    it("rejected: без currentUser.id → rejectWithValue", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      const userWithoutId = { ...mockUser, id: undefined };
-
-      const store = createTestStore({ currentUser: userWithoutId });
-      const result = await store.dispatch(
-        fetchUpdateCurrentUser(updatePayload),
-      );
-
-      expect(result.meta.requestStatus).toBe("rejected");
-      expect(result.payload).toBe("Не найден id пользователя");
-    });
-
-    it("rejected: ошибка API", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      mockedUserApi.updateUser.mockRejectedValue("Update failed");
+    it("rejected: ошибка API → rejectWithValue", async () => {
+      mockedUserApi.updateCurrentUser.mockRejectedValue("Update failed");
 
       const store = createTestStore({ currentUser: mockUser });
       const result = await store.dispatch(

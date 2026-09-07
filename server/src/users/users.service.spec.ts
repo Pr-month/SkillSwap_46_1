@@ -187,6 +187,7 @@ describe('UsersService', () => {
       birthDate: new Date('1990-01-01'),
       gender: UserGender.OTHER,
       city: mockCity.name,
+      cityId,
       avatar: null,
       about: null,
       role: UserRole.USER,

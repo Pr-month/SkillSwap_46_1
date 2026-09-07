@@ -30,6 +30,7 @@ export class UsersService {
       birthDate: user.birthdate,
       gender: user.gender,
       city: user.city?.name ?? null,
+      cityId: user.cityId,
       avatar: user.avatar,
       about: user.about,
       role: user.role,
@@ -272,11 +273,20 @@ export class UsersService {
     if (updateUserDto.birthdate !== undefined)
       user.birthdate = updateUserDto.birthdate;
     if (updateUserDto.gender !== undefined) user.gender = updateUserDto.gender;
-    if (updateUserDto.cityId !== undefined) user.cityId = updateUserDto.cityId;
     if (updateUserDto.avatar !== undefined) user.avatar = updateUserDto.avatar;
     if (updateUserDto.about !== undefined) user.about = updateUserDto.about;
 
     await this.usersRepository.save(user);
+
+    // Обновляем город отдельным точечным UPDATE: при `save(user)` загруженная
+    // связь `city` (старый город) может перезаписать FK-колонку `cityId`,
+    // поэтому меняем её после сохранения остальных полей.
+    if (updateUserDto.cityId !== undefined) {
+      await this.usersRepository.update(
+        { id },
+        { cityId: updateUserDto.cityId },
+      );
+    }
 
     const fullUser = await this.findById(id);
     return this.toProfileResponse(fullUser!);
