@@ -1,14 +1,14 @@
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { User } from '@/users/entities/user.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { User } from '../users/entities/user.entity';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skills.entity';
