@@ -6,6 +6,7 @@ import { exceptionCodes } from '@/common/errors/error-codes';
 import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
 import { getMailThrottleRedisKey } from '@/mail/constants/mail-throttle.constants';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { nodeEnvValue } from '@/module/configuration/const';
 import { REDIS_CLIENT } from '@/redis/redis.module';
 import { SkillsService } from '@/skills/skills.service';
 import { UserGender, UserRole } from '@/users/enums/user.enums';
@@ -264,19 +265,19 @@ export class AuthService {
       refreshToken: string;
     },
   ) {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = this.configService.nodeEnv === nodeEnvValue.Production;
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
   }

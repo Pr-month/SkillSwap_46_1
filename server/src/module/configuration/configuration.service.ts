@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { EnvKey } from './const';
+import { EnvKey, NodeEnvValueType } from './const';
 import { EnvironmentVariables } from './model';
 
 @Injectable()
@@ -10,8 +10,8 @@ export class ConfigurationService {
     private configService: ConfigService<EnvironmentVariables, true>,
   ) {}
 
-  get nodeEnv(): string {
-    return this.configService.get<string>(EnvKey.NodeEnv);
+  get nodeEnv(): NodeEnvValueType {
+    return this.configService.get<NodeEnvValueType>(EnvKey.NodeEnv);
   }
 
   get port(): number {
