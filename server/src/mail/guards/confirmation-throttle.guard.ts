@@ -1,7 +1,13 @@
 import { BusinessException } from '@/common/errors/business.exception';
 import { exceptionCodes } from '@/common/errors/error-codes';
+import {
+  getMailThrottleRedisKey,
+  MAIL_THROTTLE_KEYS,
+  type MailThrottleKey,
+} from '@/mail/constants/mail-throttle.constants';
 import { THROTTLE_KEY } from '@/mail/decorators/throttle-key.decorator';
 import { REDIS_CLIENT } from '@/redis/redis.module';
+import { UsersService } from '@/users/users.service';
 import {
   CanActivate,
   ExecutionContext,
@@ -14,22 +20,6 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Redis } from 'ioredis';
 
-interface ThrottleConfig {
-  ttl: number;
-  maxAttempts: number;
-}
-
-const THROTTLE_CONFIGS: Record<string, ThrottleConfig> = {
-  confirmation: {
-    ttl: 60 * 60,
-    maxAttempts: 10,
-  },
-  'reset-password': {
-    ttl: 60 * 60,
-    maxAttempts: 10,
-  },
-};
-
 @Injectable()
 export class MailThrottleGuard implements CanActivate {
   private readonly logger = new Logger(MailThrottleGuard.name);
@@ -39,6 +29,7 @@ export class MailThrottleGuard implements CanActivate {
   constructor(
     @Inject(REDIS_CLIENT) redis: Redis,
     private readonly reflector: Reflector,
+    private readonly usersService: UsersService,
   ) {
     this.redis = redis;
   }
@@ -53,15 +44,31 @@ export class MailThrottleGuard implements CanActivate {
       return true;
     }
 
-    const config = THROTTLE_CONFIGS[throttleKey];
+    const config = MAIL_THROTTLE_KEYS[throttleKey as MailThrottleKey];
     if (!config) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
-    const ip = request.ip || request.socket.remoteAddress || 'unknown';
+    const request = context
+      .switchToHttp()
+      .getRequest<
+        Request & { user?: { id: string }; body?: { email?: string } }
+      >();
 
-    const key = `mail:${throttleKey}:${ip}`;
+    let email: string | undefined;
+
+    if (request.body?.email) {
+      email = request.body.email;
+    } else if (request.user?.id) {
+      const user = await this.usersService.findById(request.user.id);
+      email = user?.email;
+    }
+
+    if (!email) {
+      return true;
+    }
+
+    const key = getMailThrottleRedisKey(throttleKey as MailThrottleKey, email);
 
     try {
       const attempts = await this.redis.get(key);

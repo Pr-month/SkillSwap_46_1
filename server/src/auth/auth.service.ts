@@ -1,7 +1,10 @@
 import { Category } from '@/categories/entities/category.entity';
 import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { TokenType } from '@/common/enums/token-type.enum';
 import { BusinessException } from '@/common/errors/business.exception';
 import { exceptionCodes } from '@/common/errors/error-codes';
+import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
+import { getMailThrottleRedisKey } from '@/mail/constants/mail-throttle.constants';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { REDIS_CLIENT } from '@/redis/redis.module';
 import { SkillsService } from '@/skills/skills.service';
@@ -11,8 +14,7 @@ import { CreateUserData } from '@/users/users.types';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { createHash } from 'crypto';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { Redis } from 'ioredis';
 import ms, { StringValue } from 'ms';
 
@@ -29,6 +31,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigurationService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly tokenBlacklistService: TokenBlacklistService,
   ) {}
 
   async register(registerDto: RegisterDto, res: Response) {
@@ -162,9 +165,9 @@ export class AuthService {
     return { message: 'Пароль успешно обновлен' };
   }
 
-  async resetPassword(token: string, newPassword: string, request?: Request) {
+  async resetPassword(token: string, newPassword: string) {
     try {
-      if (await this.isTokenUsed(token)) {
+      if (await this.tokenBlacklistService.isUsed(token)) {
         throw new BusinessException(
           exceptionCodes.users.invalidToken,
           HttpStatus.BAD_REQUEST,
@@ -188,19 +191,16 @@ export class AuthService {
       );
 
       await this.usersService.updatePassword(payload.sub, hashedPassword);
+      await this.usersService.clearRefreshToken(payload.sub);
+      await this.tokenBlacklistService.markAsUsed(token, 60 * 60);
 
-      // Помечаем токен как использованный
-      await this.markTokenAsUsed(token, 60 * 60); // 1 час
-
-      // Удалить троттлинг
-      const ip = request?.ip || request?.socket?.remoteAddress;
-      if (ip) {
-        await this.redis.del(`mail:reset-password:${ip}`);
-      }
+      await this.redis.del(
+        getMailThrottleRedisKey('reset-password', payload.email),
+      );
 
       return { message: 'Пароль успешно сброшен' };
     } catch (error) {
-      this.logger.warn('Не удалось сбросить пароль', error);
+      this.logger.warn('Password reset failed', error);
       throw new BusinessException(
         exceptionCodes.users.invalidToken,
         HttpStatus.BAD_REQUEST,
@@ -231,7 +231,7 @@ export class AuthService {
         {
           sub: userId,
           email,
-          tokenType: 'access',
+          tokenType: TokenType.ACCESS,
         },
         {
           expiresIn: this.configService.jwtAccessExpiresIn as StringValue,
@@ -242,7 +242,7 @@ export class AuthService {
         {
           sub: userId,
           email,
-          tokenType: 'refresh',
+          tokenType: TokenType.REFRESH,
         },
         {
           expiresIn: this.configService.jwtRefreshExpiresIn as StringValue,
@@ -279,23 +279,5 @@ export class AuthService {
       sameSite: 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
-  }
-
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
-  }
-
-  private async markTokenAsUsed(
-    token: string,
-    ttlSeconds: number,
-  ): Promise<void> {
-    const tokenHash = this.hashToken(token);
-    await this.redis.set(`used_token:${tokenHash}`, '1', 'EX', ttlSeconds);
-  }
-
-  private async isTokenUsed(token: string): Promise<boolean> {
-    const tokenHash = this.hashToken(token);
-    const result = await this.redis.get(`used_token:${tokenHash}`);
-    return !!result;
   }
 }

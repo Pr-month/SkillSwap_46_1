@@ -1,5 +1,6 @@
 import { CitiesModule } from '@/cities/cities.module';
 import { HttpLoggerMiddleware } from '@/common/middleware/http-logger.middleware';
+import { TokenBlacklistModule } from '@/common/services/token-blacklist.module';
 import { MailModule } from '@/mail/mail.module';
 import { RedisModule } from '@/redis/redis.module';
 import { S3Module } from '@/s3/s3.module';
@@ -80,6 +81,7 @@ import { UsersModule } from './users/users.module';
     S3Module,
     MailModule,
     RedisModule,
+    TokenBlacklistModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,16 +1,17 @@
+import { TokenType } from '@/common/enums/token-type.enum';
 import { BusinessException } from '@/common/errors/business.exception';
 import { exceptionCodes } from '@/common/errors/error-codes';
+import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
+import { getMailThrottleRedisKey } from '@/mail/constants/mail-throttle.constants';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { REDIS_CLIENT } from '@/redis/redis.module';
 import { UsersService } from '@/users/users.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { createHash } from 'crypto';
-import { Request } from 'express';
 import { Redis } from 'ioredis';
 
-import { MAIL_TEMPLATES } from './mail.constants';
+import { MAIL_TEMPLATES } from './constants/mail.constants';
 
 @Injectable()
 export class MailService {
@@ -22,53 +23,8 @@ export class MailService {
     private readonly configService: ConfigurationService,
     private readonly usersService: UsersService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly tokenBlacklistService: TokenBlacklistService,
   ) {}
-
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
-  }
-
-  private async markTokenAsUsed(
-    token: string,
-    ttlSeconds: number,
-  ): Promise<void> {
-    const tokenHash = this.hashToken(token);
-    await this.redis.set(`used_token:${tokenHash}`, '1', 'EX', ttlSeconds);
-  }
-
-  private async isTokenUsed(token: string): Promise<boolean> {
-    const tokenHash = this.hashToken(token);
-    const result = await this.redis.get(`used_token:${tokenHash}`);
-    return !!result;
-  }
-
-  private getBaseUrl(request?: Request): string {
-    if (request) {
-      const origin = request.get('origin');
-      if (origin) {
-        return origin;
-      }
-
-      const referer = request.get('referer');
-      if (referer) {
-        return new URL(referer).origin;
-      }
-
-      const protocol = request.protocol;
-      const host = request.get('host');
-      if (host) {
-        return `${protocol}://${host}`;
-      }
-    }
-
-    return 'http://localhost:4567';
-  }
-
-  private async clearThrottle(key: string, ip?: string): Promise<void> {
-    if (!ip) return;
-
-    await this.redis.del(`mail:${key}:${ip}`);
-  }
 
   async sendUserNotification(
     email: string,
@@ -78,15 +34,34 @@ export class MailService {
       html?: string;
     },
   ): Promise<void> {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: payload.subject,
-      text: payload.message,
-      html: payload.html,
-    });
+    if (!payload.message && !payload.html) {
+      throw new BusinessException(
+        exceptionCodes.mail.invalidPayload,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: payload.subject,
+        text: payload.message,
+        html: payload.html,
+      });
+
+      this.logger.log(
+        `Email sent | to: ${email} | subject: ${payload.subject}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Email sending failed | to: ${email} | subject: ${payload.subject}`,
+        error,
+      );
+      throw error;
+    }
   }
 
-  async sendConfirmationEmail(userId: string, request?: Request) {
+  async sendConfirmationEmail(userId: string, baseUrl: string) {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
@@ -104,14 +79,13 @@ export class MailService {
     }
 
     const confirmationToken = await this.jwtService.signAsync(
-      { sub: user.id, email: user.email, tokenType: 'confirmation' },
+      { sub: user.id, email: user.email, tokenType: TokenType.CONFIRMATION },
       {
         expiresIn: '24h',
         secret: this.configService.jwtAccessSecret,
       },
     );
 
-    const baseUrl = this.getBaseUrl(request);
     const confirmationLink = `${baseUrl}/?token=${confirmationToken}`;
 
     await this.sendUserNotification(user.email, {
@@ -122,10 +96,9 @@ export class MailService {
     return { message: 'Письмо отправлено' };
   }
 
-  async confirmEmail(token: string, request?: Request) {
+  async confirmEmail(token: string) {
     try {
-      // Проверка, не использован ли токен
-      if (await this.isTokenUsed(token)) {
+      if (await this.tokenBlacklistService.isUsed(token)) {
         throw new BusinessException(
           exceptionCodes.users.invalidToken,
           HttpStatus.BAD_REQUEST,
@@ -136,25 +109,31 @@ export class MailService {
         secret: this.configService.jwtAccessSecret,
       });
 
-      if (payload.tokenType !== 'confirmation') {
+      if (payload.tokenType !== TokenType.CONFIRMATION) {
         throw new BusinessException(
           exceptionCodes.users.invalidToken,
           HttpStatus.BAD_REQUEST,
         );
       }
 
+      const user = await this.usersService.findById(payload.sub);
+
+      if (!user) {
+        throw new BusinessException(
+          exceptionCodes.users.notFound,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       await this.usersService.confirmEmail(payload.sub);
 
-      // Помечаем токен как использованный
-      await this.markTokenAsUsed(token, 24 * 60 * 60);
+      await this.tokenBlacklistService.markAsUsed(token, 24 * 60 * 60);
 
-      // Удалить троттлинг после успешного подтверждения
-      const ip = request?.ip || request?.socket?.remoteAddress;
-      await this.clearThrottle('confirmation', ip);
+      await this.redis.del(getMailThrottleRedisKey('confirmation', user.email));
 
       return { message: 'Email подтвержден' };
     } catch (error) {
-      this.logger.warn('Не удалось подтвердить email', error);
+      this.logger.warn('Email confirmation failed', error);
       throw new BusinessException(
         exceptionCodes.users.invalidToken,
         HttpStatus.BAD_REQUEST,
@@ -162,7 +141,7 @@ export class MailService {
     }
   }
 
-  async sendResetPasswordEmail(email: string, request?: Request) {
+  async sendResetPasswordEmail(email: string, baseUrl: string) {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
@@ -173,14 +152,13 @@ export class MailService {
     }
 
     const resetToken = await this.jwtService.signAsync(
-      { sub: user.id, email: user.email, tokenType: 'reset-password' },
+      { sub: user.id, email: user.email, tokenType: TokenType.RESET_PASSWORD },
       {
         expiresIn: '1h',
         secret: this.configService.jwtAccessSecret,
       },
     );
 
-    const baseUrl = this.getBaseUrl(request);
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
 
     await this.sendUserNotification(user.email, {

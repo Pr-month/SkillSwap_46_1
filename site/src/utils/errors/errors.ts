@@ -36,6 +36,7 @@ export const ErrorMessages: Record<string, string> = {
 
   // Mail
   "mail:too-many-requests": "Слишком много запросов. Попробуйте позже",
+  "mail:invalid-payload": "Некорректные данные для отправки письма",
 
   // Upload
   "upload:file-required": "Необходимо выбрать файл",

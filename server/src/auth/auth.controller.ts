@@ -1,3 +1,4 @@
+import { ResetPasswordDto } from '@/auth/dto/reset-password.dto';
 import {
   Body,
   Controller,
@@ -11,10 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import {
-  Response as ExpressResponse,
-  Request as ExpressRequest,
-} from 'express';
+import { Response as ExpressResponse } from 'express';
 
 import { AuthService } from './auth.service';
 import { RequestWithUser } from './auth.types';
@@ -94,14 +92,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Сбросить пароль по токену' })
-  async resetPassword(
-    @Body() body: { token: string; newPassword: string },
-    @Req() req: ExpressRequest,
-  ) {
-    return await this.authService.resetPassword(
-      body.token,
-      body.newPassword,
-      req,
-    );
+  async resetPassword(@Body() body: ResetPasswordDto) {
+    return await this.authService.resetPassword(body.token, body.newPassword);
   }
 }

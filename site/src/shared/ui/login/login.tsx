@@ -70,9 +70,14 @@ export const LoginUI: FC<LoginUIProps> = ({
           <Button variant="primary" type="submit">
             Войти
           </Button>
-          <Link to="/registration" className={styles.registration__link}>
-            Зарегистрироваться
-          </Link>
+          <div className={styles.linksRow}>
+            <Link to="/forgot-password" className={styles.registration__link}>
+              Забыли пароль?
+            </Link>
+            <Link to="/registration" className={styles.registration__link}>
+              Зарегистрироваться
+            </Link>
+          </div>
         </div>
       </form>
     </div>

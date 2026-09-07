@@ -49,6 +49,7 @@ export const exceptionCodes = {
   },
   mail: {
     tooManyRequests: 'mail:too-many-requests',
+    invalidPayload: 'mail:invalid-payload',
   },
 } as const;
 
