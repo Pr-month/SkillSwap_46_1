@@ -57,6 +57,7 @@ export const ResetPassword: FC = () => {
         }}
       >
         <div className={styles.success}>
+          <p>Чтобы продолжить войдите в аккаунт:</p>
           <Button variant="primary" onClick={() => navigate("/login")}>
             Войти
           </Button>
