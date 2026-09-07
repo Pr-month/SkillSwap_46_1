@@ -24,15 +24,11 @@ import { Redis } from 'ioredis';
 export class MailThrottleGuard implements CanActivate {
   private readonly logger = new Logger(MailThrottleGuard.name);
 
-  @Inject(REDIS_CLIENT) private readonly redis: Redis;
-
   constructor(
-    @Inject(REDIS_CLIENT) redis: Redis,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly reflector: Reflector,
     private readonly usersService: UsersService,
-  ) {
-    this.redis = redis;
-  }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const throttleKey = this.reflector.get<string>(
@@ -97,7 +93,7 @@ export class MailThrottleGuard implements CanActivate {
         throw error;
       }
 
-      this.logger.error('Ошибка при проверке лимита отправки писем', error);
+      this.logger.error('Mail throttle check failed', error);
       return true;
     }
   }
