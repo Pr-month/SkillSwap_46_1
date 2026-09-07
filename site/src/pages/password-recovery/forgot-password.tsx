@@ -1,5 +1,5 @@
 import { useState, type FC, type SyntheticEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch } from "../../services/store";
 import { fetchForgotPassword } from "../../services/auth/actions";
 import { handleError } from "../../utils/errors/errorUtils";
@@ -15,7 +15,6 @@ export const ForgotPassword: FC = () => {
   const [success, setSuccess] = useState(false);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -42,9 +41,9 @@ export const ForgotPassword: FC = () => {
       >
         <div className={styles.success}>
           <p>Перейдите по ссылке из письма, чтобы установить новый пароль.</p>
-          <Button variant="primary" onClick={() => navigate("/login")}>
+          <Link to="/login" className={styles.backLink}>
             Вернуться ко входу
-          </Button>
+          </Link>
         </div>
       </AuthLayout>
     );
