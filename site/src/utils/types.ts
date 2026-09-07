@@ -5,6 +5,9 @@ export type TId = string;
 /** ПОЛ ПОЛЬЗОВАТЕЛЯ */
 export type TGender = "MALE" | "FEMALE" | "OTHER";
 
+/** РОЛЬ ПОЛЬЗОВАТЕЛЯ */
+export type TUserRole = "USER" | "ADMIN";
+
 /** ПОЛЬЗОВАТЕЛЬ */
 export interface IUser {
   email: string;
@@ -18,11 +21,18 @@ export interface IUserProfile extends IUser {
   gender?: TGender;
   city: string;
   avatar: string;
-  aboutMe?: string; // "о себе"
+  /** "о себе" (личный профиль, PATCH /users/me) */
+  about?: string | null;
+  /** "о себе" (публичный список, GET /users) */
+  aboutMe?: string | null;
+  role?: TUserRole;
+  /** UUID города (личный профиль) */
+  cityId?: string | null;
   likesSkillsIds: TId[]; // массив id навыков, которые лайкнул пользователь
   userSkill: TId; // навык пользователя, которому он может научить
   interestedSkillsSubcategoriesIds: TId[]; // id[] покатегорий, которым пользователь хочет научиться
-  isEmailConfirmed: boolean;
+  /** Устаревшее поле, оставлено для совместимости (бэк отдаёт role) */
+  isEmailConfirmed?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -105,8 +115,18 @@ export type TLoginUserResponse = TServerResponse<{
   user: IUserProfile;
 }>;
 
-/** ДАННЫЕ ДЛЯ ЗАПРОСА ОБНОВЛЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
+/** ДАННЫЕ ДЛЯ ЗАПРОСА ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
 export type TUpdateUserData = Omit<IUserProfile, "createdAt" | "updatedAt">;
+
+/** ДАННЫЕ ДЛЯ ОБНОВЛЕНИЯ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ (PATCH /users/me) */
+export type TUpdateCurrentUserData = {
+  name?: string;
+  about?: string | null;
+  birthdate?: string;
+  cityId?: string;
+  gender?: TGender;
+  avatar?: string | null;
+};
 
 /** ОТВЕТ НА ЗАПРОС ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
 export type TUpdateUserResponse = TServerResponse<IUserProfile>;

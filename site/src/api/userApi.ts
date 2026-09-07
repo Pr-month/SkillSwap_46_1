@@ -1,5 +1,5 @@
 import { request } from "./client";
-import type { IUserProfile } from "../utils/types";
+import type { IUserProfile, TUpdateCurrentUserData } from "../utils/types";
 import type { TId } from "../utils/types";
 
 interface ApiResponse<T> {
@@ -82,12 +82,11 @@ export const getUserById = (id: TId): Promise<IUserProfile> => {
   );
 };
 
-// PATCH /users/:id
-export const updateUser = (
-  id: string,
-  payload: Partial<IUserProfile>,
+// PATCH /users/me
+export const updateCurrentUser = (
+  payload: TUpdateCurrentUserData,
 ): Promise<IUserProfile> => {
-  return request<ApiResponse<IUserProfile>>(`/users/${id}`, {
+  return request<ApiResponse<IUserProfile>>(`/users/me`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

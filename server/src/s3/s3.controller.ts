@@ -13,7 +13,6 @@ import { memoryStorage } from 'multer';
 
 import { S3Service } from './s3.service';
 
-
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const UPLOAD_FOLDER = 'images';
@@ -51,13 +50,9 @@ export class S3Controller {
       const message =
         error instanceof Error ? error.message : 'Unknown upload error';
 
-      const stack =
-        error instanceof Error ? error.stack : undefined;
+      const stack = error instanceof Error ? error.stack : undefined;
 
-      this.logger.error(
-        `Ошибка при загрузке файла: ${message}`,
-        stack,
-      );
+      this.logger.error(`Ошибка при загрузке файла: ${message}`, stack);
 
       throw new BusinessException(
         exceptionCodes.upload.uploadFailed,
@@ -66,7 +61,7 @@ export class S3Controller {
       );
     }
   }
-    private validateFile(file: Express.Multer.File): void {
+  private validateFile(file: Express.Multer.File): void {
     if (!file) {
       throw new BusinessException(
         exceptionCodes.upload.fileRequired,
@@ -74,7 +69,11 @@ export class S3Controller {
       );
     }
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype as (typeof ALLOWED_IMAGE_TYPES)[number])) {
+    if (
+      !ALLOWED_IMAGE_TYPES.includes(
+        file.mimetype as (typeof ALLOWED_IMAGE_TYPES)[number],
+      )
+    ) {
       throw new BusinessException(
         exceptionCodes.upload.invalidImageType,
         HttpStatus.BAD_REQUEST,

@@ -7,13 +7,12 @@ import {
   logoutUser,
   registerUser,
 } from "../../api/authApi.ts";
-import { updateUser } from "../../api/userApi.ts";
+import { updateCurrentUser } from "../../api/userApi.ts";
 import type {
   IRegisterUserData,
   TLoginUserData,
-  TUpdateUserData,
+  TUpdateCurrentUserData,
 } from "../../utils/types.ts";
-import type { AuthState } from "./types.ts";
 
 export const fetchRegister = createAsyncThunk(
   "auth/register",
@@ -69,14 +68,9 @@ export const fetchProfile = createAsyncThunk(
 
 export const fetchUpdateCurrentUser = createAsyncThunk(
   "auth/updateCurrentUser",
-  async (payload: Partial<TUpdateUserData>, { getState, rejectWithValue }) => {
-    const state = getState() as { auth: AuthState };
-    const { currentUser } = state.auth;
-
-    if (!currentUser?.id) return rejectWithValue("Не найден id пользователя");
-
+  async (payload: TUpdateCurrentUserData, { rejectWithValue }) => {
     try {
-      return await updateUser(currentUser.id, payload);
+      return await updateCurrentUser(payload);
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -86,10 +80,13 @@ export const fetchUpdateCurrentUser = createAsyncThunk(
 /** ОБНОВЛЕНИЕ ПАРОЛЯ ПОЛЬЗОВАТЕЛЯ */
 export const updatePassword = createAsyncThunk(
   "auth/update-password",
-  async (newPassword: string, { rejectWithValue }) => {
+  async (
+    data: { currentPassword: string; newPassword: string },
+    { rejectWithValue },
+  ) => {
     try {
-      await changePassword(newPassword);
-      return newPassword;
+      await changePassword(data.currentPassword, data.newPassword);
+      return data.newPassword;
     } catch (err) {
       return rejectWithValue(err);
     }

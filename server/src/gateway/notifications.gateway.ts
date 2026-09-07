@@ -53,10 +53,7 @@ export class NotificationsGateway
           ? error.message
           : 'Unknown WebSocket connection error';
 
-      const stack =
-        error instanceof Error
-          ? error.stack
-          : undefined;
+      const stack = error instanceof Error ? error.stack : undefined;
 
       this.logger.error(
         `Ошибка подключения WebSocket клиента ${client.id}: ${message}`,

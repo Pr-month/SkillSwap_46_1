@@ -4,7 +4,7 @@ import type {
   TLoginUserData,
   TLoginUserResponse,
 } from "../utils/types";
-import { api, request } from "./client";
+import { request } from "./client";
 
 // POST /auth/register
 export const registerUser = async (
@@ -47,19 +47,16 @@ export const getProfile = async (): Promise<IUserProfile> => {
 
 // PATCH /auth/password
 export const changePassword = async (
+  currentPassword: string,
   newPassword: string,
-): Promise<{ newPassword: string }> => {
-  const resp = await api.patch<{ newPassword: string }>(
-    "/auth/password",
-    { newPassword: newPassword },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
+): Promise<void> => {
+  await request<void>("/auth/password", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
-
-  return resp;
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 };
 
 // POST /auth/logout
