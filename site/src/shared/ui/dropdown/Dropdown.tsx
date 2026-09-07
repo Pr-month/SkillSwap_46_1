@@ -22,6 +22,8 @@ type DropdownProps = {
   searchable?: boolean;
   searchPlaceholder?: string;
   onSearchChange?: (query: string) => void;
+  /** Если false — не фильтровать options на клиенте (опции уже отфильтрованы родителем) */
+  filterOptions?: boolean;
 };
 
 export const Dropdown = (props: DropdownProps) => {
@@ -38,6 +40,7 @@ export const Dropdown = (props: DropdownProps) => {
     searchable = false,
     searchPlaceholder = "Начните вводить...",
     onSearchChange,
+    filterOptions = true,
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +67,7 @@ export const Dropdown = (props: DropdownProps) => {
   });
 
   const filteredOptions = useMemo(() => {
-    if (!searchable) return options;
+    if (!searchable || !filterOptions) return options;
 
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -73,7 +76,7 @@ export const Dropdown = (props: DropdownProps) => {
     return options.filter((option) =>
       option.title.toLowerCase().includes(normalizedQuery),
     );
-  }, [options, searchable, searchQuery]);
+  }, [options, searchable, searchQuery, filterOptions]);
 
   const isFilled = Boolean(selected?.value);
   const isInvalid = required && !isFilled && error;
@@ -87,7 +90,7 @@ export const Dropdown = (props: DropdownProps) => {
     onClose?.();
   };
 
-  const handleTriggerClick: MouseEventHandler<HTMLElement> = (event) => {
+  const handleTriggerClick: MouseEventHandler<Element> = (event) => {
     event.stopPropagation();
 
     if (disabled) return;

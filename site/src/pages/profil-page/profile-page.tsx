@@ -8,6 +8,7 @@ import { UserInfo } from "../../shared/ui/user-info";
 import type { UserInfoProps } from "../../shared/ui/user-info";
 import { ProfileLayout } from "../../widgets/profile-layout/profile-layout";
 import { useImageUpload } from "../../shared/hooks/useImageUpload";
+import type { TGender, TUpdateCurrentUserData } from "../../utils/types";
 
 export const ProfilePage: FC = () => {
   const dispatch = useDispatch();
@@ -56,19 +57,21 @@ export const ProfilePage: FC = () => {
   };
 
   const handleSave: UserInfoProps["onSave"] = async (data) => {
-    await dispatch(
-      fetchUpdateCurrentUser({
-        email: data.email,
-        name: data.name,
-        birthDate: data.birthDate,
-        gender:
-          data.gender?.value === "male" || data.gender?.value === "female"
-            ? data.gender.value
-            : "unspecified",
-        city: data.city,
-        aboutMe: data.about,
-      }),
-    );
+    const payload: TUpdateCurrentUserData = {
+      name: data.name,
+      birthdate: data.birthdate,
+      about: data.about,
+    };
+
+    if (data.gender?.value) {
+      payload.gender = data.gender.value as TGender;
+    }
+
+    if (data.cityId) {
+      payload.cityId = data.cityId;
+    }
+
+    await dispatch(fetchUpdateCurrentUser(payload));
   };
 
   const mappedUser: UserInfoProps["user"] | undefined = currentUser
@@ -80,15 +83,16 @@ export const ProfilePage: FC = () => {
           ? {
               value: currentUser.gender,
               title:
-                currentUser.gender === "male"
+                currentUser.gender === "MALE"
                   ? "Мужской"
-                  : currentUser.gender === "female"
+                  : currentUser.gender === "FEMALE"
                     ? "Женский"
                     : "Другой",
             }
           : null,
         city: currentUser.city,
-        about: currentUser.aboutMe ?? "",
+        cityId: currentUser.cityId,
+        about: currentUser.about ?? "",
         avatar: currentUser.avatar,
       }
     : undefined;
