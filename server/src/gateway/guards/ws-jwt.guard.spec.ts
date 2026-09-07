@@ -1,3 +1,4 @@
+import { TokenType } from '@/common/enums/token-type.enum';
 import { exceptionCodes } from '@/common/errors/error-codes';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { ExecutionContext } from '@nestjs/common';
@@ -44,7 +45,7 @@ describe('WsJwtGuard', () => {
     verifyAsyncMock.mockResolvedValue({
       sub: 'user-id',
       email: 'user@example.com',
-      tokenType: 'access',
+      tokenType: TokenType.ACCESS,
     });
 
     const result = await guard.authenticate(client);
@@ -91,7 +92,7 @@ describe('WsJwtGuard', () => {
     verifyAsyncMock.mockResolvedValue({
       sub: 'user-id',
       email: 'user@example.com',
-      tokenType: 'refresh',
+      tokenType: TokenType.REFRESH,
     });
 
     await expect(guard.authenticate(client)).rejects.toMatchObject({

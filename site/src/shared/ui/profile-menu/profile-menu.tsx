@@ -1,9 +1,9 @@
 import { type FC } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../button";
 import styles from "./profile-menu.module.css";
 import type { ProfileMenuProps } from "./types";
-import { useNavigate } from "react-router-dom";
+import { Icon } from "../icon";
 
 export const ProfileMenu: FC<
   ProfileMenuProps & { onClosePopover?: () => void }
@@ -13,6 +13,8 @@ export const ProfileMenu: FC<
   onRequestClose,
   className,
   onClosePopover,
+  isEmailConfirmed,
+  onConfirmEmailClick,
 }) => {
   const navigate = useNavigate();
 
@@ -30,21 +32,51 @@ export const ProfileMenu: FC<
     navigate("/");
   };
 
+  const handleConfirmEmailClick = async () => {
+    if (onConfirmEmailClick) {
+      await onConfirmEmailClick();
+    }
+    onClosePopover?.();
+  };
+
   return (
     <div
       className={`${styles.menu} ${className || ""}`}
       role="menu"
       aria-label="Меню профиля"
     >
-      <Link
-        to="/profile"
+      <Button
+        variant="text"
         className={styles.menuItem}
         onClick={handleProfileClick}
+        icon="user"
+        iconPosition="right"
+        iconSize={20}
         aria-label="Личный кабинет"
         role="menuitem"
       >
         <span className={styles.menuItemText}>Личный кабинет</span>
-      </Link>
+      </Button>
+
+      {isEmailConfirmed ? (
+        <div className={styles.menuItem}>
+          <span className={styles.menuItemText}>Почта подтверждена</span>
+          <Icon name="like-filled" size={20} />
+        </div>
+      ) : (
+        <Button
+          variant="text"
+          className={styles.menuItem}
+          onClick={handleConfirmEmailClick}
+          icon="notification-alert"
+          iconPosition="right"
+          iconSize={20}
+          aria-label="Подтвердить почту"
+          role="menuitem"
+        >
+          <span className={styles.menuItemText}>Подтвердить почту</span>
+        </Button>
+      )}
 
       <Button
         variant="text"

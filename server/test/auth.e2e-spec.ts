@@ -101,6 +101,8 @@ describe('AuthController (e2e)', () => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.email).toBe(testUser.email);
 
+          console.log('Register status:', res.status);
+          console.log('Register body:', res.body);
           userId = res.body.id;
         });
     });

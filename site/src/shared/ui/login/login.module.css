@@ -91,3 +91,10 @@
 .registration__link:hover {
   text-decoration: underline;
 }
+
+.linksRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}

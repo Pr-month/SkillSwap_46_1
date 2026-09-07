@@ -92,4 +92,7 @@ export class User {
   @Exclude()
   @Column({ type: 'varchar', length: 500, nullable: true })
   refreshToken: string | null;
+
+  @Column({ type: 'boolean', default: false })
+  isEmailConfirmed: boolean;
 }

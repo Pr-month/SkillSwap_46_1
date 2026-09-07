@@ -1,3 +1,6 @@
+import { RequestWithUser } from '@/auth/auth.types';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { EmailConfirmedGuard } from '@/mail/guards/email-confirmed.guard';
 import {
   Body,
   Controller,
@@ -14,8 +17,6 @@ import {
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { RequestWithUser } from '../auth/auth.types';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateRequestDto, UpdateRequestDto } from './dto';
 import { RequestsService } from './requests.service';
 
@@ -27,6 +28,7 @@ export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
   @Post()
+  @UseGuards(EmailConfirmedGuard)
   @ApiOperation({ summary: 'Создать заявку на обмен' })
   create(
     @HttpRequest() request: RequestWithUser,
@@ -48,6 +50,7 @@ export class RequestsController {
   }
 
   @Patch(':id')
+  @UseGuards(EmailConfirmedGuard)
   @ApiOperation({ summary: 'Принять или отклонить входящую заявку' })
   update(
     @HttpRequest() request: RequestWithUser,

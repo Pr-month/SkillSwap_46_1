@@ -1,14 +1,16 @@
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { SkillsService } from '@/skills/skills.service';
+import { UserGender, UserRole } from '@/users/enums/user.enums';
+import { UsersService } from '@/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { SkillsService } from '../skills/skills.service';
-import { UserGender, UserRole } from '../users/enums/user.enums';
-import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 
@@ -55,6 +57,15 @@ describe('AuthService', () => {
     jwtRefreshSecret: 'test-secret',
   };
 
+  const mockRedis = {
+    del: jest.fn(),
+  };
+
+  const mockTokenBlacklistService = {
+    isUsed: jest.fn(),
+    markAsUsed: jest.fn(),
+  };
+
   const mockResponse = {
     cookie: jest.fn(),
     clearCookie: jest.fn(),
@@ -79,6 +90,14 @@ describe('AuthService', () => {
         {
           provide: ConfigurationService,
           useValue: mockConfigService,
+        },
+        {
+          provide: REDIS_CLIENT,
+          useValue: mockRedis,
+        },
+        {
+          provide: TokenBlacklistService,
+          useValue: mockTokenBlacklistService,
         },
       ],
     }).compile();

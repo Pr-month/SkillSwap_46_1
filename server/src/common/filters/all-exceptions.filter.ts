@@ -9,7 +9,11 @@ import {
 import { Request, Response } from 'express';
 import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 
-import { ExceptionCode, exceptionCodes } from '../errors/error-codes';
+import {
+  ExceptionCode,
+  exceptionCodes,
+  isExceptionCode,
+} from '../errors/error-codes';
 
 interface ErrorBody {
   code: ExceptionCode;
@@ -68,10 +72,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
 
       const payload = response as Record<string, unknown>;
-      const code =
-        typeof payload.code === 'string' && payload.code in exceptionCodes
-          ? (payload.code as ExceptionCode)
-          : fallbackCode;
+      const code = isExceptionCode(payload.code)
+        ? (payload.code as ExceptionCode)
+        : fallbackCode;
 
       const message =
         typeof payload.message === 'string' || Array.isArray(payload.message)

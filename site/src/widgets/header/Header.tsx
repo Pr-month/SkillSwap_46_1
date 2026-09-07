@@ -14,6 +14,9 @@ import { logout } from "../../services/auth/slice";
 import { HeaderIcons } from "../../shared/ui/header-icons";
 import { developers } from "../../shared/constants/developers";
 import { fetchLogout } from "../../services/auth/actions";
+import { fetchSendConfirmationEmail } from "../../services/user/actions";
+import { showToast } from "../../utils/toast";
+import { handleError } from "../../utils/errors/errorUtils";
 
 export function Header() {
   const dispatch = useDispatch();
@@ -39,6 +42,15 @@ export function Header() {
     await dispatch(fetchLogout());
     dispatch(logout());
     window.location.href = "/";
+  };
+
+  const handleConfirmEmailClick = async () => {
+    try {
+      await dispatch(fetchSendConfirmationEmail()).unwrap();
+      showToast("Письмо отправлено! Проверьте вашу почту", "success");
+    } catch (err) {
+      showToast(handleError(err).message, "error");
+    }
   };
 
   return (
@@ -142,7 +154,9 @@ export function Header() {
         >
           {({ close }) => (
             <ProfileMenu
+              isEmailConfirmed={user?.isEmailConfirmed ?? false}
               onLogoutClick={handleLogoutClick}
+              onConfirmEmailClick={handleConfirmEmailClick}
               onClosePopover={close}
             />
           )}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { EnvKey } from './const';
+import { EnvKey, NodeEnvValueType } from './const';
 import { EnvironmentVariables } from './model';
 
 @Injectable()
@@ -10,8 +10,8 @@ export class ConfigurationService {
     private configService: ConfigService<EnvironmentVariables, true>,
   ) {}
 
-  get nodeEnv(): string {
-    return this.configService.get<string>(EnvKey.NodeEnv);
+  get nodeEnv(): NodeEnvValueType {
+    return this.configService.get<NodeEnvValueType>(EnvKey.NodeEnv);
   }
 
   get port(): number {
@@ -62,10 +62,6 @@ export class ConfigurationService {
     return this.configService.get<boolean>(EnvKey.DatabaseSynchronize);
   }
 
-  get loggerType(): string {
-    return this.configService.get<string>(EnvKey.LoggerType);
-  }
-
   get s3Region(): string {
     return this.configService.get<string>(EnvKey.S3Region);
   }
@@ -96,5 +92,33 @@ export class ConfigurationService {
 
   get throttleLimit(): number {
     return this.configService.get<number>(EnvKey.ThrottleLimit);
+  }
+
+  get mailHost(): string {
+    return this.configService.get<string>(EnvKey.MailHost);
+  }
+
+  get mailPort(): number {
+    return this.configService.get<number>(EnvKey.MailPort);
+  }
+
+  get mailUser(): string {
+    return this.configService.get<string>(EnvKey.MailUser);
+  }
+
+  get mailPassword(): string {
+    return this.configService.get<string>(EnvKey.MailPassword);
+  }
+
+  get mailFrom(): string {
+    return this.configService.get<string>(EnvKey.MailFrom);
+  }
+
+  get redisHost(): string {
+    return this.configService.get<string>(EnvKey.RedisHost);
+  }
+
+  get redisPort(): number {
+    return this.configService.get<number>(EnvKey.RedisPort);
   }
 }

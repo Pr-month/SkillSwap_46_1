@@ -5,6 +5,7 @@ import {
   deleteUser,
   type GetUsersParams,
   type PaginatedUsersResponse,
+  sendConfirmationEmail,
 } from "../../api/userApi.ts";
 import type { TId } from "../../utils/types.ts";
 
@@ -36,6 +37,17 @@ export const removeUser = createAsyncThunk(
     try {
       await deleteUser(id, token);
       return id;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchSendConfirmationEmail = createAsyncThunk(
+  "auth/sendConfirmationEmail",
+  async (_, { rejectWithValue }) => {
+    try {
+      await sendConfirmationEmail();
     } catch (err) {
       return rejectWithValue(err);
     }

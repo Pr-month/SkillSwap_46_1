@@ -1,9 +1,10 @@
+import { TokenType } from '@/common/enums/token-type.enum';
 import { Request } from 'express';
 
 export interface JwtPayload {
   sub: string; // ID пользователя
   email: string; // email
-  tokenType: 'access' | 'refresh'; // чтобы отличать access от refresh
+  tokenType: TokenType.ACCESS | TokenType.REFRESH; // чтобы отличать access от refresh
   iat?: number;
   exp?: number;
 }

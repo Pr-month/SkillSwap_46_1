@@ -1,29 +1,38 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { TokenType } from '@/common/enums/token-type.enum';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
+import { getMailThrottleRedisKey } from '@/mail/constants/mail-throttle.constants';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { nodeEnvValue } from '@/module/configuration/const';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { SkillsService } from '@/skills/skills.service';
+import { UserGender, UserRole } from '@/users/enums/user.enums';
+import { UsersService } from '@/users/users.service';
+import { CreateUserData } from '@/users/users.types';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
+import { Redis } from 'ioredis';
 import ms, { StringValue } from 'ms';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { SkillsService } from '../skills/skills.service';
-import { UserGender, UserRole } from '../users/enums/user.enums';
-import { UsersService } from '../users/users.service';
-import { CreateUserData } from '../users/users.types';
 import { AuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly usersService: UsersService,
     private readonly skillsService: SkillsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigurationService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly tokenBlacklistService: TokenBlacklistService,
   ) {}
 
   async register(registerDto: RegisterDto, res: Response) {
@@ -113,9 +122,7 @@ export class AuthService {
 
     this.setAuthCookies(res, tokens);
 
-    const fullUser = await this.usersService.findById(user.id);
-
-    return fullUser;
+    return await this.usersService.findById(user.id);
   }
 
   async logout(userId: string, res: Response) {
@@ -159,6 +166,49 @@ export class AuthService {
     return { message: 'Пароль успешно обновлен' };
   }
 
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      if (await this.tokenBlacklistService.isUsed(token)) {
+        throw new BusinessException(
+          exceptionCodes.users.invalidToken,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.jwtAccessSecret,
+      });
+
+      if (payload.tokenType !== 'reset-password') {
+        throw new BusinessException(
+          exceptionCodes.users.invalidToken,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(
+        newPassword,
+        this.configService.hashSalt,
+      );
+
+      await this.usersService.updatePassword(payload.sub, hashedPassword);
+      await this.usersService.clearRefreshToken(payload.sub);
+      await this.tokenBlacklistService.markAsUsed(token, 60 * 60);
+
+      await this.redis.del(
+        getMailThrottleRedisKey('reset-password', payload.email),
+      );
+
+      return { message: 'Пароль успешно сброшен' };
+    } catch (error) {
+      this.logger.warn('Password reset failed', error);
+      throw new BusinessException(
+        exceptionCodes.users.invalidToken,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   async getProfile(userId: string) {
     return this.usersService.getProfile(userId);
   }
@@ -182,7 +232,7 @@ export class AuthService {
         {
           sub: userId,
           email,
-          tokenType: 'access',
+          tokenType: TokenType.ACCESS,
         },
         {
           expiresIn: this.configService.jwtAccessExpiresIn as StringValue,
@@ -193,7 +243,7 @@ export class AuthService {
         {
           sub: userId,
           email,
-          tokenType: 'refresh',
+          tokenType: TokenType.REFRESH,
         },
         {
           expiresIn: this.configService.jwtRefreshExpiresIn as StringValue,
@@ -215,19 +265,19 @@ export class AuthService {
       refreshToken: string;
     },
   ) {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = this.configService.nodeEnv === nodeEnvValue.Production;
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
   }

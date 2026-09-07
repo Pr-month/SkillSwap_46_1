@@ -1,6 +1,7 @@
 import { AppModule } from '@/app.module';
 import { Category } from '@/categories/entities/category.entity';
 import { City } from '@/cities/entities/city.entity';
+import { TokenType } from '@/common/enums/token-type.enum';
 import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { Request } from '@/requests/entities/request.entity';
 import { RequestStatus } from '@/requests/enums/request-status.enum';
@@ -490,7 +491,7 @@ describe('Requests (e2e)', () => {
     const accessToken = jwtService.sign({
       sub: user.id,
       email: user.email,
-      tokenType: 'access',
+      tokenType: TokenType.ACCESS,
     });
 
     return `accessToken=${accessToken}`;

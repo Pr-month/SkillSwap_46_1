@@ -5,6 +5,9 @@ export const exceptionCodes = {
     invalidCredentials: 'user:invalid-credentials',
     emailExists: 'user:email-exists',
     accessDenied: 'user:access-denied',
+    invalidToken: 'user:invalid-token',
+    emailNotConfirmed: 'user:email-not-confirmed',
+    emailAlreadyConfirmed: 'user:email-already-confirmed',
   },
   auth: {
     invalidAccessToken: 'auth:invalid-access-token',
@@ -44,6 +47,10 @@ export const exceptionCodes = {
     conflict: 'app:conflict',
     payloadTooLarge: 'app:payload-too-large',
   },
+  mail: {
+    tooManyRequests: 'mail:too-many-requests',
+    invalidPayload: 'mail:invalid-payload',
+  },
 } as const;
 
 type ExceptionGroup = (typeof exceptionCodes)[keyof typeof exceptionCodes];
@@ -52,3 +59,15 @@ export type ExceptionCode = ExceptionGroup extends infer Group
     ? Group[keyof Group]
     : never
   : never;
+
+export function isExceptionCode(value: unknown): value is ExceptionCode {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  return Object.values(exceptionCodes).some(
+    (group) =>
+      typeof group === 'object' &&
+      Object.values(group).some((code) => code === value),
+  );
+}
