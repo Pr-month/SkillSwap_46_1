@@ -1,14 +1,14 @@
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { Skill } from '@/skills/entities/skills.entity';
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, UpdateResult } from 'typeorm';
 
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { Skill } from '../skills/entities/skills.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryDto } from './dto/users-query.dto';

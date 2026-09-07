@@ -69,11 +69,11 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16-alpine
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: 1234
+          POSTGRES_DB: skillswap
         ports:
           - 5432:5432
         options: >-
@@ -82,9 +82,39 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: skillswap
+      DB_SYNCHRONIZE: true
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
       NODE_ENV: test
+      HASH_SALT: 10
+      JWT_ACCESS_SECRET: test-access-secret
+      JWT_REFRESH_SECRET: test-refresh-secret
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      S3_REGION: ru-1
+      S3_ACCESS_KEY_ID: test
+      S3_SECRET_ACCESS_KEY: test
+      S3_ENDPOINT: http://localhost:9000
+      S3_BUCKET_NAME: test-bucket
+      CORS_ORIGINS: localhost,127.0.0.1
+      THROTTLE_TTL: 60
+      THROTTLE_LIMIT: 100
 
     steps:
       - name: Checkout code

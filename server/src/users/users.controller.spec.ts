@@ -1,6 +1,6 @@
+import { RequestWithUser } from '@/auth/auth.types';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { RequestWithUser } from '../auth/auth.types';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserGender, UserRole } from './enums/user.enums';

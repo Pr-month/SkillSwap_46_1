@@ -279,7 +279,7 @@ describe('MailService', () => {
           tokenType: TokenType.RESET_PASSWORD,
         },
         {
-          expiresIn: '1h',
+          expiresIn: '24h',
           secret: 'test-secret',
         },
       );
@@ -291,12 +291,15 @@ describe('MailService', () => {
       });
     });
 
-    it('should throw if user not found', async () => {
+    it('should not throw if user not found', async () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
 
       await expect(
         service.sendResetPasswordEmail(email, baseUrl),
-      ).rejects.toThrow(BusinessException);
+      ).resolves.toBeUndefined();
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockMailerService.sendMail).not.toHaveBeenCalled();
     });
   });
 });

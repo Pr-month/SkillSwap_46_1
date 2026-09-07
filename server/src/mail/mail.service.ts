@@ -145,16 +145,13 @@ export class MailService {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      throw new BusinessException(
-        exceptionCodes.users.notFound,
-        HttpStatus.NOT_FOUND,
-      );
+      return;
     }
 
     const resetToken = await this.jwtService.signAsync(
       { sub: user.id, email: user.email, tokenType: TokenType.RESET_PASSWORD },
       {
-        expiresIn: '1h',
+        expiresIn: '24h',
         secret: this.configService.jwtAccessSecret,
       },
     );

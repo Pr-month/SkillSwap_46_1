@@ -1,5 +1,5 @@
 import { City } from '@/cities/entities/city.entity';
-import { exceptionCodes, exceptionMessages } from '@/common/errors/error-codes';
+import { exceptionCodes } from '@/common/errors/error-codes';
 import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
 import { User } from '@/users/entities/user.entity';
 import { UserGender } from '@/users/enums/user.enums';
@@ -150,7 +150,7 @@ describe('UsersController (e2e)', () => {
         .expect((res) => {
           expect(res.body).toMatchObject({
             code: exceptionCodes.users.notFound,
-            message: exceptionMessages[exceptionCodes.users.notFound],
+            message: exceptionCodes.users.notFound,
           });
         });
     });
@@ -271,7 +271,7 @@ describe('UsersController (e2e)', () => {
         .expect((res) => {
           expect(res.body).toMatchObject({
             code: exceptionCodes.users.invalidCredentials,
-            message: exceptionMessages[exceptionCodes.users.invalidCredentials],
+            message: exceptionCodes.users.invalidCredentials,
           });
         });
     });

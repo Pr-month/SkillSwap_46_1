@@ -1,9 +1,9 @@
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { Favorite } from '@/skills/entities/favorite.entity';
+import { Skill } from '@/skills/entities/skills.entity';
 import { HttpStatus } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
-import { exceptionCodes } from '../common/errors/error-codes';
-import { Favorite } from '../skills/entities/favorite.entity';
-import { Skill } from '../skills/entities/skills.entity';
 import { FavoritesService } from './favorites.service';
 
 describe('FavoritesService', () => {

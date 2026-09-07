@@ -1,11 +1,11 @@
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
 import { HttpStatus } from '@nestjs/common';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { Skill } from './entities/skills.entity';
 import { SkillsService } from './skills.service';

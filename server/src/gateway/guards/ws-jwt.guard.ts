@@ -82,10 +82,7 @@ export class WsJwtGuard implements CanActivate {
         throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
       }
 
-      this.logger.error(
-        'Неожиданная ошибка при аутентификации WebSocket-клиента',
-        error instanceof Error ? error.stack : undefined,
-      );
+      this.logger.warn('WebSocket authentication failed');
 
       throw this.createWsException(exceptionCodes.common.internal);
     }

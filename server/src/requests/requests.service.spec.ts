@@ -1,12 +1,12 @@
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { NotificationEvent } from '@/gateway/gateway.types';
+import { NotificationsGateway } from '@/gateway/notifications.gateway';
+import { Skill } from '@/skills/entities/skills.entity';
+import { User } from '@/users/entities/user.entity';
+import { UserRole } from '@/users/enums/user.enums';
 import { HttpStatus } from '@nestjs/common';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
-import { exceptionCodes } from '../common/errors/error-codes';
-import { NotificationEvent } from '../gateway/gateway.types';
-import { NotificationsGateway } from '../gateway/notifications.gateway';
-import { Skill } from '../skills/entities/skills.entity';
-import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/enums/user.enums';
 import { Request } from './entities/request.entity';
 import { RequestStatus } from './enums/request-status.enum';
 import { RequestsService } from './requests.service';

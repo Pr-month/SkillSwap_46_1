@@ -25,6 +25,7 @@ describe('User entity', () => {
       'updatedAt',
       'role',
       'refreshToken',
+      'isEmailConfirmed',
     ]);
     expect(
       columns.find(({ propertyName }) => propertyName === 'email')?.options,

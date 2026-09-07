@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { getBaseUrl } from '@/common/utils/get-base-url';
 import { ThrottleKey } from '@/mail/decorators/throttle-key.decorator';
 import { MailThrottleGuard } from '@/mail/guards/confirmation-throttle.guard';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
 import {
   Body,
   Controller,
@@ -21,7 +22,10 @@ import { MailService } from './mail.service';
 
 @Controller('mail')
 export class MailController {
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    private readonly configurationService: ConfigurationService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, MailThrottleGuard)
   @ThrottleKey('confirmation')
@@ -31,7 +35,7 @@ export class MailController {
   async sendConfirmationEmail(
     @Request() req: { user: { id: string } } & ExpressRequest,
   ) {
-    const baseUrl = getBaseUrl(req);
+    const baseUrl = getBaseUrl(this.configurationService.corsOrigins, req);
     return await this.mailService.sendConfirmationEmail(req.user.id, baseUrl);
   }
 
@@ -50,7 +54,7 @@ export class MailController {
     @Body() body: ForgotPasswordDto,
     @Request() req: ExpressRequest,
   ) {
-    const baseUrl = getBaseUrl(req);
+    const baseUrl = getBaseUrl(this.configurationService.corsOrigins, req);
     return await this.mailService.sendResetPasswordEmail(body.email, baseUrl);
   }
 }

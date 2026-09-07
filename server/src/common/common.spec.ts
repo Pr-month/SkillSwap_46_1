@@ -80,7 +80,7 @@ describe('common', () => {
       expect(json).toHaveBeenCalledWith(
         expect.objectContaining({
           code: exceptionCodes.skills.notFound,
-          message: 'Навык не найден',
+          message: exceptionCodes.skills.notFound,
           details: { id: 'skill-id' },
           path: '/skills',
         }),
