@@ -12,6 +12,7 @@ export const exceptionCodes = {
   auth: {
     invalidAccessToken: 'auth:invalid-access-token',
     expiredAccessToken: 'auth:expired-access-token',
+    invalidRefreshToken: 'auth:invalid-refresh-token',
   },
   skills: {
     notFound: 'skill:not-found',
