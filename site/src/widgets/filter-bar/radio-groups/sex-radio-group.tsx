@@ -2,9 +2,9 @@ import React from "react";
 import type { TGenderOption, TGenderFilterProps } from "./types";
 import styles from "./radio-group.module.css";
 export const genderOptions = [
-  { value: "MALE", title: "Мужской" },
-  { value: "FEMALE", title: "Женский" },
-  { value: "OTHER", title: "Другой" },
+  { value: "MALE", label: "Мужской" },
+  { value: "FEMALE", label: "Женский" },
+  { value: "OTHER", label: "Другой" },
 ];
 
 export const SexRadioGroup: React.FC<TGenderFilterProps> = ({
@@ -37,7 +37,7 @@ export const SexRadioGroup: React.FC<TGenderFilterProps> = ({
               className={styles.input}
             />
             <span className={styles.radio} aria-hidden="true" />
-            <span className={styles.label}>{option.title}</span>
+            <span className={styles.label}>{option.label}</span>
           </label>
         ))}
       </div>

@@ -266,6 +266,15 @@ describe('Favorites (e2e)', () => {
           const skillIds = res.body.map((f: { skillId: string }) => f.skillId);
           expect(skillIds).toContain(skillAId);
           expect(skillIds).toContain(skillBId);
+
+          const favoriteA = res.body.find(
+            (f: { skillId: string }) => f.skillId === skillAId,
+          );
+          expect(favoriteA.skill.owner).toMatchObject({
+            city: 'Москва',
+            birthdate: '1990-01-01T00:00:00.000Z',
+            wantsToLearn: [],
+          });
         });
     });
   });

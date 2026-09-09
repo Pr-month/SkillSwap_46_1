@@ -19,6 +19,27 @@ export class FavoriteSkillOwnerDto {
     nullable: true,
   })
   avatar?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Москва',
+    description: 'Город автора навыка',
+    nullable: true,
+  })
+  city?: string | null;
+
+  @ApiPropertyOptional({
+    example: '1990-01-01T00:00:00.000Z',
+    description: 'Дата рождения автора навыка в ISO-формате',
+    nullable: true,
+  })
+  birthdate?: string | null;
+
+  @ApiProperty({
+    type: [String],
+    example: ['Программирование', 'Фотография'],
+    description: 'Названия подкатегорий, которым хочет научиться автор навыка',
+  })
+  wantsToLearn!: string[];
 }
 
 export class FavoriteSkillDto {

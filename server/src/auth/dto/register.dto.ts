@@ -70,6 +70,7 @@ export class RegisterDto {
     require_valid_protocol: true,
     protocols: ['http', 'https'],
     require_host: true,
+    require_tld: false,
   })
   avatar: string;
 
