@@ -44,6 +44,10 @@ export function Header() {
     window.location.href = "/";
   };
 
+  const handleProfileClick = async () => {
+    navigate("/profile");
+  };
+
   const handleConfirmEmailClick = async () => {
     try {
       await dispatch(fetchSendConfirmationEmail()).unwrap();
@@ -155,6 +159,7 @@ export function Header() {
           {({ close }) => (
             <ProfileMenu
               isEmailConfirmed={user?.isEmailConfirmed ?? false}
+              onProfileClick={handleProfileClick}
               onLogoutClick={handleLogoutClick}
               onConfirmEmailClick={handleConfirmEmailClick}
               onClosePopover={close}
