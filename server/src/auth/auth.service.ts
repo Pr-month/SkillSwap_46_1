@@ -19,7 +19,7 @@ import { Response } from 'express';
 import { Redis } from 'ioredis';
 import ms, { StringValue } from 'ms';
 
-import { AuthenticatedUser } from './auth.types';
+import { AuthenticatedUser, RefreshAuthenticatedUser } from './auth.types';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -123,6 +123,32 @@ export class AuthService {
     this.setAuthCookies(res, tokens);
 
     return await this.usersService.findById(user.id);
+  }
+
+  async refresh(user: RefreshAuthenticatedUser, res: Response) {
+    const storedUser = await this.usersService.findById(user.id);
+
+    if (
+      !storedUser ||
+      !storedUser.refreshToken ||
+      storedUser.refreshToken !== user.refreshToken
+    ) {
+      throw new BusinessException(
+        exceptionCodes.auth.invalidRefreshToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const tokens = await this.generateTokens(storedUser.id, storedUser.email);
+
+    await this.usersService.updateRefreshToken(
+      storedUser.id,
+      tokens.refreshToken,
+    );
+
+    this.setAuthCookies(res, tokens);
+
+    return { message: 'Токены успешно обновлены' };
   }
 
   async logout(userId: string, res: Response) {

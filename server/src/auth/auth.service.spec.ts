@@ -54,7 +54,9 @@ describe('AuthService', () => {
     hashSalt: 10,
     jwtAccessExpiresIn: '15m',
     jwtRefreshExpiresIn: '7d',
-    jwtRefreshSecret: 'test-secret',
+    jwtAccessSecret: 'test-access-secret',
+    jwtRefreshSecret: 'test-refresh-secret',
+    nodeEnv: 'test',
   };
 
   const mockRedis = {
@@ -284,6 +286,81 @@ describe('AuthService', () => {
       expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
 
       expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+    });
+  });
+
+  describe('refresh', () => {
+    const refreshUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      refreshToken: 'current-refresh-token',
+    };
+
+    const storedUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      refreshToken: 'current-refresh-token',
+    };
+
+    beforeEach(() => {
+      mockJwtService.signAsync.mockReset();
+    });
+
+    it('should rotate tokens when refresh token is valid', async () => {
+      mockUsersService.findById.mockResolvedValue(storedUser);
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('new-access-token')
+        .mockResolvedValueOnce('new-refresh-token');
+      mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
+
+      const result = await service.refresh(refreshUser, mockResponse);
+
+      expect(result).toEqual({
+        message: 'Токены успешно обновлены',
+      });
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'new-refresh-token',
+      );
+
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reject refresh token that does not match stored token', async () => {
+      mockUsersService.findById.mockResolvedValue({
+        ...storedUser,
+        refreshToken: 'another-refresh-token',
+      });
+
+      await expect(
+        service.refresh(refreshUser, mockResponse),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.auth.invalidRefreshToken,
+      });
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
+    });
+
+    it('should reject refresh token when user no longer has one', async () => {
+      mockUsersService.findById.mockResolvedValue({
+        ...storedUser,
+        refreshToken: null,
+      });
+
+      await expect(
+        service.refresh(refreshUser, mockResponse),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.auth.invalidRefreshToken,
+      });
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
   });
 

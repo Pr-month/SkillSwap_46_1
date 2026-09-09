@@ -26,6 +26,7 @@ export const loginUser = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    retryOnUnauthorized: false,
   });
 };
 
@@ -41,7 +42,10 @@ export const checkUser = async (data: TLoginUserData): Promise<void> => {
 
 // GET /auth/profile
 export const getProfile = async (): Promise<IUserProfile> => {
-  const response = await request<{ data: IUserProfile }>("/auth/profile");
+  const response = await request<{ data: IUserProfile }>("/auth/profile", {
+    showUnauthorizedToast: false,
+  });
+
   return response.data;
 };
 
