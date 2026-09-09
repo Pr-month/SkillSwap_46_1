@@ -1,4 +1,4 @@
-import { useMemo, type FC } from "react";
+import { useEffect, useMemo, type FC } from "react";
 import styles from "./home-page.module.css";
 import { useInitialDataLoader } from "../shared/hooks/useInitialDataLoader";
 import {
@@ -17,7 +17,8 @@ import { useFilteredUsersFetch } from "../shared/hooks/useFilteredUsersFetch";
 import { ECity } from "../shared/constants/cities";
 import { SelectedFilters } from "../widgets/filter-bar/selected-filters";
 import { genderOptions, skillOptions } from "../widgets/filter-bar";
-import { useSelector } from "../services/store";
+import { useDispatch, useSelector } from "../services/store";
+import { fetchFavorites } from "../services/favorite/actions";
 
 const CITY_LABELS: Record<string, string> = Object.entries(ECity).reduce(
   (acc, [, value]) => {
@@ -31,6 +32,17 @@ export const HomePage: FC = () => {
   useInitialDataLoader();
   useFilteredUsersFetch();
   const usersSentinelRef = useUsersInfiniteScroll();
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.auth.currentUser);
+
+  // Подгружаем избранное один раз при открытии каталога, чтобы
+  // selectFavoriteSkillIds был заполнен и карточки показывали корректный
+  // статус ❤️ (добавление/удаление идёт через отдельные POST/DELETE).
+  useEffect(() => {
+    if (currentUser) {
+      dispatch(fetchFavorites());
+    }
+  }, [dispatch, currentUser]);
 
   const users = useSelector(selectUsers);
   const popular = useSelector(selectPopularUsers);

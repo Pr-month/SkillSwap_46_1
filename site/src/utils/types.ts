@@ -205,3 +205,40 @@ export interface IMyRequests {
   sent: ISkillExchange[];
   received: ISkillExchange[];
 }
+
+//* === ИЗБРАННОЕ ===
+
+/** ВЛАДЕЛЕЦ НАВЫКА В ИЗБРАННОМ */
+export interface FavoriteSkillOwnerDto {
+  id: string;
+  name: string;
+  avatar: string | null | undefined;
+  city: string | null;
+  birthdate: string | null;
+  wantsToLearn: string[];
+}
+
+/** НАВЫК В ИЗБРАННОМ */
+export interface FavoriteSkillDto {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  category: string;
+  subcategory?: string;
+  owner?: FavoriteSkillOwnerDto;
+}
+
+/** ЗАПИСЬ ИЗБРАННОГО */
+export interface FavoriteDto {
+  id: string;
+  userId: string;
+  skillId: string;
+  createdAt: string;
+  skill?: FavoriteSkillDto;
+}
+
+/** РЕЗУЛЬТАТ ПРОВЕРКИ НАХОЖДЕНИЯ НАВЫКА В ИЗБРАННОМ */
+export interface FavoriteCheckResult {
+  isFavorite: boolean;
+}

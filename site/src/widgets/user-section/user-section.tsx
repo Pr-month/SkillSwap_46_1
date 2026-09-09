@@ -1,6 +1,11 @@
 import { useState, type FC } from "react";
-import { fetchUpdateCurrentUser } from "../../services/auth/actions";
 import { useDispatch, useSelector } from "../../services/store";
+import {
+  fetchAddFavorite,
+  fetchRemoveFavorite,
+} from "../../services/favorite/actions";
+import { selectFavoriteSkillIds } from "../../services/favorite/slice";
+import { showToast } from "../../utils/toast";
 import { getSkillTitle } from "../../shared/lib/getSkillTitle";
 import { getSubcategoryNames } from "../../shared/lib/getSubcategoryNames";
 import { getLearnColors, getTeachColor } from "../../shared/lib/skillColors";
@@ -64,28 +69,38 @@ export const UserSection: FC<UserSectionProps> = ({
   const categories = useSelector((state) => state.category.categories);
   const currentUser = useSelector((state) => state.auth.currentUser);
   const sentRequests = useSelector((state) => state.requests.sent);
+  const favoriteSkillIds = useSelector(selectFavoriteSkillIds);
 
   const [sortOrder, setSortOrder] = useState<"new" | "old">("new");
+  const [pendingFavoriteId, setPendingFavoriteId] = useState<TId | null>(null);
 
   // Обработчик клика по ❤️
-  const handleFavoriteClick = (skillId: TId): void => {
-    if (!currentUser) {
+  const handleFavoriteClick = async (skillId: TId): Promise<void> => {
+    if (!currentUser || !skillId || pendingFavoriteId) {
       return;
     }
 
-    const likesSkillsIds = currentUser.likesSkillsIds ?? [];
-    const isLiked = likesSkillsIds.includes(skillId);
+    const isLiked = favoriteSkillIds.has(skillId);
 
-    const nextLikesSkillsIds = isLiked
-      ? likesSkillsIds.filter((id) => id !== skillId)
-      : [...likesSkillsIds, skillId];
+    setPendingFavoriteId(skillId);
 
-    // Асинхронное обновление пользователей для автообновления selectPopularUsers в HomePage
-    (async () => {
-      await dispatch(
-        fetchUpdateCurrentUser({ likesSkillsIds: nextLikesSkillsIds }),
+    try {
+      if (isLiked) {
+        await dispatch(fetchRemoveFavorite(skillId)).unwrap();
+      } else {
+        await dispatch(fetchAddFavorite(skillId)).unwrap();
+      }
+
+      showToast(
+        isLiked ? "Удалено из избранного" : "Добавлено в избранное",
+        "success",
       );
-    })();
+    } catch (error) {
+      console.error("Не удалось обновить избранное", error);
+      showToast("Не удалось обновить избранное", "error");
+    } finally {
+      setPendingFavoriteId(null);
+    }
   };
 
   const usersWithSkillDate = users.map((user) => {
@@ -151,9 +166,8 @@ export const UserSection: FC<UserSectionProps> = ({
     age: user.age,
     canTeach: user.canTeach,
     wantsToLearn: user.wantsToLearn,
-    isFavorite: currentUser
-      ? (currentUser.likesSkillsIds ?? []).includes(user.userSkill)
-      : false,
+    isFavorite: favoriteSkillIds.has(user.userSkill),
+    favoriteLoading: pendingFavoriteId === user.userSkill,
     onFavoriteClick: () => handleFavoriteClick(user.userSkill),
     teachColor: getTeachColor(
       user.userSkill,

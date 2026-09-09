@@ -6,6 +6,7 @@ import { citySlice } from "./city/slice";
 import { authSlice } from "./auth/slice";
 import { filterSlice } from "./filter/slice.ts";
 import { requestSlice } from "./request/slice.ts";
+import { favoriteSlice } from "./favorite/slice";
 
 import {
   useDispatch as dispatchHook,
@@ -20,6 +21,7 @@ export const rootReducer = combineSlices(
   authSlice,
   filterSlice,
   requestSlice,
+  favoriteSlice,
 );
 
 export const store = configureStore({

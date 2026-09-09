@@ -14,7 +14,10 @@ export class FavoritesService {
   private readonly skillRelations = {
     category: true,
     subcategory: true,
-    owner: true,
+    owner: {
+      city: true,
+      wantToLearnSubcategories: true,
+    },
   };
 
   constructor(
@@ -78,7 +81,10 @@ export class FavoritesService {
         skill: {
           category: true,
           subcategory: true,
-          owner: true,
+          owner: {
+            city: true,
+            wantToLearnSubcategories: true,
+          },
         },
       },
       order: { createdAt: 'DESC' },
@@ -113,6 +119,14 @@ export class FavoritesService {
               id: skill.owner.id,
               name: skill.owner.name,
               avatar: skill.owner.avatar,
+              city: skill.owner.city?.name ?? null,
+              birthdate: skill.owner.birthdate
+                ? new Date(skill.owner.birthdate).toISOString()
+                : null,
+              wantsToLearn:
+                skill.owner.wantToLearnSubcategories?.map(
+                  (subcategory) => subcategory.name,
+                ) ?? [],
             }
           : undefined,
       },

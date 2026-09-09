@@ -27,7 +27,12 @@ import {
   fetchMyRequests,
   updateRequestStatusAction,
 } from "../../services/request/actions";
-import { fetchUpdateCurrentUser } from "../../services/auth/actions";
+import {
+  fetchAddFavorite,
+  fetchFavorites,
+  fetchRemoveFavorite,
+} from "../../services/favorite/actions";
+import { selectFavoriteSkillIds } from "../../services/favorite/slice";
 import { showToast } from "../../utils/toast";
 
 const getAgeNumber = (birthDate: string): number => {
@@ -58,6 +63,7 @@ export function SkillPage() {
   const currentUser = useSelector((state) => state.auth.currentUser);
   const requestsReceived = useSelector((state) => state.requests.received);
   const sentRequests = useSelector((state) => state.requests.sent);
+  const favoriteSkillIds = useSelector(selectFavoriteSkillIds);
 
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
@@ -87,6 +93,7 @@ export function SkillPage() {
 
     if (currentUser) {
       dispatch(fetchMyRequests());
+      dispatch(fetchFavorites());
     }
   }, [
     dispatch,
@@ -155,9 +162,7 @@ export function SkillPage() {
     categories,
   );
 
-  const isFavorite = (currentUser?.likesSkillsIds ?? []).includes(
-    selectedUser.userSkill,
-  );
+  const isFavorite = favoriteSkillIds.has(selectedUser.userSkill);
 
   const isOwnProfile = currentUser?.id === selectedUser?.id;
 
@@ -216,20 +221,16 @@ export function SkillPage() {
       return;
     }
 
+    const isLiked = favoriteSkillIds.has(skillId);
+
     setIsTogglingFavorite(true);
 
-    const likesSkillsIds = currentUser.likesSkillsIds ?? [];
-    const isLiked = likesSkillsIds.includes(skillId);
-
-    const nextLikesSkillsIds = isLiked
-      ? likesSkillsIds.filter((id) => id !== skillId)
-      : [...likesSkillsIds, skillId];
-
     try {
-      await dispatch(
-        fetchUpdateCurrentUser({ likesSkillsIds: nextLikesSkillsIds }),
-      ).unwrap();
-      dispatch(fetchUsers());
+      if (isLiked) {
+        await dispatch(fetchRemoveFavorite(skillId)).unwrap();
+      } else {
+        await dispatch(fetchAddFavorite(skillId)).unwrap();
+      }
       showToast(
         isLiked ? "Удалено из избранного" : "Добавлено в избранное",
         "success",
@@ -507,9 +508,7 @@ export function SkillPage() {
               age: user.age,
               canTeach: user.canTeach,
               wantsToLearn: user.wantsToLearn,
-              isFavorite: (currentUser?.likesSkillsIds ?? []).includes(
-                user.userSkill,
-              ),
+              isFavorite: favoriteSkillIds.has(user.userSkill),
               onFavoriteClick: () => handleFavoriteClick(user.userSkill),
               teachColor: getTeachColor(
                 user.userSkill,

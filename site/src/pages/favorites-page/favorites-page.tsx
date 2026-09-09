@@ -3,14 +3,14 @@ import { ProfileFavorites } from "../../widgets/profile-favorites/profile-favori
 import { useInitialDataLoader } from "../../shared/hooks/useInitialDataLoader";
 import { ProfileLayout } from "../../widgets/profile-layout/profile-layout";
 import { useDispatch } from "../../services/store";
-import { fetchUsers } from "../../services/user/actions";
+import { fetchFavorites } from "../../services/favorite/actions";
 
 export const FavoritesPage = () => {
   useInitialDataLoader();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchUsers({ page: 1, limit: 20 }));
+    dispatch(fetchFavorites());
   }, [dispatch]);
 
   return (

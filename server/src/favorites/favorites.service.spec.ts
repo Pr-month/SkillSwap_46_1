@@ -47,6 +47,14 @@ describe('FavoritesService', () => {
         id: 'owner-id',
         name: 'Иван',
         avatar: 'https://example.com/avatar.jpg',
+        city: {
+          name: 'Москва',
+        },
+        birthdate: new Date('1990-01-01T00:00:00.000Z'),
+        wantToLearnSubcategories: [
+          { name: 'Программирование' },
+          { name: 'Фотография' },
+        ],
       },
     } as Skill;
 
@@ -74,7 +82,10 @@ describe('FavoritesService', () => {
         relations: {
           category: true,
           subcategory: true,
-          owner: true,
+          owner: {
+            city: true,
+            wantToLearnSubcategories: true,
+          },
         },
       });
 
@@ -105,6 +116,9 @@ describe('FavoritesService', () => {
             id: skill.owner.id,
             name: skill.owner.name,
             avatar: skill.owner.avatar,
+            city: 'Москва',
+            birthdate: '1990-01-01T00:00:00.000Z',
+            wantsToLearn: ['Программирование', 'Фотография'],
           },
         },
       });
@@ -180,7 +194,10 @@ describe('FavoritesService', () => {
           skill: {
             category: true,
             subcategory: true,
-            owner: true,
+            owner: {
+              city: true,
+              wantToLearnSubcategories: true,
+            },
           },
         },
         order: { createdAt: 'DESC' },
@@ -199,11 +216,14 @@ describe('FavoritesService', () => {
             images: skill.images,
             category: skill.category.name,
             subcategory: skill.subcategory.name,
-            owner: {
-              id: skill.owner.id,
-              name: skill.owner.name,
-              avatar: skill.owner.avatar,
-            },
+          owner: {
+            id: skill.owner.id,
+            name: skill.owner.name,
+            avatar: skill.owner.avatar,
+            city: 'Москва',
+            birthdate: '1990-01-01T00:00:00.000Z',
+            wantsToLearn: ['Программирование', 'Фотография'],
+          },
           },
         },
       ]);

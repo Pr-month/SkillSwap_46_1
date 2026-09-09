@@ -15,6 +15,7 @@ export type SkillCardProps = {
   canTeach: string;
   wantsToLearn: string[];
   isFavorite?: boolean;
+  favoriteLoading?: boolean;
   onFavoriteClick?: (id: TId) => void;
   teachColor?: string;
   wantsToLearnColors?: string[];
@@ -50,6 +51,7 @@ export const SkillCard = memo(function SkillCard({
   canTeach,
   wantsToLearn,
   isFavorite = false,
+  favoriteLoading = false,
   onFavoriteClick,
   teachColor,
   wantsToLearnColors = [],
@@ -89,6 +91,7 @@ export const SkillCard = memo(function SkillCard({
 
         <Toggle
           checked={isFavorite}
+          disabled={favoriteLoading}
           onChange={handleFavoriteChange}
           checkedIcon="like-filled"
           checkedIconColor="#ABD27A"
