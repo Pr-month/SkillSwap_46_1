@@ -4,27 +4,28 @@ import styles from "./profile-favorites.module.css";
 import { SkillCard } from "../skillcard";
 import type { SkillCardProps } from "../skillcard";
 import { Button } from "../../shared/ui/button";
-import type { IUserProfile, TId } from "../../utils/types";
+import type {
+  ISkillsCategory,
+  ISkillsSubcategory,
+  TId,
+} from "../../utils/types";
 import { useDispatch, useSelector } from "../../services/store";
-import { fetchUpdateCurrentUser } from "../../services/auth/actions";
-import { getSubcategoryNames } from "../../shared/lib/getSubcategoryNames";
-import { getSkillTitle } from "../../shared/lib/getSkillTitle";
-import { getLearnColors, getTeachColor } from "../../shared/lib/skillColors";
+import { fetchRemoveFavorite } from "../../services/favorite/actions";
+import { selectFavorites } from "../../services/favorite/slice";
+import { getCategoryColorBySubcategoryId } from "../../shared/lib/skillColors";
 
-type ValidTId = Exclude<TId, null | undefined>;
+const DEFAULT_LEARN_COLOR = "var(--color-category-health)";
 
-type PreparedUser = IUserProfile & {
-  age: number;
-  canTeach: string;
-  wantsToLearn: string[];
-  userSkill: ValidTId;
-};
+function getAgeFromBirthDate(
+  birthdate: string | null | undefined,
+): number {
+  if (!birthdate) {
+    return 0;
+  }
 
-function getAgeFromBirthDate(birthDate: string): number | null {
-  const birth = new Date(birthDate);
-
+  const birth = new Date(birthdate);
   if (Number.isNaN(birth.getTime())) {
-    return null;
+    return 0;
   }
 
   const today = new Date();
@@ -35,7 +36,23 @@ function getAgeFromBirthDate(birthDate: string): number | null {
     age -= 1;
   }
 
-  return age >= 0 ? age : null;
+  return age >= 0 ? age : 0;
+}
+
+function getSubcategoryColor(
+  name: string | undefined,
+  subCategories: ISkillsSubcategory[],
+  categories: ISkillsCategory[],
+): string | undefined {
+  if (!name) {
+    return undefined;
+  }
+
+  const subCategory = subCategories.find((item) => item.name === name);
+
+  return subCategory
+    ? getCategoryColorBySubcategoryId(subCategory.id, subCategories, categories)
+    : undefined;
 }
 
 export const ProfileFavorites: FC = () => {
@@ -43,8 +60,7 @@ export const ProfileFavorites: FC = () => {
   const navigate = useNavigate();
 
   const currentUser = useSelector((state) => state.auth.currentUser);
-  const users = useSelector((state) => state.user.list);
-  const skills = useSelector((state) => state.skills.data);
+  const favorites = useSelector(selectFavorites);
   const subCategories = useSelector((state) => state.category.subCategories);
   const categories = useSelector((state) => state.category.categories);
   const sentRequests = useSelector((state) => state.requests.sent);
@@ -54,11 +70,7 @@ export const ProfileFavorites: FC = () => {
       return;
     }
 
-    const nextLikesSkillsIds = currentUser.likesSkillsIds.filter(
-      (id) => id !== skillId,
-    );
-
-    dispatch(fetchUpdateCurrentUser({ likesSkillsIds: nextLikesSkillsIds }));
+    dispatch(fetchRemoveFavorite(skillId));
   };
 
   const handleGoToCatalog = (): void => {
@@ -91,62 +103,43 @@ export const ProfileFavorites: FC = () => {
     );
   }
 
-  const favoriteUsers: PreparedUser[] = users
-    .filter((user) => (currentUser.likesSkillsIds ?? []).includes(user.userSkill))
-    .map((user) => {
-      const age = getAgeFromBirthDate(user.birthDate);
-      const canTeach = getSkillTitle(user.userSkill, skills);
-      const wantsToLearn = getSubcategoryNames(
-        user.interestedSkillsSubcategoriesIds,
-        subCategories,
-      );
+  const cards: SkillCardProps[] = favorites
+    .filter((favorite) => Boolean(favorite.skill))
+    .map((favorite) => {
+      const skill = favorite.skill!;
+      const owner = skill.owner;
+
+      const wantsToLearn = owner?.wantsToLearn ?? [];
 
       return {
-        ...user,
-        age,
-        canTeach,
+        id: owner?.id,
+        avatar: owner?.avatar ?? "",
+        name: owner?.name ?? "",
+        city: owner?.city ?? "",
+        age: getAgeFromBirthDate(owner?.birthdate),
+        canTeach: skill.title,
         wantsToLearn,
+        isFavorite: true,
+        onFavoriteClick: () => handleFavoriteClick(favorite.skillId),
+        teachColor: getSubcategoryColor(
+          skill.subcategory,
+          subCategories,
+          categories,
+        ),
+        wantsToLearnColors: wantsToLearn.map(
+          (name) =>
+            getSubcategoryColor(name, subCategories, categories) ??
+            DEFAULT_LEARN_COLOR,
+        ),
+        disableDetails: owner
+          ? String(owner.id) === String(currentUser.id)
+          : true,
+        exchangeProposed: sentRequests.some(
+          (request) =>
+            String(request.requiredSkillUserId) === String(owner?.id),
+        ),
       };
-    })
-    .filter((user): user is PreparedUser => {
-      return (
-        Boolean(user.name?.trim()) &&
-        Boolean(user.city?.trim()) &&
-        user.age !== null &&
-        user.age >= 14 &&
-        user.userSkill !== null &&
-        user.userSkill !== undefined &&
-        Boolean(user.canTeach?.trim()) &&
-        user.wantsToLearn.length > 0
-      );
     });
-
-  const cards: SkillCardProps[] = favoriteUsers.map((user) => ({
-    id: user.id,
-    avatar: user.avatar,
-    name: user.name,
-    city: user.city,
-    age: user.age,
-    canTeach: user.canTeach,
-    wantsToLearn: user.wantsToLearn,
-    isFavorite: true,
-    onFavoriteClick: () => handleFavoriteClick(user.userSkill),
-    teachColor: getTeachColor(
-      user.userSkill,
-      skills,
-      subCategories,
-      categories,
-    ),
-    wantsToLearnColors: getLearnColors(
-      user.interestedSkillsSubcategoriesIds,
-      subCategories,
-      categories,
-    ),
-    disableDetails: String(user.id) === String(currentUser.id),
-    exchangeProposed: sentRequests.some(
-      (request) => String(request.requiredSkillUserId) === String(user.id),
-    ),
-  }));
 
   return (
     <section className={styles.section}>

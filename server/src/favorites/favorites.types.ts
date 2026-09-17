@@ -1,5 +1,6 @@
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../categories/entities/subcategory.entity';
+import { City } from '../cities/entities/city.entity';
 import { Favorite } from '../skills/entities/favorite.entity';
 import { Skill } from '../skills/entities/skills.entity';
 import { User } from '../users/entities/user.entity';
@@ -9,7 +10,13 @@ export type FavoriteData = Pick<
   'id' | 'userId' | 'skillId' | 'createdAt'
 >;
 
-export type FavoriteSkillOwnerData = Pick<User, 'id' | 'name' | 'avatar'>;
+export type FavoriteSkillOwnerData = Pick<
+  User,
+  'id' | 'name' | 'avatar' | 'birthdate'
+> & {
+  city: Pick<City, 'name'> | null;
+  wantToLearnSubcategories: Pick<Subcategory, 'name'>[];
+};
 
 export type FavoriteSkillData = Pick<
   Skill,
