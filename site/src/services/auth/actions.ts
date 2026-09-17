@@ -7,10 +7,12 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  registerUserOAuth,
   resetPassword,
 } from "../../api/authApi.ts";
 import { updateCurrentUser } from "../../api/userApi.ts";
 import type {
+  IRegisterOAuthData,
   IRegisterUserData,
   TLoginUserData,
   TUpdateCurrentUserData,
@@ -125,6 +127,17 @@ export const fetchResetPassword = createAsyncThunk(
   ) => {
     try {
       await resetPassword(payload.token, payload.newPassword);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchRegisterOAuth = createAsyncThunk(
+  "auth/register-oauth",
+  async (data: IRegisterOAuthData, { rejectWithValue }) => {
+    try {
+      return await registerUserOAuth(data);
     } catch (err) {
       return rejectWithValue(err);
     }

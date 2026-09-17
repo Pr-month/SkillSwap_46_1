@@ -157,6 +157,7 @@ export function Header() {
               isEmailConfirmed={user?.isEmailConfirmed ?? false}
               onLogoutClick={handleLogoutClick}
               onConfirmEmailClick={handleConfirmEmailClick}
+              onProfileClick={() => navigate("/profile")}
               onClosePopover={close}
             />
           )}

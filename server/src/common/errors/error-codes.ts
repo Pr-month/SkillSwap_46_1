@@ -13,6 +13,11 @@ export const exceptionCodes = {
     invalidAccessToken: 'auth:invalid-access-token',
     expiredAccessToken: 'auth:expired-access-token',
     invalidRefreshToken: 'auth:invalid-refresh-token',
+    oauthFailed: 'auth:oauth-failed',
+    oauthEmailMissing: 'auth:oauth-email-missing',
+    oauthStateInvalid: 'auth:oauth-state-invalid',
+    unknownOAuthProvider: 'auth:unknown-oauth-provider',
+    oauthPendingExpired: 'auth:oauth-pending-expired',
   },
   skills: {
     notFound: 'skill:not-found',

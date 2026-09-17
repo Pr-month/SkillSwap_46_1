@@ -1,8 +1,10 @@
 import type {
+  IRegisterOAuthData,
   IRegisterUserData,
   IUserProfile,
   TLoginUserData,
   TLoginUserResponse,
+  TOAuthPendingProfile,
 } from "../utils/types";
 import { request } from "./client";
 
@@ -94,4 +96,24 @@ export const resetPassword = async (
 // GET /mail/confirm-email
 export const confirmEmail = async (token: string): Promise<void> => {
   await request<void>(`/mail/confirm-email?token=${token}`);
+};
+
+// POST /auth/register/oauth
+export const registerUserOAuth = async (
+  data: IRegisterOAuthData,
+): Promise<TLoginUserResponse> => {
+  const resp = await request<TLoginUserResponse>("/auth/register/oauth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return resp;
+};
+
+export const getOAuthPending = async (
+  pendingId: string,
+): Promise<TOAuthPendingProfile> => {
+  return await request<TOAuthPendingProfile>(
+    `/auth/oauth/pending/${pendingId}`,
+  );
 };

@@ -587,6 +587,112 @@ describe('UsersService', () => {
       expect(builder.take).toHaveBeenCalledWith(2);
     });
   });
+
+  it('returns profile with null/empty fallbacks when relations are missing', async () => {
+    const user = createUser({
+      city: undefined as unknown as typeof mockCity,
+      cityId: null as unknown as string,
+      skills: undefined as unknown as Skill[],
+      favoriteSkills: undefined as unknown as Skill[],
+      wantToLearnSubcategories: undefined as unknown as Subcategory[],
+    });
+
+    usersRepository.findOne.mockResolvedValue(user);
+
+    const profile = await service.getProfile(userId);
+
+    expect(profile.city).toBeNull();
+    expect(profile.likesSkillsIds).toEqual([]);
+    expect(profile.userSkill).toBeNull();
+    expect(profile.interestedSkillsSubcategoriesIds).toEqual([]);
+  });
+
+  it('throws 404 when page > 1 and total === 0', async () => {
+    const builder = createQueryBuilderMock([[], 0]);
+    usersRepository.createQueryBuilder.mockReturnValue(builder);
+
+    const query = new UsersQueryDto();
+    query.page = 2;
+    query.limit = 20;
+
+    await expect(service.findAll(query)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('updates about and cityId through separate update call', async () => {
+    const existing = createUser();
+    const updated = createUser({
+      name: 'Новое имя',
+      about: 'Новое about',
+      cityId: 'new-city-id',
+    });
+
+    usersRepository.findOne
+      .mockResolvedValueOnce(existing)
+      .mockResolvedValueOnce(updated);
+    usersRepository.save.mockResolvedValue(updated);
+    usersRepository.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+
+    const dto: UpdateUserDto = {
+      name: 'Новое имя',
+      about: 'Новое about',
+      cityId: 'new-city-id',
+    };
+
+    const result = await service.updateProfile(userId, dto);
+
+    expect(usersRepository.save).toHaveBeenCalled();
+    expect(usersRepository.update).toHaveBeenCalledWith(
+      { id: userId },
+      { cityId: 'new-city-id' },
+    );
+    expect(result.about).toBe('Новое about');
+  });
+
+  it('throws when updating password of a missing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+    await expect(
+      service.updatePassword(userId, 'new-hash'),
+    ).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('confirms email of an existing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+
+    await expect(service.confirmEmail(userId)).resolves.toBeUndefined();
+
+    expect(usersRepository.update).toHaveBeenCalledWith(
+      { id: userId },
+      { isEmailConfirmed: true },
+    );
+  });
+
+  it('throws when confirming email of a missing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+    await expect(service.confirmEmail(userId)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('throws when changing password of a missing user', async () => {
+    usersRepository.findOne.mockResolvedValue(null);
+
+    await expect(
+      service.changePassword(userId, {
+        currentPassword: 'old',
+        newPassword: 'new',
+      }),
+    ).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+
+    expect(bcrypt.compare).not.toHaveBeenCalled();
+  });
 });
 
 type MockedQueryBuilder = {

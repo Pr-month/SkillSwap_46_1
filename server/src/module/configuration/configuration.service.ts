@@ -121,4 +121,28 @@ export class ConfigurationService {
   get redisPort(): number {
     return this.configService.get<number>(EnvKey.RedisPort);
   }
+
+  get googleClientId(): string {
+    return this.configService.get<string>(EnvKey.GoogleClientId);
+  }
+
+  get googleClientSecret(): string {
+    return this.configService.get<string>(EnvKey.GoogleClientSecret);
+  }
+
+  get googleCallbackUrl(): string {
+    return this.configService.get<string>(EnvKey.GoogleCallbackUrl);
+  }
+
+  get yandexClientId(): string {
+    return this.configService.get<string>(EnvKey.YandexClientId);
+  }
+
+  get yandexClientSecret(): string {
+    return this.configService.get<string>(EnvKey.YandexClientSecret);
+  }
+
+  get yandexCallbackUrl(): string {
+    return this.configService.get<string>(EnvKey.YandexCallbackUrl);
+  }
 }
