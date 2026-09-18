@@ -173,7 +173,7 @@ describe("userSlice", () => {
       };
       const state = userReducer(
         stateWithUsers,
-        removeUser.fulfilled("user-1", "", { id: "user-1", token: "tok" }),
+        removeUser.fulfilled("user-1", "", { id: "user-1" }),
       );
       expect(state.list).toEqual([mockUser2]);
     });
@@ -186,7 +186,7 @@ describe("userSlice", () => {
       };
       const state = userReducer(
         stateWithSelected,
-        removeUser.fulfilled("user-1", "", { id: "user-1", token: "tok" }),
+        removeUser.fulfilled("user-1", "", { id: "user-1" }),
       );
       expect(state.selectedUser).toBeNull();
     });
@@ -199,7 +199,7 @@ describe("userSlice", () => {
       };
       const state = userReducer(
         stateWithSelected,
-        removeUser.fulfilled("user-2", "", { id: "user-2", token: "tok" }),
+        removeUser.fulfilled("user-2", "", { id: "user-2" }),
       );
       expect(state.selectedUser).toEqual(mockUser1);
     });

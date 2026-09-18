@@ -6,8 +6,16 @@ interface ApiResponse<T> {
   data: T;
 }
 
-type ApiSubcategory = Omit<ISkillsSubcategory, "skillCategoryId"> & {
+type ApiSubcategory = {
+  id: TId;
+  name: string;
   categoryId: TId;
+};
+
+type ApiCategory = {
+  id: TId;
+  name: string;
+  subcategories: ApiSubcategory[];
 };
 
 const normalizeSubcategory = (
@@ -18,47 +26,37 @@ const normalizeSubcategory = (
   skillCategoryId: subcategory.categoryId,
 });
 
-const normalizeCategory = (category: ISkillsCategory): ISkillsCategory => ({
-  ...category,
-  subcategories: category.subcategories.map((subcategory) =>
-    normalizeSubcategory(subcategory as ApiSubcategory),
-  ),
+const normalizeCategory = (category: ApiCategory): ISkillsCategory => ({
+  id: category.id,
+  name: category.name,
+  subcategories: category.subcategories.map(normalizeSubcategory),
 });
 
 export const getCategories = (): Promise<ISkillsCategory[]> => {
-  return request<ApiResponse<ISkillsCategory[]>>("/categories").then(
-    (response) => response.data.map(normalizeCategory),
+  return request<ApiResponse<ApiCategory[]>>("/categories").then((response) =>
+    response.data.map(normalizeCategory),
   );
 };
 
 export const getSubCategories = (): Promise<ISkillsSubcategory[]> => {
-  return request<
-    ApiResponse<
-      {
-        id: TId;
-        name: string;
-        categoryId: TId;
-      }[]
-    >
-  >("/subcategories").then((response) =>
-    response.data.map((subcategory) => ({
-      id: subcategory.id,
-      name: subcategory.name,
-      skillCategoryId: subcategory.categoryId,
-    })),
+  return request<ApiResponse<ApiSubcategory[]>>("/subcategories").then(
+    (response) =>
+      response.data.map((subcategory) => ({
+        id: subcategory.id,
+        name: subcategory.name,
+        skillCategoryId: subcategory.categoryId,
+      })),
   );
 };
 
 export const getCategoryById = (id: TId): Promise<ISkillsCategory> => {
-  return request<ApiResponse<ISkillsCategory[]>>("/categories").then(
-    (response) => {
-      const category = response.data.find((category) => category.id === id);
+  return request<ApiResponse<ApiCategory[]>>("/categories").then((response) => {
+    const category = response.data.find((category) => category.id === id);
 
-      if (!category) {
-        throw new Error(`Category with id ${id} not found`);
-      }
+    if (!category) {
+      throw new Error(`Category with id ${id} not found`);
+    }
 
-      return normalizeCategory(category);
-    },
-  );
+    return normalizeCategory(category);
+  });
 };

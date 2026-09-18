@@ -50,7 +50,7 @@ export const authSlice = createSlice({
       .addCase(fetchLogin.pending, handlePending)
       .addCase(fetchLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload.data;
+        state.currentUser = action.payload.user;
       })
       .addCase(fetchLogin.rejected, handleRejected)
 
