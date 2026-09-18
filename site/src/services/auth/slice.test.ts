@@ -1,4 +1,4 @@
-import { describe, expect, jest, it } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 import authReducer, { logout } from "./slice";
 import type { AuthState } from "./types";
 import {
@@ -8,24 +8,14 @@ import {
   fetchUpdateCurrentUser,
   fetchCheckUser,
 } from "./actions";
-import { tokenService } from "../../utils/tokenService";
 import type { IUserProfile } from "../../utils/types";
-
-// Мокаем tokenService
-jest.mock("../../utils/tokenService", () => ({
-  tokenService: {
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-  },
-}));
 
 const mockUser: IUserProfile = {
   id: "user-1",
   email: "test@test.com",
   name: "Test User",
   birthDate: "2000-01-01",
-  gender: "male",
+  gender: "MALE",
   city: "Moscow",
   avatar: "avatar.png",
   likesSkillsIds: [],
@@ -44,7 +34,6 @@ const initialState: AuthState = {
 };
 
 describe("authSlice", () => {
-  // Initial state
   it("должен вернуть начальное состояние", () => {
     const state = authReducer(undefined, { type: "@@INIT" });
     expect(state).toEqual(initialState);
@@ -52,7 +41,7 @@ describe("authSlice", () => {
 
   // logout
   describe("logout", () => {
-    it("должен сбросить currentUser и удалить токен", () => {
+    it("должен сбросить currentUser", () => {
       const stateWithUser: AuthState = {
         ...initialState,
         currentUser: mockUser,
@@ -61,7 +50,6 @@ describe("authSlice", () => {
       const state = authReducer(stateWithUser, logout());
 
       expect(state.currentUser).toBeNull();
-      expect(tokenService.remove).toHaveBeenCalled();
     });
   });
 
@@ -70,17 +58,17 @@ describe("authSlice", () => {
     it("pending: loading=true, error=null", () => {
       const state = authReducer(
         { ...initialState, error: "old error" },
-        fetchRegister.pending("", {} as any),
+        fetchRegister.pending("", {} as never),
       );
       expect(state.loading).toBe(true);
       expect(state.error).toBeNull();
     });
 
-    it("fulfilled: loading=false, currentUser из payload", () => {
-      const payload = { status: true, access_token: "tok", user: mockUser };
+    it("fulfilled: loading=false, currentUser из payload.user", () => {
+      const payload = { status: true, user: mockUser };
       const state = authReducer(
         { ...initialState, loading: true },
-        fetchRegister.fulfilled(payload as any, "", {} as any),
+        fetchRegister.fulfilled(payload as never, "", {} as never),
       );
       expect(state.loading).toBe(false);
       expect(state.currentUser).toEqual(mockUser);
@@ -111,17 +99,17 @@ describe("authSlice", () => {
     it("pending: loading=true, error=null", () => {
       const state = authReducer(
         initialState,
-        fetchLogin.pending("", {} as any),
+        fetchLogin.pending("", {} as never),
       );
       expect(state.loading).toBe(true);
       expect(state.error).toBeNull();
     });
 
-    it("fulfilled: loading=false, currentUser из payload", () => {
-      const payload = { status: true, access_token: "tok", user: mockUser };
+    it("fulfilled: loading=false, currentUser из payload.data", () => {
+      const payload = { status: true, data: mockUser };
       const state = authReducer(
         { ...initialState, loading: true },
-        fetchLogin.fulfilled(payload as any, "", {} as any),
+        fetchLogin.fulfilled(payload as never, "", {} as never),
       );
       expect(state.loading).toBe(false);
       expect(state.currentUser).toEqual(mockUser);
@@ -138,9 +126,7 @@ describe("authSlice", () => {
     });
   });
 
-  // ──────────────────────────────────────
   // fetchProfile
-  // ──────────────────────────────────────
   describe("fetchProfile", () => {
     it("pending: loading=true", () => {
       const state = authReducer(
@@ -170,14 +156,12 @@ describe("authSlice", () => {
     });
   });
 
-  // ──────────────────────────────────────
   // fetchUpdateCurrentUser
-  // ──────────────────────────────────────
   describe("fetchUpdateCurrentUser", () => {
     it("pending: loading=true", () => {
       const state = authReducer(
         initialState,
-        fetchUpdateCurrentUser.pending("", {}),
+        fetchUpdateCurrentUser.pending("", {} as never),
       );
       expect(state.loading).toBe(true);
     });
@@ -186,7 +170,7 @@ describe("authSlice", () => {
       const updatedUser = { ...mockUser, name: "Updated Name" };
       const state = authReducer(
         { ...initialState, loading: true, currentUser: mockUser },
-        fetchUpdateCurrentUser.fulfilled(updatedUser, "", {}),
+        fetchUpdateCurrentUser.fulfilled(updatedUser, "", {} as never),
       );
       expect(state.loading).toBe(false);
       expect(state.currentUser).toEqual(updatedUser);
@@ -203,14 +187,12 @@ describe("authSlice", () => {
     });
   });
 
-  // ──────────────────────────────────────
   // fetchCheckUser
-  // ──────────────────────────────────────
   describe("fetchCheckUser", () => {
     it("pending: checkUserLoading=true, checkUserError=null", () => {
       const state = authReducer(
         { ...initialState, checkUserError: "old" },
-        fetchCheckUser.pending("", {} as any),
+        fetchCheckUser.pending("", {} as never),
       );
       expect(state.checkUserLoading).toBe(true);
       expect(state.checkUserError).toBeNull();
@@ -219,7 +201,7 @@ describe("authSlice", () => {
     it("fulfilled: checkUserLoading=false, checkUserError=null", () => {
       const state = authReducer(
         { ...initialState, checkUserLoading: true },
-        fetchCheckUser.fulfilled(undefined, "", {} as any),
+        fetchCheckUser.fulfilled(undefined, "", {} as never),
       );
       expect(state.checkUserLoading).toBe(false);
       expect(state.checkUserError).toBeNull();
