@@ -1,12 +1,14 @@
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { Skill } from '@/skills/entities/skills.entity';
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, UpdateResult } from 'typeorm';
 
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
@@ -61,6 +63,7 @@ describe('UsersService', () => {
       favorites: [],
       skills: [],
       wantToLearn: [],
+      wantToLearnSubcategories: [],
       favoriteSkills: [],
       role: UserRole.USER,
       refreshToken: null,
@@ -140,7 +143,12 @@ describe('UsersService', () => {
     await expect(service.findById(userId)).resolves.toBe(user);
     expect(usersRepository.findOne).toHaveBeenCalledWith({
       where: { id: userId },
-      relations: { city: true },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
     });
   });
 
@@ -178,10 +186,14 @@ describe('UsersService', () => {
       name: 'Иван Иванов',
       birthDate: new Date('1990-01-01'),
       gender: UserGender.OTHER,
-      city: mockCity,
+      city: mockCity.name,
+      cityId,
       avatar: null,
       about: null,
       role: UserRole.USER,
+      likesSkillsIds: [],
+      userSkill: null,
+      interestedSkillsSubcategoriesIds: [],
       createdAt,
       updatedAt,
     });
@@ -193,6 +205,59 @@ describe('UsersService', () => {
     usersRepository.findOne.mockResolvedValue(null);
 
     await expect(service.getProfile(userId)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('returns a public profile with skill and interest identifiers', async () => {
+    const taughtSkill = Object.assign(new Skill(), {
+      id: 'skill-uuid-1',
+    });
+
+    const favoriteSkill = Object.assign(new Skill(), {
+      id: 'favorite-skill-uuid-1',
+    });
+
+    const subcategory = Object.assign(new Subcategory(), {
+      id: 'subcategory-uuid-1',
+    });
+
+    const user = createUser({
+      skills: [taughtSkill],
+      favoriteSkills: [favoriteSkill],
+      wantToLearnSubcategories: [subcategory],
+    });
+
+    usersRepository.findOne.mockResolvedValue(user);
+
+    const profile = await service.getPublicProfile(userId);
+
+    expect(usersRepository.findOne).toHaveBeenCalledWith({
+      where: { id: userId },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
+    });
+
+    expect(profile).toMatchObject({
+      id: userId,
+      city: 'Москва',
+      likesSkillsIds: ['favorite-skill-uuid-1'],
+      userSkill: 'skill-uuid-1',
+      interestedSkillsSubcategoriesIds: ['subcategory-uuid-1'],
+    });
+
+    expect(profile).not.toHaveProperty('password');
+    expect(profile).not.toHaveProperty('refreshToken');
+  });
+
+  it('throws when getting a missing public profile', async () => {
+    usersRepository.findOne.mockResolvedValue(null);
+
+    await expect(service.getPublicProfile(userId)).rejects.toMatchObject({
       status: HttpStatus.NOT_FOUND,
     });
   });
@@ -350,9 +415,8 @@ describe('UsersService', () => {
       Object.assign(user, {
         skills: [{ id: skillId }],
         favoriteSkills: [{ id: skillId }],
-        wantToLearn: [
-          { id: 'category-uuid-1', subcategories: [{ id: subcategoryId }] },
-        ],
+        wantToLearn: [{ id: 'category-uuid-1' }],
+        wantToLearnSubcategories: [{ id: subcategoryId }],
       });
       const builder = createQueryBuilderMock([[user], 1]);
       usersRepository.createQueryBuilder.mockReturnValue(builder);
@@ -479,7 +543,7 @@ describe('UsersService', () => {
       expect(builder.andWhere).toHaveBeenCalledTimes(1);
       const [condition, params] = builder.andWhere.mock.calls[0];
       expect(condition).toEqual(
-        '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+        '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
       );
       expect(params).toEqual({ subCategoryIds: ['sub-1'] });
     });
@@ -522,6 +586,112 @@ describe('UsersService', () => {
       expect(builder.skip).toHaveBeenCalledWith(2);
       expect(builder.take).toHaveBeenCalledWith(2);
     });
+  });
+
+  it('returns profile with null/empty fallbacks when relations are missing', async () => {
+    const user = createUser({
+      city: undefined as unknown as typeof mockCity,
+      cityId: null as unknown as string,
+      skills: undefined as unknown as Skill[],
+      favoriteSkills: undefined as unknown as Skill[],
+      wantToLearnSubcategories: undefined as unknown as Subcategory[],
+    });
+
+    usersRepository.findOne.mockResolvedValue(user);
+
+    const profile = await service.getProfile(userId);
+
+    expect(profile.city).toBeNull();
+    expect(profile.likesSkillsIds).toEqual([]);
+    expect(profile.userSkill).toBeNull();
+    expect(profile.interestedSkillsSubcategoriesIds).toEqual([]);
+  });
+
+  it('throws 404 when page > 1 and total === 0', async () => {
+    const builder = createQueryBuilderMock([[], 0]);
+    usersRepository.createQueryBuilder.mockReturnValue(builder);
+
+    const query = new UsersQueryDto();
+    query.page = 2;
+    query.limit = 20;
+
+    await expect(service.findAll(query)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('updates about and cityId through separate update call', async () => {
+    const existing = createUser();
+    const updated = createUser({
+      name: 'Новое имя',
+      about: 'Новое about',
+      cityId: 'new-city-id',
+    });
+
+    usersRepository.findOne
+      .mockResolvedValueOnce(existing)
+      .mockResolvedValueOnce(updated);
+    usersRepository.save.mockResolvedValue(updated);
+    usersRepository.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+
+    const dto: UpdateUserDto = {
+      name: 'Новое имя',
+      about: 'Новое about',
+      cityId: 'new-city-id',
+    };
+
+    const result = await service.updateProfile(userId, dto);
+
+    expect(usersRepository.save).toHaveBeenCalled();
+    expect(usersRepository.update).toHaveBeenCalledWith(
+      { id: userId },
+      { cityId: 'new-city-id' },
+    );
+    expect(result.about).toBe('Новое about');
+  });
+
+  it('throws when updating password of a missing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+    await expect(
+      service.updatePassword(userId, 'new-hash'),
+    ).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('confirms email of an existing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+
+    await expect(service.confirmEmail(userId)).resolves.toBeUndefined();
+
+    expect(usersRepository.update).toHaveBeenCalledWith(
+      { id: userId },
+      { isEmailConfirmed: true },
+    );
+  });
+
+  it('throws when confirming email of a missing user', async () => {
+    usersRepository.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+
+    await expect(service.confirmEmail(userId)).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+  });
+
+  it('throws when changing password of a missing user', async () => {
+    usersRepository.findOne.mockResolvedValue(null);
+
+    await expect(
+      service.changePassword(userId, {
+        currentPassword: 'old',
+        newPassword: 'new',
+      }),
+    ).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND,
+    });
+
+    expect(bcrypt.compare).not.toHaveBeenCalled();
   });
 });
 

@@ -1,8 +1,15 @@
+import { OAuthModule } from '@/auth/oauth/oauth.module';
 import { CitiesModule } from '@/cities/cities.module';
+import { HttpLoggerMiddleware } from '@/common/middleware/http-logger.middleware';
+import { TokenBlacklistModule } from '@/common/services/token-blacklist.module';
+import { MailModule } from '@/mail/mail.module';
+import { RedisModule } from '@/redis/redis.module';
 import { S3Module } from '@/s3/s3.module';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StringValue } from 'ms';
 
@@ -50,6 +57,19 @@ import { UsersModule } from './users/users.module';
       inject: [ConfigurationService],
       useFactory: dbConfig,
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => ({
+        throttlers: [
+          {
+            ttl: configService.throttleTtl * 1000,
+            limit: configService.throttleLimit,
+          },
+        ],
+        skipIf: () => process.env.NODE_ENV === 'test',
+      }),
+    }),
     UsersModule,
     AuthModule,
     CategoriesModule,
@@ -60,8 +80,22 @@ import { UsersModule } from './users/users.module';
     CitiesModule,
     GatewayModule,
     S3Module,
+    MailModule,
+    RedisModule,
+    TokenBlacklistModule,
+    OAuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}

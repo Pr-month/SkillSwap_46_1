@@ -6,9 +6,12 @@ import { showToast } from "../utils/toast";
 interface RequestConfig extends RequestInit {
   showErrorToast?: boolean;
   showSuccessToast?: boolean;
+  retryOnUnauthorized?: boolean;
+  showUnauthorizedToast?: boolean;
 }
 
 const API_BASE_URL = "/api";
+let refreshPromise: Promise<void> | null = null;
 function addBaseUrl(url: string): string {
   return url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
 }
@@ -27,11 +30,32 @@ async function parseErrorResponse(
   }
 }
 
+function refreshSession(): Promise<void> {
+  if (!refreshPromise) {
+    refreshPromise = request<unknown>("/auth/refresh", {
+      method: "POST",
+      showErrorToast: false,
+      retryOnUnauthorized: false,
+    })
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+}
+
 export async function request<T>(
   url: string,
   config: RequestConfig = {},
 ): Promise<T> {
-  const { showErrorToast = true, ...fetchConfig } = config;
+  const {
+    showErrorToast = true,
+    showUnauthorizedToast = true,
+    retryOnUnauthorized = true,
+    ...fetchConfig
+  } = config;
 
   const isFormData = fetchConfig.body instanceof FormData;
 
@@ -45,7 +69,24 @@ export async function request<T>(
         },
       });
 
-    const response = await fetch(interceptedUrl, interceptedConfig);
+    const response = await fetch(interceptedUrl, {
+      ...interceptedConfig,
+      credentials: "include",
+    });
+
+    if (response.status === 401 && retryOnUnauthorized) {
+      try {
+        await refreshSession();
+
+        return await request<T>(url, {
+          ...config,
+          retryOnUnauthorized: false,
+        });
+      } catch {
+        // Если refresh-токен недействителен, ниже будет обработана
+        // исходная ошибка 401.
+      }
+    }
 
     if (response.ok) {
       let data: T;
@@ -65,8 +106,8 @@ export async function request<T>(
 
     const errorData = await parseErrorResponse(response);
 
-    if (showErrorToast) {
-      const { message, errorCode } = handleError(
+    if (showErrorToast && (response.status !== 401 || showUnauthorizedToast)) {
+      const { message } = handleError(
         errorData || {
           code: "unknown",
           statusCode: response.status,
@@ -78,7 +119,7 @@ export async function request<T>(
       if (response.status >= 500) {
         showToast("Ошибка сервера. Попробуйте позже.", "error");
       } else {
-        showToast(message, "error", errorCode);
+        showToast(message, "error");
       }
     }
 

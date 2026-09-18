@@ -5,6 +5,9 @@ export type TId = string;
 /** ПОЛ ПОЛЬЗОВАТЕЛЯ */
 export type TGender = "MALE" | "FEMALE" | "OTHER";
 
+/** РОЛЬ ПОЛЬЗОВАТЕЛЯ */
+export type TUserRole = "USER" | "ADMIN";
+
 /** ПОЛЬЗОВАТЕЛЬ */
 export interface IUser {
   email: string;
@@ -18,10 +21,18 @@ export interface IUserProfile extends IUser {
   gender?: TGender;
   city: string;
   avatar: string;
-  aboutMe?: string; // "о себе"
+  /** "о себе" (личный профиль, PATCH /users/me) */
+  about?: string | null;
+  /** "о себе" (публичный список, GET /users) */
+  aboutMe?: string | null;
+  role?: TUserRole;
+  /** UUID города (личный профиль) */
+  cityId?: string | null;
   likesSkillsIds: TId[]; // массив id навыков, которые лайкнул пользователь
   userSkill: TId; // навык пользователя, которому он может научить
   interestedSkillsSubcategoriesIds: TId[]; // id[] покатегорий, которым пользователь хочет научиться
+  /** Устаревшее поле, оставлено для совместимости (бэк отдаёт role) */
+  isEmailConfirmed?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -88,6 +99,10 @@ export type IRegisterUserData = {
   about?: string;
   wantToLearn?: string[];
   skills?: string[];
+  title?: string;
+  description?: string;
+  images?: string[];
+  interestedSkillsSubcategoriesIds?: string[];
 };
 
 /** ДАННЫЕ ДЛЯ ЗАПРОСА АВТОРИЗАЦИИ */
@@ -97,12 +112,21 @@ export type TLoginUserData = Pick<IUser, "email"> & {
 
 /** ОТВЕТ НА ЗАПРОС АВТОРИЗАЦИИ */
 export type TLoginUserResponse = TServerResponse<{
-  access_token: string;
   user: IUserProfile;
 }>;
 
-/** ДАННЫЕ ДЛЯ ЗАПРОСА ОБНОВЛЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
+/** ДАННЫЕ ДЛЯ ЗАПРОСА ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
 export type TUpdateUserData = Omit<IUserProfile, "createdAt" | "updatedAt">;
+
+/** ДАННЫЕ ДЛЯ ОБНОВЛЕНИЯ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ (PATCH /users/me) */
+export type TUpdateCurrentUserData = {
+  name?: string;
+  about?: string | null;
+  birthdate?: string;
+  cityId?: string;
+  gender?: TGender;
+  avatar?: string | null;
+};
 
 /** ОТВЕТ НА ЗАПРОС ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ */
 export type TUpdateUserResponse = TServerResponse<IUserProfile>;
@@ -148,9 +172,8 @@ export type TModifySkillData = Partial<
 
 /** ДАННЫЕ ЗАПРОСА НА ОБМЕН НАВЫКАМИ */
 export interface ISkillExchangeData {
-  userSkill: TId; // навык, которому пользователь может научить
-  requiredSkillUserId: TId; // id пользователя с необходимым навыком
-  message: string; // сообщение
+  offeredSkillId: TId; // навык, которому пользователь может научить
+  requestedSkillId: TId; // навык, которому пользователь хочет научиться
 }
 
 /** ОТВЕТ НА ЗАПРОС ОБМЕНА НАВЫКАМИ */
@@ -181,4 +204,57 @@ export type UploadResponse = {
 export interface IMyRequests {
   sent: ISkillExchange[];
   received: ISkillExchange[];
+}
+
+/** ДАННЫЕ ДЛЯ ЗАВЕРШЕНИЯ OAuth-РЕГИСТРАЦИИ (POST /auth/register/oauth) */
+export type IRegisterOAuthData = Omit<
+  IRegisterUserData,
+  "email" | "password"
+> & {
+  /** id временной OAuth-сессии, выданный бэком после callback */
+  pendingId: string;
+};
+
+export type TOAuthPendingProfile = {
+  email: string;
+  name: string;
+  avatar: string | null;
+  provider: string;
+};
+
+//* === ИЗБРАННОЕ ===
+
+/** ВЛАДЕЛЕЦ НАВЫКА В ИЗБРАННОМ */
+export interface FavoriteSkillOwnerDto {
+  id: string;
+  name: string;
+  avatar: string | null | undefined;
+  city: string | null;
+  birthdate: string | null;
+  wantsToLearn: string[];
+}
+
+/** НАВЫК В ИЗБРАННОМ */
+export interface FavoriteSkillDto {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  category: string;
+  subcategory?: string;
+  owner?: FavoriteSkillOwnerDto;
+}
+
+/** ЗАПИСЬ ИЗБРАННОГО */
+export interface FavoriteDto {
+  id: string;
+  userId: string;
+  skillId: string;
+  createdAt: string;
+  skill?: FavoriteSkillDto;
+}
+
+/** РЕЗУЛЬТАТ ПРОВЕРКИ НАХОЖДЕНИЯ НАВЫКА В ИЗБРАННОМ */
+export interface FavoriteCheckResult {
+  isFavorite: boolean;
 }

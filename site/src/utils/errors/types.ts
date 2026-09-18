@@ -1,9 +1,10 @@
-export type Error = {
+export interface Error {
   code: string;
-  path: string;
+  message: string;
   statusCode: number;
-  timestamp: Date;
-};
+  path: string;
+  timestamp: string;
+}
 
 export interface ErrorResponse {
   message: string;

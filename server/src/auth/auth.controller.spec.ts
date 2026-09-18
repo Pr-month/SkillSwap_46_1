@@ -7,11 +7,12 @@ import { exceptionCodes } from '../common/errors/error-codes';
 import { UserGender } from '../users/enums/user.enums';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { RequestWithUser } from './auth.types';
+import { RequestWithRefreshUser, RequestWithUser } from './auth.types';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 describe('AuthController', () => {
@@ -27,6 +28,7 @@ describe('AuthController', () => {
     checkUser: jest.fn(),
     getProfile: jest.fn(),
     updatePassword: jest.fn(),
+    refresh: jest.fn(),
   };
 
   const mockResponse = {
@@ -47,6 +49,8 @@ describe('AuthController', () => {
       .overrideGuard(LocalAuthGuard)
       .useValue({ canActivate: () => true })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(JwtRefreshAuthGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
@@ -118,6 +122,35 @@ describe('AuthController', () => {
 
       expect(result).toEqual(mockUser);
       expect(mockAuthService.login).toHaveBeenCalledWith(
+        mockUser,
+        mockResponse,
+      );
+    });
+  });
+
+  describe('refresh', () => {
+    it('should call authService.refresh with user and response', async () => {
+      const mockUser = {
+        id: 'user-id',
+        email: 'test@example.com',
+        refreshToken: 'current-refresh-token',
+      };
+
+      const mockRequest = {
+        user: mockUser,
+      } as unknown as RequestWithRefreshUser;
+
+      mockAuthService.refresh.mockResolvedValue({
+        message: 'Токены успешно обновлены',
+      });
+
+      const result = await controller.refresh(mockRequest, mockResponse);
+
+      expect(result).toEqual({
+        message: 'Токены успешно обновлены',
+      });
+
+      expect(mockAuthService.refresh).toHaveBeenCalledWith(
         mockUser,
         mockResponse,
       );

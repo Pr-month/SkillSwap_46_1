@@ -22,7 +22,7 @@ const makeUser = (
   email: `${overrides.id}@test.com`,
   name: overrides.id,
   birthDate: "2000-01-01",
-  gender: "unspecified",
+  gender: "OTHER",
   city: "Moscow",
   avatar: "a.png",
   likesSkillsIds: [],
@@ -280,4 +280,3 @@ describe("selectSimilarUsers", () => {
     expect(selectSimilarUsers(state)).toEqual([]);
   });
 });
-

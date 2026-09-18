@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, jest, it } from "@jest/globals";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slice";
 import {
@@ -8,20 +8,10 @@ import {
   fetchUpdateCurrentUser,
   fetchCheckUser,
 } from "./actions";
-import { tokenService } from "../../utils/tokenService";
 import * as authApi from "../../api/authApi";
 import * as userApi from "../../api/userApi";
 import type { IUserProfile, TLoginUserResponse } from "../../utils/types";
 import type { AuthState } from "./types";
-
-// Мокаем tokenService
-jest.mock("../../utils/tokenService", () => ({
-  tokenService: {
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-  },
-}));
 
 jest.mock("../../api/authApi");
 jest.mock("../../api/userApi");
@@ -34,7 +24,7 @@ const mockUser: IUserProfile = {
   email: "test@test.com",
   name: "Test User",
   birthDate: "2000-01-01",
-  gender: "male",
+  gender: "MALE",
   city: "Moscow",
   avatar: "avatar.png",
   likesSkillsIds: [],
@@ -68,18 +58,17 @@ describe("auth thunks", () => {
   describe("fetchRegister", () => {
     const registerData = {
       email: "test@test.com",
-      name: "Test",
-      birthDate: "2000-01-01",
-      gender: "male" as const,
-      city: "Moscow",
-      avatar: "avatar.png",
       password: "123456",
+      name: "Test",
+      birthdate: "2000-01-01",
+      gender: "MALE" as const,
+      cityId: "city-uuid-1",
+      avatar: "avatar.png",
     };
 
     it("fulfilled: вызывает registerUser и сохраняет пользователя", async () => {
       const response: TLoginUserResponse = {
         status: true,
-        access_token: "token-123",
         user: mockUser,
       };
       mockedAuthApi.registerUser.mockResolvedValue(response);
@@ -110,7 +99,6 @@ describe("auth thunks", () => {
     it("fulfilled: вызывает loginUser и сохраняет пользователя", async () => {
       const response: TLoginUserResponse = {
         status: true,
-        access_token: "token-123",
         user: mockUser,
       };
       mockedAuthApi.loginUser.mockResolvedValue(response);
@@ -148,7 +136,7 @@ describe("auth thunks", () => {
       expect(store.getState().auth.checkUserError).toBeNull();
     });
 
-    it("rejected: ошибка → rejectWithValue → checkUserError", async () => {
+    it("rejected: ошибка → rejectWithValue", async () => {
       mockedAuthApi.checkUser.mockRejectedValue("User not found");
 
       const store = createTestStore();
@@ -160,8 +148,7 @@ describe("auth thunks", () => {
 
   // fetchProfile
   describe("fetchProfile", () => {
-    it("fulfilled: при наличии токена загружает профиль", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
+    it("fulfilled: загружает профиль", async () => {
       mockedAuthApi.getProfile.mockResolvedValue(mockUser);
 
       const store = createTestStore();
@@ -171,20 +158,20 @@ describe("auth thunks", () => {
       expect(store.getState().auth.currentUser).toEqual(mockUser);
     });
 
-    it('rejected: без токена → rejectWithValue "Токен не найден"', async () => {
-      (tokenService.get as jest.Mock).mockReturnValue(null);
+    it("fulfilled: 401 → currentUser=null, без reject", async () => {
+      const unauthorizedError = { statusCode: 401 };
+      mockedAuthApi.getProfile.mockRejectedValue(unauthorizedError);
 
       const store = createTestStore();
       const result = await store.dispatch(fetchProfile());
 
-      expect(result.meta.requestStatus).toBe("rejected");
-      expect(result.payload).toBe("Токен не найден");
-      expect(mockedAuthApi.getProfile).not.toHaveBeenCalled();
+      expect(result.meta.requestStatus).toBe("fulfilled");
+      expect(result.payload).toBeNull();
+      expect(store.getState().auth.currentUser).toBeNull();
     });
 
-    it("rejected: ошибка API", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      mockedAuthApi.getProfile.mockRejectedValue("Server error");
+    it("rejected: ошибка API (не 401)", async () => {
+      mockedAuthApi.getProfile.mockRejectedValue({ statusCode: 500 });
 
       const store = createTestStore();
       const result = await store.dispatch(fetchProfile());
@@ -199,48 +186,19 @@ describe("auth thunks", () => {
 
     it("fulfilled: обновляет пользователя", async () => {
       const updatedUser = { ...mockUser, name: "New Name" };
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      mockedUserApi.updateUser.mockResolvedValue(updatedUser);
+      mockedUserApi.updateCurrentUser.mockResolvedValue(updatedUser);
 
       const store = createTestStore({ currentUser: mockUser });
       await store.dispatch(fetchUpdateCurrentUser(updatePayload));
 
-      expect(mockedUserApi.updateUser).toHaveBeenCalledWith(
-        "user-1",
+      expect(mockedUserApi.updateCurrentUser).toHaveBeenCalledWith(
         updatePayload,
-        "valid-token",
       );
       expect(store.getState().auth.currentUser).toEqual(updatedUser);
     });
 
-    it("rejected: без токена → rejectWithValue", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue(null);
-
-      const store = createTestStore({ currentUser: mockUser });
-      const result = await store.dispatch(
-        fetchUpdateCurrentUser(updatePayload),
-      );
-
-      expect(result.meta.requestStatus).toBe("rejected");
-      expect(result.payload).toBe("Токен не найден");
-    });
-
-    it("rejected: без currentUser.id → rejectWithValue", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      const userWithoutId = { ...mockUser, id: undefined };
-
-      const store = createTestStore({ currentUser: userWithoutId });
-      const result = await store.dispatch(
-        fetchUpdateCurrentUser(updatePayload),
-      );
-
-      expect(result.meta.requestStatus).toBe("rejected");
-      expect(result.payload).toBe("Не найден id пользователя");
-    });
-
-    it("rejected: ошибка API", async () => {
-      (tokenService.get as jest.Mock).mockReturnValue("valid-token");
-      mockedUserApi.updateUser.mockRejectedValue("Update failed");
+    it("rejected: ошибка API → rejectWithValue", async () => {
+      mockedUserApi.updateCurrentUser.mockRejectedValue("Update failed");
 
       const store = createTestStore({ currentUser: mockUser });
       const result = await store.dispatch(

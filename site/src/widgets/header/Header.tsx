@@ -13,93 +13,10 @@ import styles from "./header.module.css";
 import { logout } from "../../services/auth/slice";
 import { HeaderIcons } from "../../shared/ui/header-icons";
 import { developers } from "../../shared/constants/developers";
-
-const allCategories = [
-  {
-    title: "Бизнес и карьера",
-    iconName: "briefcase",
-    iconBackgroundColor: "var(--color-category-business)",
-    skills: [
-      "Управление командой",
-      "Маркетинг и реклама",
-      "Продажи и переговоры",
-      "Личный бренд",
-      "Резюме и собеседование",
-      "Тайм-менеджмент",
-      "Проектное управление",
-      "Предпринимательство",
-    ],
-  },
-  {
-    title: "Творчество и искусство",
-    iconName: "palette",
-    iconBackgroundColor: "var(--color-category-creative)",
-    skills: [
-      "Рисование и иллюстрация",
-      "Фотография",
-      "Видеомонтаж",
-      "Музыка и звук",
-      "Актёрское мастерство",
-      "Креативное письмо",
-      "Арт-терапия",
-      "Декор и DIY",
-    ],
-  },
-  {
-    title: "Иностранные языки",
-    iconName: "global",
-    iconBackgroundColor: "var(--color-category-languages)",
-    skills: [
-      "Английский",
-      "Французский",
-      "Испанский",
-      "Немецкий",
-      "Китайский",
-      "Японский",
-      "Подготовка к экзаменам (IELTS, TOEFL)",
-    ],
-  },
-  {
-    title: "Образование и развитие",
-    iconName: "book",
-    iconBackgroundColor: "var(--color-category-education)",
-    skills: [
-      "Личностное развитие",
-      "Навыки обучения",
-      "Когнитивные техники",
-      "Скорочтение",
-      "Навыки преподавания",
-      "Коучинг",
-    ],
-  },
-  {
-    title: "Дом и уют",
-    iconName: "home",
-    iconBackgroundColor: "var(--color-category-home)",
-    skills: [
-      "Уборка и организация",
-      "Домашние финансы",
-      "Приготовление еды",
-      "Домашние растения",
-      "Ремонт",
-      "Хранение вещей",
-    ],
-  },
-  {
-    title: "Здоровье и лайфстайл",
-    iconName: "lifestyle",
-    iconBackgroundColor: "var(--color-category-health)",
-    skills: [
-      "Йога и медитация",
-      "Питание и ЗОЖ",
-      "Ментальное здоровье",
-      "Осознанность",
-      "Физические тренировки",
-      "Сон и восстановление",
-      "Баланс жизни и работы",
-    ],
-  },
-];
+import { fetchLogout } from "../../services/auth/actions";
+import { fetchSendConfirmationEmail } from "../../services/user/actions";
+import { showToast } from "../../utils/toast";
+import { handleError } from "../../utils/errors/errorUtils";
 
 export function Header() {
   const dispatch = useDispatch();
@@ -122,8 +39,22 @@ export function Header() {
   };
 
   const handleLogoutClick = async () => {
+    await dispatch(fetchLogout());
     dispatch(logout());
     window.location.href = "/";
+  };
+
+  const handleProfileClick = async () => {
+    navigate("/profile");
+  };
+
+  const handleConfirmEmailClick = async () => {
+    try {
+      await dispatch(fetchSendConfirmationEmail()).unwrap();
+      showToast("Письмо отправлено! Проверьте вашу почту", "success");
+    } catch (err) {
+      showToast(handleError(err).message, "error");
+    }
   };
 
   return (
@@ -188,7 +119,7 @@ export function Header() {
                 >
                   Категории навыков
                 </h3>
-                <SkillCategoryGroup categories={allCategories} />
+                <SkillCategoryGroup categories={[]} />
               </div>
             </Popover>
           </li>
@@ -227,7 +158,11 @@ export function Header() {
         >
           {({ close }) => (
             <ProfileMenu
+              isEmailConfirmed={user?.isEmailConfirmed ?? false}
+              onProfileClick={handleProfileClick}
               onLogoutClick={handleLogoutClick}
+              onConfirmEmailClick={handleConfirmEmailClick}
+              onProfileClick={() => navigate("/profile")}
               onClosePopover={close}
             />
           )}

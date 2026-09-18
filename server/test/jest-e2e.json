@@ -17,5 +17,6 @@
   "testTimeout": 30000,
   "forceExit": true,
   "detectOpenHandles": true,
-  "verbose": true
+  "verbose": true,
+  "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"]
 }

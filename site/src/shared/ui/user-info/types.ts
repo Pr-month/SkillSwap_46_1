@@ -7,15 +7,15 @@ export interface UserInfoProps {
     birthDate: string; // формат "YYYY-MM-DD"
     gender: OptionType | null;
     city: string;
+    cityId?: string | null;
     about: string;
     avatar?: string;
   };
   onSave?: (data: {
-    email: string;
     name: string;
-    birthDate: string;
+    birthdate: string;
     gender: OptionType | null;
-    city: string;
+    cityId?: string;
     about: string;
   }) => void;
   errors?: {

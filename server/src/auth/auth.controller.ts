@@ -1,3 +1,5 @@
+import { ResetPasswordDto } from '@/auth/dto/reset-password.dto';
+import { RegisterOAuthDto } from '@/auth/oauth/dto/register-oauth.dto';
 import {
   Body,
   Controller,
@@ -6,7 +8,7 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Request,
+  Req,
   Response,
   UseGuards,
 } from '@nestjs/common';
@@ -14,11 +16,12 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Response as ExpressResponse } from 'express';
 
 import { AuthService } from './auth.service';
-import { RequestWithUser } from './auth.types';
+import { RequestWithRefreshUser, RequestWithUser } from './auth.types';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -35,16 +38,37 @@ export class AuthController {
     return await this.authService.register(registerDto, res);
   }
 
+  @Post('register/oauth')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Завершение регистрации через OAuth' })
+  async registerWithOAuth(
+    @Body() registerOAuthDto: RegisterOAuthDto,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    return await this.authService.registerWithOAuth(registerOAuthDto, res);
+  }
+
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход в систему' })
   async login(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Response({ passthrough: true }) res: ExpressResponse,
     @Body() _loginDto: LoginDto,
   ) {
     return await this.authService.login(req.user, res);
+  }
+
+  @UseGuards(JwtRefreshAuthGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Обновление токенов авторизации' })
+  async refresh(
+    @Req() req: RequestWithRefreshUser,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    return await this.authService.refresh(req.user, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -52,7 +76,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Выход из системы (очистка токенов)' })
   async logout(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
     return await this.authService.logout(req.user.id, res);
@@ -70,7 +94,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Получение профиля текущего пользователя' })
-  async getProfile(@Request() req: RequestWithUser) {
+  async getProfile(@Req() req: RequestWithUser) {
     return await this.authService.getProfile(req.user.id);
   }
 
@@ -79,12 +103,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Смена пароля' })
   async updatePassword(
-    @Request() req: RequestWithUser,
+    @Req() req: RequestWithUser,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
     return await this.authService.updatePassword(
       req.user.id,
       updatePasswordDto,
     );
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Сбросить пароль по токену' })
+  async resetPassword(@Body() body: ResetPasswordDto) {
+    return await this.authService.resetPassword(body.token, body.newPassword);
   }
 }

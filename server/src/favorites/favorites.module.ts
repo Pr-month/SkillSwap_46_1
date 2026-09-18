@@ -1,8 +1,8 @@
+import { Favorite } from '@/skills/entities/favorite.entity';
+import { Skill } from '@/skills/entities/skills.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Favorite } from '../skills/entities/favorite.entity';
-import { Skill } from '../skills/entities/skills.entity';
 import {
   FavoritesController,
   MyFavoritesController,

@@ -1,5 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { CACHE_KEYS } from '@/common/constants/cache-keys.constants';
+import { CACHE_TTL } from '@/common/constants/cache-ttl.constants';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Redis } from 'ioredis';
 import { Repository } from 'typeorm';
 
 import { City } from './entities/city.entity';
@@ -11,6 +15,7 @@ export class CitiesService implements OnModuleInit {
   constructor(
     @InjectRepository(City)
     private readonly cityRepository: Repository<City>,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   /**
@@ -36,10 +41,26 @@ export class CitiesService implements OnModuleInit {
    * Используется для отображения списка самых популярных городов.
    */
   async findPopular(limit: number): Promise<City[]> {
-    return this.cityRepository.find({
+    const cacheKey = `${CACHE_KEYS.CITIES_POPULAR}:${limit}`;
+
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached) as City[];
+    }
+
+    const cities = await this.cityRepository.find({
       order: { population: 'DESC' },
       take: limit,
     });
+
+    await this.redis.set(
+      cacheKey,
+      JSON.stringify(cities),
+      'EX',
+      CACHE_TTL.ONE_DAY,
+    );
+
+    return cities;
   }
 
   /**

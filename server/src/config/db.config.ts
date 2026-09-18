@@ -16,6 +16,10 @@ export const dbConfig = (
     ? 'src/**/*.entity{.ts,.js}'
     : join(__dirname, '..', '**', '*.entity{.ts,.js}');
 
+  const migrations = isTsRuntime
+    ? 'src/database/migrations/*{.ts,.js}'
+    : join(__dirname, '..', 'database', 'migrations', '*{.ts,.js}');
+
   const options: DataSourceOptions = {
     type: 'postgres',
     host: configurationService.databaseHost,
@@ -25,6 +29,8 @@ export const dbConfig = (
     database: configurationService.databaseName,
     synchronize: configurationService.databaseSynchronize,
     entities: [entities],
+    migrations: [migrations],
+    migrationsTableName: 'migrations',
   };
 
   console.log('DEBUG LIVE SERVER DB CONFIG:', options);

@@ -2,18 +2,21 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   changePassword,
   checkUser,
+  forgotPassword,
   getProfile,
   loginUser,
+  logoutUser,
   registerUser,
+  registerUserOAuth,
+  resetPassword,
 } from "../../api/authApi.ts";
-import { updateUser } from "../../api/userApi.ts";
-import { tokenService } from "../../utils/tokenService.ts";
+import { updateCurrentUser } from "../../api/userApi.ts";
 import type {
+  IRegisterOAuthData,
   IRegisterUserData,
   TLoginUserData,
-  TUpdateUserData,
+  TUpdateCurrentUserData,
 } from "../../utils/types.ts";
-import type { AuthState } from "./types.ts";
 
 export const fetchRegister = createAsyncThunk(
   "auth/register",
@@ -51,11 +54,17 @@ export const fetchCheckUser = createAsyncThunk(
 export const fetchProfile = createAsyncThunk(
   "auth/profile",
   async (_, { rejectWithValue }) => {
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
     try {
       return await getProfile();
     } catch (err) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "statusCode" in err &&
+        err.statusCode === 401
+      ) {
+        return null;
+      }
       return rejectWithValue(err);
     }
   },
@@ -63,14 +72,9 @@ export const fetchProfile = createAsyncThunk(
 
 export const fetchUpdateCurrentUser = createAsyncThunk(
   "auth/updateCurrentUser",
-  async (payload: Partial<TUpdateUserData>, { getState, rejectWithValue }) => {
-    const state = getState() as { auth: AuthState };
-    const { currentUser } = state.auth;
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
-    if (!currentUser?.id) return rejectWithValue("Не найден id пользователя");
+  async (payload: TUpdateCurrentUserData, { rejectWithValue }) => {
     try {
-      return await updateUser(currentUser.id, payload, token);
+      return await updateCurrentUser(payload);
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -80,12 +84,60 @@ export const fetchUpdateCurrentUser = createAsyncThunk(
 /** ОБНОВЛЕНИЕ ПАРОЛЯ ПОЛЬЗОВАТЕЛЯ */
 export const updatePassword = createAsyncThunk(
   "auth/update-password",
-  async (newPassword: string, { rejectWithValue }) => {
-    const token = tokenService.get();
-    if (!token) return rejectWithValue("Токен не найден");
+  async (
+    data: { currentPassword: string; newPassword: string },
+    { rejectWithValue },
+  ) => {
     try {
-      await changePassword(newPassword);
-      return newPassword;
+      await changePassword(data.currentPassword, data.newPassword);
+      return data.newPassword;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchLogout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutUser();
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchForgotPassword = createAsyncThunk(
+  "auth/forgot-password",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      await forgotPassword(email);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchResetPassword = createAsyncThunk(
+  "auth/reset-password",
+  async (
+    payload: { token: string; newPassword: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      await resetPassword(payload.token, payload.newPassword);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchRegisterOAuth = createAsyncThunk(
+  "auth/register-oauth",
+  async (data: IRegisterOAuthData, { rejectWithValue }) => {
+    try {
+      return await registerUserOAuth(data);
     } catch (err) {
       return rejectWithValue(err);
     }

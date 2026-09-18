@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
 import {EnvKey, nodeEnvValues} from '../const';
-import {IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, Max, Min} from "class-validator";
+import {IsArray, IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, Max, Min} from "class-validator";
 import {Transform} from "class-transformer";
+import {transformStringIPsToArr} from "../configuration.common";
+import {IsCorsOriginValue} from "../validation/is-ip-or-localhost";
 
 export class EnvironmentVariables {
   @IsString()
@@ -67,10 +69,6 @@ export class EnvironmentVariables {
   [EnvKey.DatabaseSynchronize]: boolean;
 
   @IsString()
-  @IsIn(['dev', 'production', 'test', 'combined', 'console'])
-  [EnvKey.LoggerType]: string;
-
-  @IsString()
   @IsNotEmpty()
   [EnvKey.S3Region]: string;
 
@@ -89,4 +87,79 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   [EnvKey.S3Bucket]: string;
+
+  @IsArray()
+  @Transform(({ value }) => transformStringIPsToArr(value))
+  @IsCorsOriginValue({ each: true })
+  [EnvKey.CorsOrigins]: string[];
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  [EnvKey.ThrottleTtl]: number;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  [EnvKey.ThrottleLimit]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailHost]: string;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  @Max(65535)
+  [EnvKey.MailPort]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailUser]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailPassword]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.MailFrom]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.RedisHost]: string;
+
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  @Max(65535)
+  [EnvKey.RedisPort]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleClientId]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleClientSecret]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleCallbackUrl]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexClientId]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexClientSecret]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexCallbackUrl]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.CookieDomain]: string;
 }

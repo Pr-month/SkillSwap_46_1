@@ -11,6 +11,12 @@ import type { TNotificationGroupItem } from "../notification-group/types";
 import styles from "./header.icons.module.css";
 import { useDispatch, useSelector } from "../../../services/store";
 import { fetchMyRequests } from "../../../services/request/actions";
+import {
+  NEW_REQUEST_NOTIFICATION_EVENT,
+  notificationsSocket,
+  type NotificationPayload,
+} from "../../../api/notificationsSocket";
+import { showToast } from "../../../utils/toast";
 
 const MONTHS = [
   "января",
@@ -103,6 +109,26 @@ export const HeaderIcons: React.FC<THeaderIconsProps> = ({ isUserAuth }) => {
     if (isUserAuth) {
       dispatch(fetchMyRequests());
     }
+  }, [dispatch, isUserAuth]);
+
+  useEffect(() => {
+    if (!isUserAuth) {
+      notificationsSocket.disconnect();
+      return;
+    }
+
+    const handleNewRequest = (payload: NotificationPayload) => {
+      showToast(payload.message, "info");
+      void dispatch(fetchMyRequests());
+    };
+
+    notificationsSocket.on(NEW_REQUEST_NOTIFICATION_EVENT, handleNewRequest);
+    notificationsSocket.connect();
+
+    return () => {
+      notificationsSocket.off(NEW_REQUEST_NOTIFICATION_EVENT, handleNewRequest);
+      notificationsSocket.disconnect();
+    };
   }, [dispatch, isUserAuth]);
 
   const notifications = useMemo<TNotificationWithRoute[]>(() => {

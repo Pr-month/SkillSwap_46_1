@@ -1,12 +1,12 @@
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, Repository } from 'typeorm';
 
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserListItemResponse } from './dto/user-list-item.response';
@@ -29,10 +29,17 @@ export class UsersService {
       name: user.name,
       birthDate: user.birthdate,
       gender: user.gender,
-      city: user.city,
+      city: user.city?.name ?? null,
+      cityId: user.cityId,
       avatar: user.avatar,
       about: user.about,
       role: user.role,
+      likesSkillsIds: user.favoriteSkills?.map((skill) => skill.id) ?? [],
+      userSkill: user.skills?.[0]?.id ?? null,
+      interestedSkillsSubcategoriesIds:
+        user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
+        [],
+      isEmailConfirmed: user.isEmailConfirmed,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -51,10 +58,8 @@ export class UsersService {
       likesSkillsIds: user.favoriteSkills?.map((skill) => skill.id) ?? [],
       userSkill: user.skills?.[0]?.id ?? null,
       interestedSkillsSubcategoriesIds:
-        user.wantToLearn?.flatMap(
-          (category) =>
-            category.subcategories?.map((subcategory) => subcategory.id) ?? [],
-        ) ?? [],
+        user.wantToLearnSubcategories?.map((subcategory) => subcategory.id) ??
+        [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -76,6 +81,10 @@ export class UsersService {
       .leftJoinAndSelect('user.favoriteSkills', 'favoriteSkill')
       .leftJoinAndSelect('user.wantToLearn', 'wantToLearn')
       .leftJoinAndSelect('wantToLearn.subcategories', 'wantToLearnSubcategory')
+      .leftJoinAndSelect(
+        'user.wantToLearnSubcategories',
+        'userWantToLearnSubcategory',
+      )
       .orderBy('user.createdAt', 'DESC')
       .skip(query.skip)
       .take(query.limit);
@@ -114,7 +123,7 @@ export class UsersService {
         );
       } else if (skillOption === 'want-to-learn') {
         builder.andWhere(
-          '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+          '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
           { subCategoryIds: query.subCategoryIds },
         );
       } else {
@@ -125,7 +134,7 @@ export class UsersService {
                 '"userSkill"."subcategory_id"::text IN (:...subCategoryIds)',
               )
               .orWhere(
-                '"wantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
+                '"userWantToLearnSubcategory"."id"::text IN (:...subCategoryIds)',
               );
           }),
           { subCategoryIds: query.subCategoryIds },
@@ -161,7 +170,12 @@ export class UsersService {
   async findById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { id },
-      relations: { city: true },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
     });
   }
 
@@ -194,6 +208,20 @@ export class UsersService {
     }
   }
 
+  async confirmEmail(userId: string): Promise<void> {
+    const result = await this.usersRepository.update(
+      { id: userId },
+      { isEmailConfirmed: true },
+    );
+
+    if (!result.affected) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
   async getProfile(id: string): Promise<UserProfileResponse> {
     const user = await this.findById(id);
 
@@ -206,6 +234,28 @@ export class UsersService {
 
     return this.toProfileResponse(user);
   }
+
+  async getPublicProfile(id: string): Promise<UserListItemResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        city: true,
+        skills: true,
+        favoriteSkills: true,
+        wantToLearnSubcategories: true,
+      },
+    });
+
+    if (!user) {
+      throw new BusinessException(
+        exceptionCodes.users.notFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.toUserListItem(user);
+  }
+
   async updateProfile(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -223,11 +273,20 @@ export class UsersService {
     if (updateUserDto.birthdate !== undefined)
       user.birthdate = updateUserDto.birthdate;
     if (updateUserDto.gender !== undefined) user.gender = updateUserDto.gender;
-    if (updateUserDto.cityId !== undefined) user.cityId = updateUserDto.cityId;
     if (updateUserDto.avatar !== undefined) user.avatar = updateUserDto.avatar;
     if (updateUserDto.about !== undefined) user.about = updateUserDto.about;
 
     await this.usersRepository.save(user);
+
+    // Обновляем город отдельным точечным UPDATE: при `save(user)` загруженная
+    // связь `city` (старый город) может перезаписать FK-колонку `cityId`,
+    // поэтому меняем её после сохранения остальных полей.
+    if (updateUserDto.cityId !== undefined) {
+      await this.usersRepository.update(
+        { id },
+        { cityId: updateUserDto.cityId },
+      );
+    }
 
     const fullUser = await this.findById(id);
     return this.toProfileResponse(fullUser!);

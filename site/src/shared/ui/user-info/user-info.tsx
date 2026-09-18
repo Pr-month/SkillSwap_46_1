@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import clsx from "clsx";
 import { Avatar } from "../avatar";
 import { BasicInput } from "../input/basic-input";
@@ -9,21 +9,24 @@ import { Icon } from "../icon";
 import { PasswordInput } from "../input";
 import type { UserInfoProps } from "./types";
 import type { OptionType } from "../dropdown/types";
-import { ECity } from "../../constants/cities";
-import { useDispatch } from "../../../services/store";
+import { useDispatch, useSelector } from "../../../services/store";
 import { updatePassword } from "../../../services/auth/actions";
+import {
+  fetchPopularCities,
+  fetchSearchCities,
+} from "../../../services/city/actions";
+import {
+  MIN_CITY_SEARCH_LENGTH,
+  selectCitySearchResults,
+  selectPopularCities,
+} from "../../../services/city/slice";
 import styles from "./user-info.module.css";
 
 const genderOptions: OptionType[] = [
-  { value: "male", title: "Мужской" },
-  { value: "female", title: "Женский" },
-  { value: "other", title: "Другой" },
+  { value: "MALE", title: "Мужской" },
+  { value: "FEMALE", title: "Женский" },
+  { value: "OTHER", title: "Другой" },
 ];
-
-const cityOptions: OptionType[] = Object.entries(ECity).map(([key, value]) => ({
-  value: key,
-  title: value,
-}));
 
 const validatePassword = (password: string): string => {
   if (!password) {
@@ -54,47 +57,99 @@ export const UserInfo: FC<UserInfoProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState(user?.email ?? "");
+  const email = user?.email ?? "";
   const [name, setName] = useState(user?.name ?? "");
   const [birthDate, setBirthDate] = useState(user?.birthDate ?? "");
   const [gender, setGender] = useState<OptionType | null>(user?.gender ?? null);
-  const [city, setCity] = useState(user?.city ?? "");
+  const [city, setCity] = useState<OptionType | null>(() => {
+    // `city` может прийти строкой (название) или объектом City (после login/register),
+    // поэтому нормализуем значение до названия города, чтобы title всегда был строкой.
+    const rawCity = user?.city as unknown;
+    const cityName =
+      typeof rawCity === "string"
+        ? rawCity
+        : rawCity && typeof rawCity === "object" && "name" in rawCity
+          ? String((rawCity as { name?: unknown }).name ?? "")
+          : "";
+
+    if (user?.cityId) {
+      return { value: user.cityId, title: cityName };
+    }
+
+    if (cityName) {
+      return { value: "", title: cityName };
+    }
+
+    return null;
+  });
   const [about, setAbout] = useState(user?.about ?? "");
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const selectedCityOption =
-    cityOptions.find((option) => option.title === city) ?? null;
+  const popularCities = useSelector(selectPopularCities);
+  const citySearchResults = useSelector(selectCitySearchResults);
+
+  const [citySearchQuery, setCitySearchQuery] = useState("");
+
+  useEffect(() => {
+    if (popularCities.length === 0) {
+      dispatch(fetchPopularCities());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const query = citySearchQuery.trim();
+
+    if (query.length < MIN_CITY_SEARCH_LENGTH) return;
+
+    const timeoutId = window.setTimeout(() => {
+      dispatch(fetchSearchCities(query));
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [citySearchQuery, dispatch]);
+
+  const isSearching = citySearchQuery.trim().length >= MIN_CITY_SEARCH_LENGTH;
+  const cityOptions: OptionType[] = (
+    isSearching ? citySearchResults : popularCities
+  ).map((cityItem) => ({ value: cityItem.id, title: cityItem.name }));
 
   const handleSave = () => {
     onSave?.({
-      email,
       name,
-      birthDate,
+      birthdate: birthDate,
       gender,
-      city,
+      ...(city?.value ? { cityId: city.value } : {}),
       about,
     });
   };
 
   const handleCancelPasswordChange = () => {
     setShowPasswordChange(false);
+    setCurrentPassword("");
     setNewPassword("");
+    setCurrentPasswordError("");
     setPasswordError("");
   };
 
   const handlePasswordSave = async () => {
-    const validationError = validatePassword(newPassword);
+    const currentError = currentPassword ? "" : "Введите текущий пароль";
+    const newError = validatePassword(newPassword);
 
-    if (validationError) {
-      setPasswordError(validationError);
+    setCurrentPasswordError(currentError);
+    setPasswordError(newError);
+
+    if (currentError || newError) {
       return;
     }
 
     try {
-      await dispatch(updatePassword(newPassword)).unwrap();
+      await dispatch(updatePassword({ currentPassword, newPassword })).unwrap();
       handleCancelPasswordChange();
     } catch {
       setPasswordError("Не удалось изменить пароль");
@@ -127,17 +182,8 @@ export const UserInfo: FC<UserInfoProps> = ({
             label="Почта"
             placeholder="Введите email"
             value={email}
-            onChange={setEmail}
             error={errors.email}
-            required
-            rightIcon={
-              <Icon
-                name="edit"
-                size={24}
-                className={styles.editIcon}
-                alt="Редактирование поля почты"
-              />
-            }
+            disabled
           />
 
           <button
@@ -145,8 +191,10 @@ export const UserInfo: FC<UserInfoProps> = ({
             className={styles.changePasswordLink}
             onClick={() => {
               setShowPasswordChange(!showPasswordChange);
-              setPasswordError("");
+              setCurrentPassword("");
               setNewPassword("");
+              setCurrentPasswordError("");
+              setPasswordError("");
             }}
             aria-expanded={showPasswordChange}
             aria-controls="password-change-container"
@@ -159,6 +207,18 @@ export const UserInfo: FC<UserInfoProps> = ({
               id="password-change-container"
               className={styles.passwordChangeContainer}
             >
+              <PasswordInput
+                label="Текущий пароль"
+                placeholder="Введите текущий пароль"
+                value={currentPassword}
+                onChange={(value) => {
+                  setCurrentPassword(value);
+                  setCurrentPasswordError("");
+                }}
+                error={currentPasswordError}
+                required
+              />
+
               <PasswordInput
                 label="Новый пароль"
                 placeholder="Придумайте новый пароль"
@@ -242,11 +302,14 @@ export const UserInfo: FC<UserInfoProps> = ({
             title="Город"
             placeholder="Выберите город"
             options={cityOptions}
-            selected={selectedCityOption}
-            onChange={(option) => setCity(option?.title ?? "")}
+            selected={city}
+            onChange={setCity}
             error={Boolean(errors.city)}
             searchable
             searchPlaceholder="Введите город"
+            onSearchChange={setCitySearchQuery}
+            onClose={() => setCitySearchQuery("")}
+            filterOptions={!isSearching}
           />
         </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Avatar } from "../../shared/ui/avatar";
 import { Button } from "../../shared/ui/button";
@@ -27,7 +27,12 @@ import {
   fetchMyRequests,
   updateRequestStatusAction,
 } from "../../services/request/actions";
-import { fetchUpdateCurrentUser } from "../../services/auth/actions";
+import {
+  fetchAddFavorite,
+  fetchFavorites,
+  fetchRemoveFavorite,
+} from "../../services/favorite/actions";
+import { selectFavoriteSkillIds } from "../../services/favorite/slice";
 import { showToast } from "../../utils/toast";
 
 const getAgeNumber = (birthDate: string): number => {
@@ -58,17 +63,23 @@ export function SkillPage() {
   const currentUser = useSelector((state) => state.auth.currentUser);
   const requestsReceived = useSelector((state) => state.requests.received);
   const sentRequests = useSelector((state) => state.requests.sent);
+  const favoriteSkillIds = useSelector(selectFavoriteSkillIds);
 
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+
+  // Защита от повторного dispatch fetchSkills при двойном монтировании
+  // эффекта в React StrictMode (dev-режим).
+  const skillsRequested = useRef(false);
 
   useEffect(() => {
     if (users.length === 0) {
       dispatch(fetchUsers());
     }
 
-    if (skills.length === 0) {
+    if (skills.length === 0 && !skillsRequested.current) {
+      skillsRequested.current = true;
       dispatch(fetchSkills());
     }
 
@@ -82,6 +93,7 @@ export function SkillPage() {
 
     if (currentUser) {
       dispatch(fetchMyRequests());
+      dispatch(fetchFavorites());
     }
   }, [
     dispatch,
@@ -150,8 +162,7 @@ export function SkillPage() {
     categories,
   );
 
-  const isFavorite =
-    currentUser?.likesSkillsIds.includes(selectedUser.userSkill) ?? false;
+  const isFavorite = favoriteSkillIds.has(selectedUser.userSkill);
 
   const isOwnProfile = currentUser?.id === selectedUser?.id;
 
@@ -210,19 +221,16 @@ export function SkillPage() {
       return;
     }
 
+    const isLiked = favoriteSkillIds.has(skillId);
+
     setIsTogglingFavorite(true);
 
-    const isLiked = currentUser.likesSkillsIds.includes(skillId);
-
-    const nextLikesSkillsIds = isLiked
-      ? currentUser.likesSkillsIds.filter((id) => id !== skillId)
-      : [...currentUser.likesSkillsIds, skillId];
-
     try {
-      await dispatch(
-        fetchUpdateCurrentUser({ likesSkillsIds: nextLikesSkillsIds }),
-      ).unwrap();
-      dispatch(fetchUsers());
+      if (isLiked) {
+        await dispatch(fetchRemoveFavorite(skillId)).unwrap();
+      } else {
+        await dispatch(fetchAddFavorite(skillId)).unwrap();
+      }
       showToast(
         isLiked ? "Удалено из избранного" : "Добавлено в избранное",
         "success",
@@ -270,9 +278,8 @@ export function SkillPage() {
     try {
       await dispatch(
         createRequestAction({
-          userSkill: currentUser.userSkill,
-          requiredSkillUserId: selectedUser.id,
-          message: `Хочу предложить обмен по навыку "${selectedSkill?.title ?? "Навык"}"`,
+          offeredSkillId: currentUser.userSkill,
+          requestedSkillId: selectedUser.userSkill,
         }),
       ).unwrap();
 
@@ -501,8 +508,7 @@ export function SkillPage() {
               age: user.age,
               canTeach: user.canTeach,
               wantsToLearn: user.wantsToLearn,
-              isFavorite:
-                currentUser?.likesSkillsIds.includes(user.userSkill) ?? false,
+              isFavorite: favoriteSkillIds.has(user.userSkill),
               onFavoriteClick: () => handleFavoriteClick(user.userSkill),
               teachColor: getTeachColor(
                 user.userSkill,

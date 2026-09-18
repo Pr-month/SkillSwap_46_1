@@ -2,15 +2,6 @@ import { interceptors } from "./interceptors";
 
 export function setupApiInterceptors() {
   interceptors.addRequestInterceptor(async (url, config) => {
-    const token = localStorage.getItem("accessToken");
-
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
-
     return { url, config };
   });
 

@@ -1,14 +1,14 @@
+import { Category } from '@/categories/entities/category.entity';
+import { Subcategory } from '@/categories/entities/subcategory.entity';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { PaginatedResponseDto } from '@/common/dto/response.dto';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { User } from '@/users/entities/user.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 
-import { Category } from '../categories/entities/category.entity';
-import { Subcategory } from '../categories/entities/subcategory.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { PaginatedResponseDto } from '../common/dto/response.dto';
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { User } from '../users/entities/user.entity';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skills.entity';
@@ -38,6 +38,42 @@ export class SkillsService {
     return this.skillsRepository.save(skill);
   }
 
+  async createForRegistration(
+    ownerId: string,
+    data: {
+      title?: string;
+      description?: string;
+      subcategoryId?: string;
+      images?: string[];
+    },
+  ): Promise<Skill | null> {
+    const subcategoryId = data.subcategoryId?.trim();
+
+    if (!subcategoryId) {
+      return null;
+    }
+
+    const subcategory = await this.subcategoriesRepository.findOneBy({
+      id: subcategoryId,
+    });
+
+    if (!subcategory) {
+      return null;
+    }
+
+    const skill = this.skillsRepository.create({
+      title: data.title?.trim() || subcategory.name || 'Мой навык',
+      description: data.description?.trim() || 'Навык пользователя',
+      images: data.images ?? null,
+      categoryId: subcategory.categoryId,
+      subcategoryId: subcategory.id,
+      ownerId,
+      owner: { id: ownerId } as User,
+    });
+
+    return this.skillsRepository.save(skill);
+  }
+
   async findAll(query: PaginationDto): Promise<PaginatedResponseDto<Skill>> {
     const builder = this.skillsRepository
       .createQueryBuilder('skill')
@@ -50,17 +86,19 @@ export class SkillsService {
       .take(query.limit);
 
     if (query.search) {
-      builder.andWhere(
-        new Brackets((where) => {
-          where
-            .where('LOWER(skill.title) LIKE :search')
-            .orWhere('LOWER(category.name) LIKE :search')
-            .orWhere('LOWER(subcategory.name) LIKE :search');
-        }),
-        { search: `%${query.search.toLowerCase()}%` },
-      );
+      const search = query.search.trim().toLowerCase();
+      if (search) {
+        builder.andWhere(
+          new Brackets((where) => {
+            where
+              .where('LOWER(skill.title) LIKE :search')
+              .orWhere('LOWER(category.name) LIKE :search')
+              .orWhere('LOWER(subcategory.name) LIKE :search');
+          }),
+          { search: `%${search}%` },
+        );
+      }
     }
-
     if (query.category) {
       builder.andWhere(
         new Brackets((where) => {

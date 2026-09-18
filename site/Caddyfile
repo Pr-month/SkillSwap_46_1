@@ -1,0 +1,34 @@
+site.udarilisvtantcy.com {
+	encode gzip zstd
+
+	root * /srv
+	try_files {path} /index.html
+	file_server
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+api.udarilisvtantcy.com {
+	encode gzip zstd
+
+	reverse_proxy app:4567
+
+	header {
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

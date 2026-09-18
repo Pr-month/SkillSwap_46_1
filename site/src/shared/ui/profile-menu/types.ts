@@ -4,4 +4,6 @@ export type ProfileMenuProps = {
   onRequestClose?: () => void;
   className?: string;
   onClosePopover?: () => void;
+  isEmailConfirmed: boolean;
+  onConfirmEmailClick?: () => Promise<void>;
 };

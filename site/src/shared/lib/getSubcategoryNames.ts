@@ -4,4 +4,6 @@ export const getSubcategoryNames = (
   ids: string[],
   subCategories: ISkillsSubcategory[],
 ): string[] =>
-  ids.map((id) => subCategories.find((s) => s.id === id)?.name ?? id);
+  ids
+    .map((id) => subCategories.find((s) => s.id === id)?.name)
+    .filter((name): name is string => name != null);

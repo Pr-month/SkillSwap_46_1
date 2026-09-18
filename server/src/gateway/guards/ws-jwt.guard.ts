@@ -1,4 +1,15 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { JwtPayload } from '@/auth/auth.types';
+import {
+  type ExceptionCode,
+  exceptionCodes,
+} from '@/common/errors/error-codes';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   JsonWebTokenError,
   JwtService,
@@ -8,17 +19,12 @@ import {
 import { WsException } from '@nestjs/websockets';
 import { parse } from 'cookie';
 
-import { JwtPayload } from '../../auth/auth.types';
-import {
-  type ExceptionCode,
-  exceptionCodes,
-  exceptionMessages,
-} from '../../common/errors/error-codes';
-import { ConfigurationService } from '../../module/configuration/configuration.service';
 import { AuthenticatedSocket, SocketUser } from '../gateway.types';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
+  private readonly logger = new Logger(WsJwtGuard.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configurationService: ConfigurationService,
@@ -76,6 +82,8 @@ export class WsJwtGuard implements CanActivate {
         throw this.createWsException(exceptionCodes.auth.invalidAccessToken);
       }
 
+      this.logger.warn('WebSocket authentication failed');
+
       throw this.createWsException(exceptionCodes.common.internal);
     }
   }
@@ -99,7 +107,7 @@ export class WsJwtGuard implements CanActivate {
   private createWsException(code: ExceptionCode): WsException {
     return new WsException({
       code,
-      message: exceptionMessages[code],
+      message: code,
     });
   }
 }

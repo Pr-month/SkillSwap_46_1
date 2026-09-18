@@ -1,4 +1,3 @@
-import { USE_MOCKS } from "../config/apiConfig";
 import type {
   IMyRequests,
   ISkillExchange,
@@ -6,7 +5,6 @@ import type {
   TId,
   TRequestStatus,
 } from "../utils/types";
-import { tokenService } from "../utils/tokenService.ts";
 import { request } from "./client";
 
 interface ApiResponse<T> {
@@ -14,57 +12,58 @@ interface ApiResponse<T> {
   data: T;
 }
 
-//POST
+interface ApiRequest {
+  id: TId;
+  createdAt: string;
+  status: TRequestStatus;
+  isRead: boolean;
+  sender: {
+    id: TId;
+  };
+  receiver: {
+    id: TId;
+  };
+  offeredSkill: {
+    id: TId;
+  };
+  requestedSkill: {
+    id: TId;
+  };
+}
+
+const mapApiRequest = (apiRequest: ApiRequest): ISkillExchange => ({
+  id: apiRequest.id,
+  userSkill: apiRequest.offeredSkill.id,
+  requiredSkillUserId: apiRequest.receiver.id,
+  createdAt: apiRequest.createdAt,
+  status: apiRequest.status,
+  fromUserId: apiRequest.sender.id,
+  toUserId: apiRequest.receiver.id,
+});
+
+// POST /requests
 export const createRequest = (
   data: ISkillExchangeData,
 ): Promise<ISkillExchange> => {
-  const token = tokenService.get();
-
-  if (USE_MOCKS) {
-    return fetch("/request-single.json")
-      .then((r) => r.json())
-      .then((res) => ({
-        ...res.data,
-        ...data,
-        status: "pending",
-        fromUserId: "user-1",
-        toUserId: data.requiredSkillUserId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-  }
-
-  return request<ApiResponse<ISkillExchange>>("/requests", {
+  return request<ApiResponse<ApiRequest>>("/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };
 
-//GET my
+// GET /requests/incoming + /requests/outgoing
 export const getMyRequests = async (): Promise<IMyRequests> => {
-  const token = tokenService.get();
-
-  if (USE_MOCKS) {
-    return fetch("/requests.json")
-      .then((r) => r.json())
-      .then((res) => res.data);
-  }
-
   const [incoming, outgoing] = await Promise.all([
-    request<ApiResponse<ISkillExchange[]>>("/requests/incoming", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((res) => res.data),
-    request<ApiResponse<ISkillExchange[]>>("/requests/outgoing", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((res) => res.data),
+    request<ApiResponse<ApiRequest[]>>("/requests/incoming").then((res) =>
+      res.data.map(mapApiRequest),
+    ),
+
+    request<ApiResponse<ApiRequest[]>>("/requests/outgoing").then((res) =>
+      res.data.map(mapApiRequest),
+    ),
   ]);
 
   return {
@@ -73,65 +72,34 @@ export const getMyRequests = async (): Promise<IMyRequests> => {
   };
 };
 
-//GET by id
+// GET /requests/:id
 export const getRequestById = (id: TId): Promise<ISkillExchange> => {
-  const token = tokenService.get();
-  if (USE_MOCKS) {
-    return fetch("/request-single.json")
-      .then((r) => r.json())
-      .then((res) => res.data);
-  }
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`).then((res) =>
+    mapApiRequest(res.data),
+  );
 };
 
-//PATCH status
+// PATCH /requests/:id
 export const updateRequestStatus = (
   id: TId,
   status: TRequestStatus,
 ): Promise<ISkillExchange> => {
-  const token = tokenService.get();
-  if (USE_MOCKS) {
-    return fetch("/request-single.json")
-      .then((r) => r.json())
-      .then((res) => ({
-        ...res.data,
-        status,
-        updatedAt: new Date().toISOString(),
-      }));
-  }
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ status }),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };
 
-//PATCH complete
+// PATCH /requests/:id (done)
 export const completeRequest = (id: TId): Promise<ISkillExchange> => {
-  const token = tokenService.get();
-  if (USE_MOCKS) {
-    return fetch("/request-single.json")
-      .then((r) => r.json())
-      .then((res) => ({
-        ...res.data,
-        status: "done",
-        updatedAt: new Date().toISOString(),
-      }));
-  }
-
-  return request<ApiResponse<ISkillExchange>>(`/requests/${id}`, {
+  return request<ApiResponse<ApiRequest>>(`/requests/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ status: "done" }),
-  }).then((res: { status: boolean; data: ISkillExchange }) => res.data);
+  }).then((res) => mapApiRequest(res.data));
 };

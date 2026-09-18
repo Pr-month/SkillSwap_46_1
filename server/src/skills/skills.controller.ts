@@ -1,3 +1,6 @@
+import { RequestWithUser } from '@/auth/auth.types';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import {
   Body,
   Controller,
@@ -15,9 +18,6 @@ import {
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { RequestWithUser } from '../auth/auth.types';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { SkillsService } from './skills.service';

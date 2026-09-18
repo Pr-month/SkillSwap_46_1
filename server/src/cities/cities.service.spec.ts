@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { REDIS_CLIENT } from '../redis/redis.module';
 import { CitiesService } from './cities.service';
 import { City } from './entities/city.entity';
 
@@ -18,6 +19,11 @@ const mockCityRepo = {
   createQueryBuilder: jest.fn(() => mockQueryBuilder),
 };
 
+const mockRedis = {
+  get: jest.fn(),
+  set: jest.fn(),
+};
+
 describe('CitiesService', () => {
   let service: CitiesService;
 
@@ -28,6 +34,10 @@ describe('CitiesService', () => {
         {
           provide: getRepositoryToken(City),
           useValue: mockCityRepo,
+        },
+        {
+          provide: REDIS_CLIENT,
+          useValue: mockRedis,
         },
       ],
     }).compile();
@@ -62,10 +72,26 @@ describe('CitiesService', () => {
   });
 
   describe('findPopular', () => {
-    it('должен возвращать города, отсортированные по населению', async () => {
+    it('должен возвращать города из кеша, если они есть', async () => {
       const mockResult = [
         { id: 'city-1', name: 'Москва', population: 12000000 },
       ];
+
+      mockRedis.get.mockResolvedValue(JSON.stringify(mockResult));
+
+      const result = await service.findPopular(20);
+
+      expect(mockRedis.get).toHaveBeenCalledWith('cache:cities:popular:20');
+      expect(mockCityRepo.find).not.toHaveBeenCalled();
+      expect(result).toEqual(mockResult);
+    });
+
+    it('должен брать из БД и класть в кеш, если кеша нет', async () => {
+      const mockResult = [
+        { id: 'city-1', name: 'Москва', population: 12000000 },
+      ];
+
+      mockRedis.get.mockResolvedValue(null);
       mockCityRepo.find.mockResolvedValue(mockResult);
 
       const result = await service.findPopular(20);
@@ -74,6 +100,7 @@ describe('CitiesService', () => {
         order: { population: 'DESC' },
         take: 20,
       });
+      expect(mockRedis.set).toHaveBeenCalled();
       expect(result).toEqual(mockResult);
     });
   });

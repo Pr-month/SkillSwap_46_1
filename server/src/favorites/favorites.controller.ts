@@ -1,3 +1,5 @@
+import { RequestWithUser } from '@/auth/auth.types';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import {
   Controller,
   Delete,
@@ -17,8 +19,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { RequestWithUser } from '../auth/auth.types';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FavoriteCheckDto, FavoriteDto } from './dto/favorite-response.dto';
 import { FavoritesService } from './favorites.service';
 

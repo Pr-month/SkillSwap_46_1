@@ -13,7 +13,7 @@
 }
 
 .account__google,
-.account__apple {
+.account__yandex {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -27,7 +27,7 @@
 }
 
 .account__google img,
-.account__apple img {
+.account__yandex img {
   width: 24px;
   height: 24px;
 }
@@ -90,4 +90,11 @@
 
 .registration__link:hover {
   text-decoration: underline;
+}
+
+.linksRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
 }

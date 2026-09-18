@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 import {
   AccountRegister,
   AuthorRegister,
@@ -11,12 +11,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { IRegisterUserData, TGender } from "../../utils/types";
 import {
   fetchCheckUser,
-  fetchLogin,
   fetchRegister,
+  fetchRegisterOAuth,
   fetchUpdateCurrentUser,
 } from "../../services/auth/actions";
 import { useDispatch, useSelector } from "../../services/store";
-import { tokenService } from "../../utils/tokenService";
 import { fetchCategories } from "../../services/category/actions";
 import {
   selectCategories,
@@ -42,6 +41,8 @@ export const Register: FC = () => {
   const [skillDescription, setSkillDescription] = useState("");
   const [skillImages, setSkillImages] = useState<string[]>([]);
 
+  const [oauthPendingId, setOauthPendingId] = useState<string | null>(null);
+
   const [registrationError, setRegistrationError] = useState<string | null>(
     null,
   );
@@ -57,9 +58,26 @@ export const Register: FC = () => {
     selectSubCategoriesByCategoryId,
   );
 
-  useState(() => {
+  const categoriesRequested = useRef(false);
+
+  useEffect(() => {
+    if (categoriesRequested.current || categories.length !== 0) {
+      return;
+    }
+    categoriesRequested.current = true;
     dispatch(fetchCategories());
-  });
+  }, [dispatch, categories.length]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const pendingId = params.get("oauth_pending");
+
+    if (pendingId) {
+      setOauthPendingId(pendingId);
+      setStep(2);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, location.pathname, navigate]);
 
   const convertSubcategoriesToCategories = (
     subcategoryIds: string[],
@@ -85,12 +103,6 @@ export const Register: FC = () => {
     setRegistrationError(null);
 
     try {
-      const loginResult = await dispatch(
-        fetchLogin({ email, password }),
-      ).unwrap();
-
-      tokenService.set(loginResult.access_token);
-
       await dispatch(
         fetchUpdateCurrentUser({
           interestedSkillsSubcategoriesIds: learningSkills,
@@ -116,19 +128,37 @@ export const Register: FC = () => {
     try {
       const categoryIds = convertSubcategoriesToCategories(learningSkills);
 
-      const registerData: IRegisterUserData = {
-        email,
-        password,
+      const commonData = {
         name,
         birthdate: birthDate,
         gender: (gender?.value as TGender) || "OTHER",
         cityId: city?.value as string,
-        avatar: avatar,
+        avatar,
         wantToLearn: categoryIds,
         skills: [String(skillSubcategory.value)],
+        title: skillName,
+        description: skillDescription,
+        images: skillImages,
+        interestedSkillsSubcategoriesIds: learningSkills,
       };
 
-      console.log("Register data:", registerData);
+      if (oauthPendingId) {
+        await dispatch(
+          fetchRegisterOAuth({ ...commonData, pendingId: oauthPendingId }),
+        ).unwrap();
+
+        navigate(from, {
+          replace: true,
+          state: { showRegistrationSuccess: true },
+        });
+        return;
+      }
+
+      const registerData: IRegisterUserData = {
+        email,
+        password,
+        ...commonData,
+      };
 
       await dispatch(fetchRegister(registerData)).unwrap();
 
@@ -139,19 +169,38 @@ export const Register: FC = () => {
     } catch (err) {
       console.error("Registration error:", err);
 
-      try {
-        await dispatch(fetchCheckUser({ email, password })).unwrap();
-      } catch (error) {
-        const apiError = error as ApiError;
-        const status = apiError?.statusCode;
-        if (status === 409) {
-          const recoverySuccess = await attemptRecovery();
-          if (recoverySuccess) {
-            navigate(from, {
-              replace: true,
-              state: { showRegistrationSuccess: true },
-            });
-            return;
+      const apiError = err as ApiError;
+
+      if (apiError?.code === "auth:oauth-pending-expired") {
+        setOauthPendingId(null);
+        setStep(1);
+        setRegistrationError(
+          "Сессия регистрации истекла. Попробуйте войти через Google или Яндекс заново.",
+        );
+        return;
+      }
+
+      if (apiError?.statusCode === 409) {
+        if (oauthPendingId) {
+          setRegistrationError(
+            "Этот email уже зарегистрирован. Войдите в аккаунт.",
+          );
+          return;
+        }
+
+        try {
+          await dispatch(fetchCheckUser({ email, password })).unwrap();
+        } catch (error) {
+          const checkError = error as ApiError;
+          if (checkError?.statusCode === 409) {
+            const recoverySuccess = await attemptRecovery();
+            if (recoverySuccess) {
+              navigate(from, {
+                replace: true,
+                state: { showRegistrationSuccess: true },
+              });
+              return;
+            }
           }
         }
       }
@@ -188,7 +237,13 @@ export const Register: FC = () => {
         learningSkills={learningSkills}
         setLearningSkills={setLearningSkills}
         onNext={() => setStep(3)}
-        onBack={() => setStep(1)}
+        onBack={() => {
+          if (oauthPendingId) {
+            navigate("/login");
+            return;
+          }
+          setStep(1);
+        }}
       />
     );
   }

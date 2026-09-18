@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { csrfMiddleware } from './common/middleware/csrf.middleware';
 import { ConfigurationService } from './module/configuration/configuration.service';
 
 import cookieParser = require('cookie-parser');
@@ -12,8 +13,30 @@ import cookieParser = require('cookie-parser');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableShutdownHooks();
+
+  const configService = app.get(ConfigurationService);
+  const expressApp = app.getHttpAdapter().getInstance();
+
+  expressApp.set('trust proxy', 1);
+
   app.useGlobalFilters(new AllExceptionsFilter());
   app.use(cookieParser());
+
+  app.enableCors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const isAllowed = configService.corsOrigins.includes(origin);
+      callback(null, isAllowed);
+    },
+  });
+
+  app.use(csrfMiddleware);
   app.useGlobalPipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
@@ -35,8 +58,9 @@ async function bootstrap() {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
 
-  SwaggerModule.setup('docs', app, documentFactory);
-  const configService = app.get(ConfigurationService);
+  if (configService.nodeEnv !== 'production') {
+    SwaggerModule.setup('docs', app, documentFactory);
+  }
 
   app.setGlobalPrefix('api');
 

@@ -1,13 +1,19 @@
+import { RegisterOAuthDto } from '@/auth/oauth/dto/register-oauth.dto';
+import { OAuthPendingService } from '@/auth/oauth/oauth-pending.service';
+import { BusinessException } from '@/common/errors/business.exception';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { TokenBlacklistService } from '@/common/services/token-blacklist.service';
+import { ConfigurationService } from '@/module/configuration/configuration.service';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { SkillsService } from '@/skills/skills.service';
+import { UserGender, UserRole } from '@/users/enums/user.enums';
+import { UsersService } from '@/users/users.service';
+import { HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { ConfigurationService } from '../module/configuration/configuration.service';
-import { UserGender, UserRole } from '../users/enums/user.enums';
-import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 
@@ -36,6 +42,12 @@ describe('AuthService', () => {
     updateRefreshToken: jest.fn(),
     updatePassword: jest.fn(),
     clearRefreshToken: jest.fn(),
+    getProfile: jest.fn(),
+    confirmEmail: jest.fn(),
+  };
+
+  const mockSkillsService = {
+    createForRegistration: jest.fn(),
   };
 
   const mockJwtService = {
@@ -46,13 +58,30 @@ describe('AuthService', () => {
     hashSalt: 10,
     jwtAccessExpiresIn: '15m',
     jwtRefreshExpiresIn: '7d',
-    jwtRefreshSecret: 'test-secret',
+    jwtAccessSecret: 'test-access-secret',
+    jwtRefreshSecret: 'test-refresh-secret',
+    nodeEnv: 'test',
+  };
+
+  const mockRedis = {
+    del: jest.fn(),
+  };
+
+  const mockTokenBlacklistService = {
+    isUsed: jest.fn(),
+    markAsUsed: jest.fn(),
   };
 
   const mockResponse = {
     cookie: jest.fn(),
     clearCookie: jest.fn(),
   } as unknown as Response;
+
+  const mockOAuthPendingService = {
+    create: jest.fn(),
+    peek: jest.fn(),
+    consume: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -63,12 +92,28 @@ describe('AuthService', () => {
           useValue: mockUsersService,
         },
         {
+          provide: SkillsService,
+          useValue: mockSkillsService,
+        },
+        {
           provide: JwtService,
           useValue: mockJwtService,
         },
         {
           provide: ConfigurationService,
           useValue: mockConfigService,
+        },
+        {
+          provide: REDIS_CLIENT,
+          useValue: mockRedis,
+        },
+        {
+          provide: TokenBlacklistService,
+          useValue: mockTokenBlacklistService,
+        },
+        {
+          provide: OAuthPendingService,
+          useValue: mockOAuthPendingService,
         },
       ],
     }).compile();
@@ -138,7 +183,7 @@ describe('AuthService', () => {
           role: UserRole.USER,
           about: null,
           wantToLearn: [],
-          skills: [],
+          wantToLearnSubcategories: [],
         }),
       );
       expect(mockUsersService.create).toHaveBeenCalled();
@@ -258,6 +303,81 @@ describe('AuthService', () => {
     });
   });
 
+  describe('refresh', () => {
+    const refreshUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      refreshToken: 'current-refresh-token',
+    };
+
+    const storedUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      refreshToken: 'current-refresh-token',
+    };
+
+    beforeEach(() => {
+      mockJwtService.signAsync.mockReset();
+    });
+
+    it('should rotate tokens when refresh token is valid', async () => {
+      mockUsersService.findById.mockResolvedValue(storedUser);
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('new-access-token')
+        .mockResolvedValueOnce('new-refresh-token');
+      mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
+
+      const result = await service.refresh(refreshUser, mockResponse);
+
+      expect(result).toEqual({
+        message: 'Токены успешно обновлены',
+      });
+
+      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'new-refresh-token',
+      );
+
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reject refresh token that does not match stored token', async () => {
+      mockUsersService.findById.mockResolvedValue({
+        ...storedUser,
+        refreshToken: 'another-refresh-token',
+      });
+
+      await expect(
+        service.refresh(refreshUser, mockResponse),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.auth.invalidRefreshToken,
+      });
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
+    });
+
+    it('should reject refresh token when user no longer has one', async () => {
+      mockUsersService.findById.mockResolvedValue({
+        ...storedUser,
+        refreshToken: null,
+      });
+
+      await expect(
+        service.refresh(refreshUser, mockResponse),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.auth.invalidRefreshToken,
+      });
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
+    });
+  });
+
   describe('logout', () => {
     it('should clear refresh token in DB and clear cookies', async () => {
       mockUsersService.clearRefreshToken.mockResolvedValue(undefined);
@@ -316,17 +436,17 @@ describe('AuthService', () => {
     };
 
     it('should successfully return user profile', async () => {
-      mockUsersService.findById.mockResolvedValue(mockUser);
+      mockUsersService.getProfile.mockResolvedValue(mockUser);
 
       const result = await service.getProfile('user-id');
 
       expect(result).toEqual(mockUser);
 
-      expect(mockUsersService.findById).toHaveBeenCalledWith('user-id');
+      expect(mockUsersService.getProfile).toHaveBeenCalledWith('user-id');
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      mockUsersService.findById.mockRejectedValue(
+      mockUsersService.getProfile.mockRejectedValue(
         new BusinessException(exceptionCodes.users.notFound, 404),
       );
 
@@ -399,6 +519,214 @@ describe('AuthService', () => {
         service.updatePassword('invalid-id', updatePasswordDto),
       ).rejects.toThrow(BusinessException);
       expect(mockUsersService.updatePassword).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('registerWithOAuth', () => {
+    const pendingId = 'pending-id-123';
+    const mockProfile = {
+      provider: 'google',
+      providerId: 'google-user-123',
+      email: 'oauth@example.com',
+      name: 'Иван из Google',
+      avatar: 'https://example.com/google-avatar.jpg',
+    };
+
+    const mockOAuthDto = {
+      pendingId,
+      name: 'Иван Петров',
+      birthdate: '1990-01-01',
+      gender: UserGender.MALE,
+      cityId,
+      avatar: 'https://example.com/avatar.jpg',
+      about: 'О себе',
+      wantToLearn: ['cat-1'],
+      skills: ['sub-1'],
+      title: 'Игра на гитаре',
+      description: 'Научу аккордам',
+      images: ['https://example.com/skill.jpg'],
+      interestedSkillsSubcategoriesIds: ['sub-1'],
+    };
+
+    const mockUser = {
+      id: 'user-id',
+      email: 'oauth@example.com',
+      name: 'Иван Петров',
+      birthdate: new Date('1990-01-01'),
+      gender: UserGender.MALE,
+      cityId,
+      city: mockCity,
+      avatar: 'https://example.com/avatar.jpg',
+      role: UserRole.USER,
+      isEmailConfirmed: true,
+    };
+
+    beforeEach(() => {
+      mockedBcrypt.hash.mockResolvedValue('random-hashed-password' as never);
+      mockOAuthPendingService.consume.mockResolvedValue(mockProfile);
+      mockUsersService.findByEmail.mockResolvedValue(null);
+      mockUsersService.create.mockResolvedValue(mockUser);
+      mockUsersService.confirmEmail.mockResolvedValue(undefined);
+      mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
+      mockSkillsService.createForRegistration.mockResolvedValue(undefined);
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access-token')
+        .mockResolvedValueOnce('refresh-token');
+    });
+
+    it('should register user from OAuth profile and set cookies', async () => {
+      const result = await service.registerWithOAuth(
+        mockOAuthDto as RegisterOAuthDto,
+        mockResponse,
+      );
+
+      expect(result).toEqual(mockUser);
+
+      expect(mockOAuthPendingService.consume).toHaveBeenCalledWith(pendingId);
+
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        mockProfile.email,
+      );
+
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `${mockProfile.provider}:${mockProfile.providerId}`,
+        ),
+        10,
+      );
+
+      expect(mockUsersService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: mockProfile.email,
+          password: 'random-hashed-password',
+          name: mockOAuthDto.name,
+          birthdate: new Date(mockOAuthDto.birthdate),
+          gender: mockOAuthDto.gender,
+          cityId: mockOAuthDto.cityId,
+          avatar: mockOAuthDto.avatar,
+          role: UserRole.USER,
+          about: mockOAuthDto.about,
+        }),
+      );
+
+      expect(mockUsersService.confirmEmail).toHaveBeenCalledWith('user-id');
+
+      // Скилл создали
+      expect(mockSkillsService.createForRegistration).toHaveBeenCalledWith(
+        'user-id',
+        {
+          title: mockOAuthDto.title,
+          description: mockOAuthDto.description,
+          subcategoryId: mockOAuthDto.skills[0],
+          images: mockOAuthDto.images,
+        },
+      );
+
+      // Токены и куки
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'user-id',
+        'refresh-token',
+      );
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
+    });
+
+    it('should fall back to profile name and avatar when dto fields are missing', async () => {
+      const dtoWithoutNameAndAvatar = {
+        pendingId,
+        birthdate: mockOAuthDto.birthdate,
+        gender: mockOAuthDto.gender,
+        cityId: mockOAuthDto.cityId,
+        about: mockOAuthDto.about,
+        wantToLearn: mockOAuthDto.wantToLearn,
+        skills: mockOAuthDto.skills,
+        title: mockOAuthDto.title,
+        description: mockOAuthDto.description,
+        images: mockOAuthDto.images,
+        interestedSkillsSubcategoriesIds:
+          mockOAuthDto.interestedSkillsSubcategoriesIds,
+      };
+
+      await service.registerWithOAuth(
+        dtoWithoutNameAndAvatar as RegisterOAuthDto,
+        mockResponse,
+      );
+
+      expect(mockUsersService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: mockProfile.name,
+          avatar: mockProfile.avatar,
+        }),
+      );
+    });
+
+    it('should throw ConflictException if user already exists (race condition)', async () => {
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'existing-user-id',
+        email: mockProfile.email,
+      });
+
+      await expect(
+        service.registerWithOAuth(
+          mockOAuthDto as RegisterOAuthDto,
+          mockResponse,
+        ),
+      ).rejects.toThrow(BusinessException);
+
+      expect(mockUsersService.create).not.toHaveBeenCalled();
+      expect(mockUsersService.updateRefreshToken).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error if pendingId is expired', async () => {
+      mockOAuthPendingService.consume.mockRejectedValue(
+        new BusinessException(
+          exceptionCodes.auth.oauthPendingExpired,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+
+      await expect(
+        service.registerWithOAuth(
+          mockOAuthDto as RegisterOAuthDto,
+          mockResponse,
+        ),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.auth.oauthPendingExpired,
+      });
+
+      expect(mockUsersService.findByEmail).not.toHaveBeenCalled();
+      expect(mockUsersService.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create skill if no subcategory id provided', async () => {
+      const dtoWithoutSkill = {
+        ...mockOAuthDto,
+        skills: [],
+        interestedSkillsSubcategoriesIds: [],
+      };
+
+      await service.registerWithOAuth(
+        dtoWithoutSkill as RegisterOAuthDto,
+        mockResponse,
+      );
+
+      expect(mockSkillsService.createForRegistration).not.toHaveBeenCalled();
+    });
+
+    it('should still create user and set cookies if skill creation fails', async () => {
+      mockSkillsService.createForRegistration.mockRejectedValue(
+        new Error('S3 upload failed'),
+      );
+
+      await expect(
+        service.registerWithOAuth(
+          mockOAuthDto as RegisterOAuthDto,
+          mockResponse,
+        ),
+      ).rejects.toThrow('S3 upload failed');
+
+      expect(mockUsersService.create).toHaveBeenCalled();
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
   });
 });

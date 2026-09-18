@@ -34,12 +34,14 @@ export class CreateSkillDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
-  @IsUrl({
-    require_protocol: true,
-    require_valid_protocol: true,
-    protocols: ['http', 'https'],
-    require_host: true,
-    host_whitelist: ['localhost', '127.0.0.1'],
-  })
+  @IsUrl(
+    {
+      require_protocol: true,
+      require_valid_protocol: true,
+      protocols: ['http', 'https'],
+      require_host: true,
+    },
+    { each: true },
+  )
   images?: string[];
 }

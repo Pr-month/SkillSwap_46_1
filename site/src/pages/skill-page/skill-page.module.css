@@ -37,11 +37,14 @@
 
 .authorName {
   margin: 0;
+  overflow: hidden;
   color: var(--color-text-primary, #3f4a2c);
   font-family: var(--font-family-heading, "Jost", sans-serif);
   font-size: var(--fs-h2, 24px);
   line-height: var(--lh-h2, 32px);
   font-weight: var(--font-weight-medium, 500);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .authorMeta {

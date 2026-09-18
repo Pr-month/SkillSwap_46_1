@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { tokenService } from "../../utils/tokenService.ts";
 import {
   fetchCheckUser,
   fetchLogin,
@@ -35,7 +34,6 @@ export const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.currentUser = null;
-      tokenService.remove();
     },
   },
   extraReducers: (builder) => {
