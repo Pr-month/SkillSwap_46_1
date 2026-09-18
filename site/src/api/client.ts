@@ -10,7 +10,7 @@ interface RequestConfig extends RequestInit {
   showUnauthorizedToast?: boolean;
 }
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL ?? ""}/api`;
 let refreshPromise: Promise<void> | null = null;
 function addBaseUrl(url: string): string {
   return url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
