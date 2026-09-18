@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Brackets, Repository } from 'typeorm';
 
+import { Favorite } from '../skills/entities/favorite.entity';
+import { Skill } from '../skills/entities/skills.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserListItemResponse } from './dto/user-list-item.response';
@@ -85,7 +87,6 @@ export class UsersService {
         'user.wantToLearnSubcategories',
         'userWantToLearnSubcategory',
       )
-      .orderBy('user.createdAt', 'DESC')
       .skip(query.skip)
       .take(query.limit);
 
@@ -140,6 +141,30 @@ export class UsersService {
           { subCategoryIds: query.subCategoryIds },
         );
       }
+    }
+
+    if (query.orderBy === 'popular') {
+      // Сортировка по популярности: считаем, сколько избранных получили
+      // навыки пользователя. Коррелированный подзапрос позволяет отсортировать
+      // список по всей базе, не ломая пагинацию (skip/take).
+      builder
+        .addSelect(
+          (subQuery) =>
+            subQuery
+              .select('COUNT(favorite.id)')
+              .from(Favorite, 'favorite')
+              .leftJoin(
+                Skill,
+                'favoriteSkill',
+                '"favoriteSkill"."id" = "favorite"."skillId"',
+              )
+              .where('"favoriteSkill"."owner_id" = "user"."id"'),
+          'popularity',
+        )
+        .orderBy('popularity', 'DESC')
+        .addOrderBy('user.createdAt', 'DESC');
+    } else {
+      builder.orderBy('user.createdAt', 'DESC');
     }
 
     const [users, total] = await builder.getManyAndCount();

@@ -60,6 +60,21 @@ describe("userApi.getUsers", () => {
     });
   });
 
+  it("сериализует orderBy для сортировки популярных", async () => {
+    mockedRequest.mockResolvedValue({
+      status: true,
+      data: { data: [], page: 1, totalPages: 1 },
+    });
+
+    await getUsers({ orderBy: "popular" });
+
+    expect(mockedRequest).toHaveBeenCalledWith("/users/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page: 1, limit: 20, orderBy: "popular" }),
+    });
+  });
+
   it("не отправляет `all`-значения gender/skillOption", async () => {
     mockedRequest.mockResolvedValue({
       status: true,

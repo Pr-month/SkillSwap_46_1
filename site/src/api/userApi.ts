@@ -15,6 +15,8 @@ export interface PaginatedUsersResponse {
 
 export type UserGenderFilter = "male" | "female" | "other";
 export type UserSkillOptionFilter = "all" | "can-teach" | "want-to-learn";
+/** Поле сортировки списка пользователей: новые или популярные. */
+export type UserOrderBy = "createdAt" | "popular";
 
 export interface GetUsersParams {
   page?: number;
@@ -24,6 +26,7 @@ export interface GetUsersParams {
   cities?: string[];
   subCategoryIds?: string[];
   skillOption?: UserSkillOptionFilter;
+  orderBy?: UserOrderBy;
 }
 
 const DEFAULT_PAGE = 1;
@@ -38,6 +41,7 @@ export const getUsers = ({
   cities,
   subCategoryIds,
   skillOption,
+  orderBy,
 }: GetUsersParams = {}): Promise<PaginatedUsersResponse> => {
   const body: GetUsersParams = {
     page,
@@ -64,6 +68,10 @@ export const getUsers = ({
 
   if (skillOption && skillOption !== "all") {
     body.skillOption = skillOption;
+  }
+
+  if (orderBy) {
+    body.orderBy = orderBy;
   }
 
   return request<ApiResponse<PaginatedUsersResponse>>("/users/search", {

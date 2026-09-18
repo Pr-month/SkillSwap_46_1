@@ -9,19 +9,12 @@ export const selectUserPage = (state: RootState) => state.user.page;
 export const selectUserTotalPages = (state: RootState) => state.user.totalPages;
 export const selectUserHasMore = (state: RootState) => state.user.hasMore;
 
-export const selectPopularUsers = createSelector(selectUsers, (users) => {
-  const likesCount = users
-    .flatMap((u) => u.likesSkillsIds)
-    .reduce<Record<string, number>>((acc, skillId) => {
-      acc[skillId] = (acc[skillId] ?? 0) + 1;
-      return acc;
-    }, {});
-  return [...users]
-    .sort(
-      (a, b) => (likesCount[b.userSkill] ?? 0) - (likesCount[a.userSkill] ?? 0),
-    )
-    .slice(0, 9);
-});
+/**
+ * Популярные пользователи приходят с бэкенда уже отсортированными по
+ * количеству полученных избранных (POST /users/search с `orderBy=popular`),
+ * поэтому доп. сортировка на клиенте не нужна.
+ */
+export const selectPopularUsers = (state: RootState) => state.user.popular;
 
 export const selectNewestUsers = createSelector(selectUsers, (users) => {
   const now = new Date();

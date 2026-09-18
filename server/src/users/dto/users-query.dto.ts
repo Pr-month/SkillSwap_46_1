@@ -10,6 +10,9 @@ export const USER_SKILL_OPTIONS = [
 ] as const;
 export type UserSkillOption = (typeof USER_SKILL_OPTIONS)[number];
 
+export const USER_ORDER_BY_OPTIONS = ['createdAt', 'popular'] as const;
+export type UserOrderByOption = (typeof USER_ORDER_BY_OPTIONS)[number];
+
 /**
  * Нормализует query-параметр-массив к массиву строк.
  *
@@ -67,4 +70,14 @@ export class UsersQueryDto extends PaginationDto {
   @IsOptional()
   @IsIn(USER_SKILL_OPTIONS)
   skillOption?: UserSkillOption;
+
+  /**
+   * Поле сортировки списка:
+   *  - `createdAt` (по умолчанию) — сначала новые пользователи;
+   *  - `popular` — сначала пользователи с наибольшим числом полученных
+   *    избранных (сколько раз навыки пользователя добавили в избранное).
+   */
+  @IsOptional()
+  @IsIn(USER_ORDER_BY_OPTIONS)
+  orderBy?: UserOrderByOption;
 }

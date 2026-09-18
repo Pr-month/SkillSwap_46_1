@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "../header";
 import { Footer } from "../footer";
 import { confirmEmail } from "../../api/authApi";
+import { fetchProfile } from "../../services/auth/actions";
+import { useDispatch } from "../../services/store";
 import { showToast } from "../../utils/toast";
 import styles from "./layout.module.css";
 
@@ -11,6 +13,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get("token");
@@ -21,6 +24,9 @@ export function Layout({ children }: LayoutProps) {
     confirmEmail(token)
       .then(() => {
         showToast("Email подтвержден!", "success");
+        // Обновляем профиль, чтобы кнопка подтверждения почты сменила
+        // состояние без перезагрузки страницы.
+        dispatch(fetchProfile());
       })
       .catch(() => {
         showToast("Не удалось подтвердить email", "error");
@@ -30,7 +36,7 @@ export function Layout({ children }: LayoutProps) {
         newParams.delete("token");
         navigate({ search: newParams.toString() }, { replace: true });
       });
-  }, [token, navigate, searchParams]);
+  }, [token, navigate, searchParams, dispatch]);
 
   return (
     <div className={styles.layout}>

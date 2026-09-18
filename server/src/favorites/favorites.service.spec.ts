@@ -216,14 +216,14 @@ describe('FavoritesService', () => {
             images: skill.images,
             category: skill.category.name,
             subcategory: skill.subcategory.name,
-          owner: {
-            id: skill.owner.id,
-            name: skill.owner.name,
-            avatar: skill.owner.avatar,
-            city: 'Москва',
-            birthdate: '1990-01-01T00:00:00.000Z',
-            wantsToLearn: ['Программирование', 'Фотография'],
-          },
+            owner: {
+              id: skill.owner.id,
+              name: skill.owner.name,
+              avatar: skill.owner.avatar,
+              city: 'Москва',
+              birthdate: '1990-01-01T00:00:00.000Z',
+              wantsToLearn: ['Программирование', 'Фотография'],
+            },
           },
         },
       ]);
