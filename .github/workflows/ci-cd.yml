@@ -1,14 +1,15 @@
-name: CI - Lint and Tests
+name: CI/CD
 
 on:
   pull_request:
     branches: ['**']
   push:
     branches: ['main']
+  workflow_dispatch:
 
 jobs:
   lint:
-    name: Run Linter
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,15 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run server linter
+      - name: Lint server
         run: npm run lint:server
 
-      - name: Run site linter
+      - name: Lint client
         run: npm run lint:client
 
   unit-tests:
-    name: Run Unit Tests
-    if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,16 +40,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run server unit tests
+      - name: Server unit tests
         run: npm run test:server
 
-      - name: Run site unit tests
+      - name: Client unit tests
         run: npm run test:client
 
   e2e-tests:
-    name: Run E2E Tests
-    if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+    name: E2E Tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    needs: [lint, unit-tests]
 
     services:
       postgres:
@@ -113,3 +114,27 @@ jobs:
 
       - name: Run e2e tests
         run: npm run test:e2e
+
+  deploy:
+    name: Deploy to VPS
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, e2e-tests]
+    environment: production
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            set -e
+            cd /root/skillswap
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up --build -d
+            docker compose -f docker-compose.prod.yml ps
+            docker image prune -f
