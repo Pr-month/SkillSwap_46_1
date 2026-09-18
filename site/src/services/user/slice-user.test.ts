@@ -1,6 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
 import userReducer, { clearSelectedUser } from "./slice";
-import { fetchUsers, fetchUserById, removeUser } from "./actions";
+import {
+  fetchPopularUsers,
+  fetchUsers,
+  fetchUserById,
+  removeUser,
+} from "./actions";
 import type { IUserProfile } from "../../utils/types";
 
 const mockUser1: IUserProfile = {
@@ -35,6 +40,7 @@ const mockUser2: IUserProfile = {
 
 interface UserState {
   list: IUserProfile[];
+  popular: IUserProfile[];
   selectedUser: IUserProfile | null;
   loading: boolean;
   error: string | null;
@@ -45,6 +51,7 @@ interface UserState {
 
 const initialState: UserState = {
   list: [],
+  popular: [],
   selectedUser: null,
   loading: false,
   error: null,
@@ -130,6 +137,36 @@ describe("userSlice", () => {
       };
       const state = userReducer({ ...initialState, loading: true }, action);
       expect(state.error).toBe("Ошибка запроса пользователей");
+    });
+  });
+
+  //fetchPopularUsers
+  describe("fetchPopularUsers", () => {
+    it("fulfilled: заполняет popular из ответа", () => {
+      const state = userReducer(
+        initialState,
+        fetchPopularUsers.fulfilled(
+          { data: [mockUser1, mockUser2], page: 1, totalPages: 1 },
+          "",
+          9,
+        ),
+      );
+
+      expect(state.popular).toEqual([mockUser1, mockUser2]);
+    });
+
+    it("fulfilled: не меняет основной список list", () => {
+      const state = userReducer(
+        { ...initialState, list: [mockUser1] },
+        fetchPopularUsers.fulfilled(
+          { data: [mockUser2], page: 1, totalPages: 1 },
+          "",
+          9,
+        ),
+      );
+
+      expect(state.list).toEqual([mockUser1]);
+      expect(state.popular).toEqual([mockUser2]);
     });
   });
 

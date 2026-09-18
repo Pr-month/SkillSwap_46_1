@@ -1,9 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { IUserProfile } from "../../utils/types.ts";
-import { fetchUsers, fetchUserById, removeUser } from "./actions.ts";
+import {
+  fetchPopularUsers,
+  fetchUsers,
+  fetchUserById,
+  removeUser,
+} from "./actions.ts";
 
 interface UserState {
   list: IUserProfile[];
+  popular: IUserProfile[];
   selectedUser: IUserProfile | null;
   loading: boolean;
   error: string | null;
@@ -14,6 +20,7 @@ interface UserState {
 
 const initialState: UserState = {
   list: [],
+  popular: [],
   selectedUser: null,
   loading: false,
   error: null,
@@ -74,6 +81,10 @@ export const userSlice = createSlice({
         state.hasMore = page < totalPages;
       })
       .addCase(fetchUsers.rejected, handleRejected)
+      // fetchPopularUsers
+      .addCase(fetchPopularUsers.fulfilled, (state, action) => {
+        state.popular = action.payload.data;
+      })
       // fetchUserById
       .addCase(fetchUserById.pending, handlePending)
       .addCase(fetchUserById.fulfilled, (state, action) => {

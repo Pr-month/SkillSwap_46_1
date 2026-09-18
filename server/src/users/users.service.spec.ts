@@ -586,6 +586,28 @@ describe('UsersService', () => {
       expect(builder.skip).toHaveBeenCalledWith(2);
       expect(builder.take).toHaveBeenCalledWith(2);
     });
+
+    it('sorts by createdAt desc by default', async () => {
+      const builder = createQueryBuilderMock([[], 0]);
+      usersRepository.createQueryBuilder.mockReturnValue(builder);
+
+      await service.findAll(new UsersQueryDto());
+
+      expect(builder.orderBy).toHaveBeenCalledWith('user.createdAt', 'DESC');
+      expect(builder.addSelect).not.toHaveBeenCalled();
+    });
+
+    it('sorts by received favorites when orderBy=popular', async () => {
+      const builder = createQueryBuilderMock([[], 0]);
+      usersRepository.createQueryBuilder.mockReturnValue(builder);
+
+      const query = Object.assign(new UsersQueryDto(), { orderBy: 'popular' });
+      await service.findAll(query);
+
+      expect(builder.addSelect).toHaveBeenCalledTimes(1);
+      expect(builder.orderBy).toHaveBeenCalledWith('popularity', 'DESC');
+      expect(builder.addOrderBy).toHaveBeenCalledWith('user.createdAt', 'DESC');
+    });
   });
 
   it('returns profile with null/empty fallbacks when relations are missing', async () => {
@@ -697,7 +719,9 @@ describe('UsersService', () => {
 
 type MockedQueryBuilder = {
   leftJoinAndSelect: jest.Mock;
+  addSelect: jest.Mock;
   orderBy: jest.Mock;
+  addOrderBy: jest.Mock;
   skip: jest.Mock;
   take: jest.Mock;
   andWhere: jest.Mock;
@@ -707,7 +731,9 @@ type MockedQueryBuilder = {
 function createQueryBuilderMock(result: [User[], number]): MockedQueryBuilder {
   const builder: MockedQueryBuilder = {
     leftJoinAndSelect: jest.fn(),
+    addSelect: jest.fn(),
     orderBy: jest.fn(),
+    addOrderBy: jest.fn(),
     skip: jest.fn(),
     take: jest.fn(),
     andWhere: jest.fn(),
