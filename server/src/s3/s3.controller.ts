@@ -13,7 +13,7 @@ import { memoryStorage } from 'multer';
 
 import { S3Service } from './s3.service';
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const UPLOAD_FOLDER = 'images';
 const UPLOAD_FIELD_NAME = 'image';

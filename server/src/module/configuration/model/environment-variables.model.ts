@@ -158,4 +158,8 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   [EnvKey.YandexCallbackUrl]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.CookieDomain]: string;
 }

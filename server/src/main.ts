@@ -13,6 +13,8 @@ import cookieParser = require('cookie-parser');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableShutdownHooks();
+
   const configService = app.get(ConfigurationService);
   const expressApp = app.getHttpAdapter().getInstance();
 
@@ -29,18 +31,7 @@ async function bootstrap() {
         return;
       }
 
-      let hostname: string;
-      try {
-        hostname = new URL(origin).hostname;
-      } catch {
-        callback(null, false);
-        return;
-      }
-
-      const allowedOrigins = configService.corsOrigins;
-      const isAllowed =
-        allowedOrigins.includes(origin) || allowedOrigins.includes(hostname);
-
+      const isAllowed = configService.corsOrigins.includes(origin);
       callback(null, isAllowed);
     },
   });
@@ -67,7 +58,9 @@ async function bootstrap() {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
 
-  SwaggerModule.setup('docs', app, documentFactory);
+  if (configService.nodeEnv !== 'production') {
+    SwaggerModule.setup('docs', app, documentFactory);
+  }
 
   app.setGlobalPrefix('api');
 

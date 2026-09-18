@@ -1,0 +1,82 @@
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: builder
+    container_name: skillswap-migrate
+    restart: "no"
+    env_file:
+      - ./server/.env.production
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      NODE_ENV: production
+    command: npm run migration:run
+    working_dir: /app/server
+    networks:
+      - skillswap-network
+
+  app:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: production
+    container_name: skillswap-app
+    restart: unless-stopped
+    env_file:
+      - ./server/.env.production
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    expose:
+      - "4567"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:4567/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - skillswap-network
+
+  web:
+    build:
+      context: .
+      dockerfile: site/Dockerfile
+      target: production
+      args:
+        VITE_API_URL: https://api.udarilisvtantcy.com
+    container_name: skillswap-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - skillswap-network
+
+networks:
+  skillswap-network:
+    external: true
+    name: skillswap_default
+
+volumes:
+  caddy_data:
+  caddy_config:
