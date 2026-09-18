@@ -33,9 +33,9 @@ export const fetchUserById = createAsyncThunk(
 
 export const removeUser = createAsyncThunk(
   "user/delete",
-  async ({ id, token }: { id: TId; token: string }, { rejectWithValue }) => {
+  async ({ id }: { id: TId }, { rejectWithValue }) => {
     try {
-      await deleteUser(id, token);
+      await deleteUser(id);
       return id;
     } catch (err) {
       return rejectWithValue(err);

@@ -13,7 +13,7 @@ const mockUser: IUserProfile = {
   email: "test@test.com",
   name: "Test User",
   birthDate: "2000-01-01",
-  gender: "male",
+  gender: "MALE",
   city: "Moscow",
   avatar: "avatar.png",
   likesSkillsIds: [],
@@ -47,7 +47,10 @@ describe("user thunks", () => {
       const store = createTestStore();
       await store.dispatch(fetchUsers({ page: 1, limit: 20 }));
 
-      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({ page: 1, limit: 20 });
+      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({
+        page: 1,
+        limit: 20,
+      });
       expect(store.getState().user.list).toEqual([mockUser]);
       expect(store.getState().user.loading).toBe(false);
     });
@@ -123,11 +126,9 @@ describe("user thunks", () => {
       mockedUserApi.deleteUser.mockResolvedValue(undefined);
 
       const store = createTestStore();
-      const result = await store.dispatch(
-        removeUser({ id: "user-1", token: "tok" }),
-      );
+      const result = await store.dispatch(removeUser({ id: "user-1" }));
 
-      expect(mockedUserApi.deleteUser).toHaveBeenCalledWith("user-1", "tok");
+      expect(mockedUserApi.deleteUser).toHaveBeenCalledWith("user-1");
       expect(result.payload).toBe("user-1");
     });
 
@@ -135,9 +136,7 @@ describe("user thunks", () => {
       mockedUserApi.deleteUser.mockRejectedValue("Delete failed");
 
       const store = createTestStore();
-      const result = await store.dispatch(
-        removeUser({ id: "user-1", token: "tok" }),
-      );
+      const result = await store.dispatch(removeUser({ id: "user-1" }));
 
       expect(result.meta.requestStatus).toBe("rejected");
     });

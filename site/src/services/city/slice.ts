@@ -10,7 +10,7 @@ import type { ICity } from "../../utils/types";
  */
 export const MIN_CITY_SEARCH_LENGTH = 3;
 
-type CityState = {
+export type CityState = {
   popularCities: ICity[];
   searchResults: ICity[];
   searchQuery: string;
