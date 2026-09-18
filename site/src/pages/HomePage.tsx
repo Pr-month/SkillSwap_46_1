@@ -19,6 +19,7 @@ import { SelectedFilters } from "../widgets/filter-bar/selected-filters";
 import { genderOptions, skillOptions } from "../widgets/filter-bar";
 import { useDispatch, useSelector } from "../services/store";
 import { fetchFavorites } from "../services/favorite/actions";
+import { fetchPopularUsers } from "../services/user/actions";
 
 const CITY_LABELS: Record<string, string> = Object.entries(ECity).reduce(
   (acc, [, value]) => {
@@ -43,6 +44,12 @@ export const HomePage: FC = () => {
       dispatch(fetchFavorites());
     }
   }, [dispatch, currentUser]);
+
+  // Популярных пользователей сортирует бэкенд по количеству полученных
+  // избранных, поэтому их нужно запросить отдельно от основного списка.
+  useEffect(() => {
+    dispatch(fetchPopularUsers());
+  }, [dispatch]);
 
   const users = useSelector(selectUsers);
   const popular = useSelector(selectPopularUsers);

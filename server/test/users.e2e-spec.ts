@@ -203,6 +203,25 @@ describe('UsersController (e2e)', () => {
         });
     });
 
+    it('поддерживает сортировку orderBy=popular', () => {
+      return request(httpServer)
+        .post('/users/search')
+        .send({ orderBy: 'popular' })
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.page).toBe(1);
+        });
+    });
+
+    it('отклоняет недопустимое значение orderBy', () => {
+      return request(httpServer)
+        .post('/users/search')
+        .send({ orderBy: 'unknown' })
+        .expect(400)
+        .expect(expectValidationError);
+    });
+
     it('отклоняет недопустимое значение skillOption', () => {
       return request(httpServer)
         .post('/users/search')

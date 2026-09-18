@@ -62,6 +62,7 @@ const defaultFilterState: FilterState = {
 
 const buildState = (overrides: {
   users?: IUserProfile[];
+  popular?: IUserProfile[];
   selectedUser?: IUserProfile | null;
   currentUser?: IUserProfile | null;
   skills?: ISkill[];
@@ -70,6 +71,7 @@ const buildState = (overrides: {
   ({
     user: {
       list: overrides.users ?? [],
+      popular: overrides.popular ?? [],
       selectedUser: overrides.selectedUser ?? null,
       loading: false,
       error: null,
@@ -117,30 +119,29 @@ describe("простые селекторы", () => {
 
 //selectPopularUsers
 describe("selectPopularUsers", () => {
-  it("сортирует пользователей по количеству лайков на их навык", () => {
-    const users = [
-      makeUser({ id: "u1", userSkill: "skill-a", likesSkillsIds: [] }),
-      makeUser({ id: "u2", userSkill: "skill-b", likesSkillsIds: ["skill-a"] }),
-      makeUser({
-        id: "u3",
-        userSkill: "skill-c",
-        likesSkillsIds: ["skill-a", "skill-a"],
-      }),
-    ];
-    // skill-a имеет 3 лайка (u2 лайкнул 1 + u3 лайкнул 2), skill-b — 0, skill-c — 0
-    const state = buildState({ users });
-    const result = selectPopularUsers(state);
+  it("возвращает популярных пользователей, отсортированных бэкендом", () => {
+    const popular = [makeUser({ id: "p1" }), makeUser({ id: "p2" })];
+    const state = buildState({
+      users: [makeUser({ id: "u1" })],
+      popular,
+    });
 
-    // u1 с skill-a должен быть первым (3 лайка на skill-a)
-    expect(result[0].id).toBe("u1");
+    expect(selectPopularUsers(state)).toEqual(popular);
   });
 
-  it("возвращает максимум 9 пользователей", () => {
-    const users = Array.from({ length: 15 }, (_, i) =>
-      makeUser({ id: `u${i}` }),
-    );
-    const state = buildState({ users });
-    expect(selectPopularUsers(state)).toHaveLength(9);
+  it("не зависит от основного списка пользователей", () => {
+    // В основном списке «популярных» нет — селектор всё равно возвращает
+    // данные, загруженные отдельным запросом orderBy=popular.
+    const popular = [makeUser({ id: "popular-1" })];
+    const state = buildState({ users: [], popular });
+
+    expect(selectPopularUsers(state)).toEqual(popular);
+  });
+
+  it("возвращает пустой массив, если популярные ещё не загружены", () => {
+    const state = buildState({ users: [makeUser({ id: "u1" })] });
+
+    expect(selectPopularUsers(state)).toEqual([]);
   });
 });
 

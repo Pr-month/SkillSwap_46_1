@@ -1,7 +1,12 @@
 import { beforeEach, jest, describe, expect, it } from "@jest/globals";
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./slice";
-import { fetchUsers, fetchUserById, removeUser } from "./actions";
+import {
+  fetchPopularUsers,
+  fetchUsers,
+  fetchUserById,
+  removeUser,
+} from "./actions";
 import * as userApi from "../../api/userApi";
 import type { IUserProfile } from "../../utils/types";
 
@@ -94,6 +99,54 @@ describe("user thunks", () => {
 
       expect(result.meta.requestStatus).toBe("rejected");
       expect(store.getState().user.list).toEqual([]);
+    });
+  });
+
+  //fetchPopularUsers
+  describe("fetchPopularUsers", () => {
+    it("fulfilled: запрашивает популярных с orderBy=popular", async () => {
+      mockedUserApi.getUsers.mockResolvedValue({
+        data: [mockUser],
+        page: 1,
+        totalPages: 1,
+      });
+
+      const store = createTestStore();
+      await store.dispatch(fetchPopularUsers());
+
+      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({
+        page: 1,
+        limit: 9,
+        orderBy: "popular",
+      });
+      expect(store.getState().user.popular).toEqual([mockUser]);
+    });
+
+    it("пробрасывает переданный limit", async () => {
+      mockedUserApi.getUsers.mockResolvedValue({
+        data: [mockUser],
+        page: 1,
+        totalPages: 1,
+      });
+
+      const store = createTestStore();
+      await store.dispatch(fetchPopularUsers(3));
+
+      expect(mockedUserApi.getUsers).toHaveBeenCalledWith({
+        page: 1,
+        limit: 3,
+        orderBy: "popular",
+      });
+    });
+
+    it("rejected: ошибка API", async () => {
+      mockedUserApi.getUsers.mockRejectedValue("Network error");
+
+      const store = createTestStore();
+      const result = await store.dispatch(fetchPopularUsers());
+
+      expect(result.meta.requestStatus).toBe("rejected");
+      expect(store.getState().user.popular).toEqual([]);
     });
   });
 
