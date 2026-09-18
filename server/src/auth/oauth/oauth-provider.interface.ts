@@ -1,4 +1,4 @@
-export type OAuthProviderName = 'google' | 'yandex' | (string & {});
+export type OAuthProviderName = 'google' | 'yandex';
 
 export interface OAuthProfile {
   email: string;
