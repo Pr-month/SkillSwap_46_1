@@ -1,4 +1,37 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: skillswap-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - skillswap-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: skillswap-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - skillswap-network
+
   migrate:
     build:
       context: .
@@ -14,6 +47,30 @@ services:
       NODE_ENV: production
     command: npm run migration:run
     working_dir: /app/server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - skillswap-network
+
+  seed:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: builder
+    container_name: skillswap-seed
+    restart: "no"
+    env_file:
+      - ./server/.env.production
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      NODE_ENV: production
+    command: sh -c "npm run seeding:cities && npm run seeding:categories && npm run seeding:users"
+    working_dir: /app/server
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     networks:
       - skillswap-network
 
@@ -34,7 +91,7 @@ services:
     expose:
       - "4567"
     depends_on:
-      migrate:
+      seed:
         condition: service_completed_successfully
     healthcheck:
       test:
@@ -74,9 +131,10 @@ services:
 
 networks:
   skillswap-network:
-    external: true
-    name: skillswap_default
+    name: skillswap-network
 
 volumes:
+  postgres_data:
+  redis_data:
   caddy_data:
   caddy_config:
