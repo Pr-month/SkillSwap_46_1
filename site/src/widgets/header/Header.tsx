@@ -17,6 +17,11 @@ import { fetchLogout } from "../../services/auth/actions";
 import { fetchSendConfirmationEmail } from "../../services/user/actions";
 import { showToast } from "../../utils/toast";
 import { handleError } from "../../utils/errors/errorUtils";
+import { selectCategories } from "../../services/category/slice";
+import { fetchCategories } from "../../services/category/actions";
+import { useEffect } from "react";
+import type { TSkillCategoryProps } from "../../shared/ui/skill-category";
+import { getCategoryStyle } from "../../shared/constants/categoryIcons";
 
 export function Header() {
   const dispatch = useDispatch();
@@ -25,6 +30,25 @@ export function Header() {
 
   const isAuthenticated = useSelector((state) => !!state.auth.currentUser);
   const user = useSelector((state) => state.auth.currentUser);
+
+  const categories = useSelector(selectCategories);
+
+  useEffect(() => {
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, categories.length]);
+
+  const categoryItems: TSkillCategoryProps[] = categories.map((category) => {
+    const { iconName, iconBackgroundColor } = getCategoryStyle(category.name);
+
+    return {
+      title: category.name,
+      iconName,
+      iconBackgroundColor,
+      skills: category.subcategories.map((sub) => sub.name),
+    };
+  });
 
   const handleSearch = (value: string) => {
     dispatch(setSearchQuery(value));
@@ -42,10 +66,6 @@ export function Header() {
     await dispatch(fetchLogout());
     dispatch(logout());
     window.location.href = "/";
-  };
-
-  const handleProfileClick = async () => {
-    navigate("/profile");
   };
 
   const handleConfirmEmailClick = async () => {
@@ -119,7 +139,7 @@ export function Header() {
                 >
                   Категории навыков
                 </h3>
-                <SkillCategoryGroup categories={[]} />
+                <SkillCategoryGroup categories={categoryItems} />
               </div>
             </Popover>
           </li>
@@ -159,7 +179,6 @@ export function Header() {
           {({ close }) => (
             <ProfileMenu
               isEmailConfirmed={user?.isEmailConfirmed ?? false}
-              onProfileClick={handleProfileClick}
               onLogoutClick={handleLogoutClick}
               onConfirmEmailClick={handleConfirmEmailClick}
               onProfileClick={() => navigate("/profile")}
