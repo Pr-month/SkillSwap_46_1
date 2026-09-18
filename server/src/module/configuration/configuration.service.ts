@@ -145,4 +145,8 @@ export class ConfigurationService {
   get yandexCallbackUrl(): string {
     return this.configService.get<string>(EnvKey.YandexCallbackUrl);
   }
+
+  get cookieDomain(): string {
+    return this.configService.get<string>(EnvKey.CookieDomain);
+  }
 }

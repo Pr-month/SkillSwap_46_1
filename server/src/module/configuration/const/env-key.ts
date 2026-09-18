@@ -33,4 +33,5 @@ export enum EnvKey {
   YandexClientId = 'YANDEX_CLIENT_ID',
   YandexClientSecret = 'YANDEX_CLIENT_SECRET',
   YandexCallbackUrl = 'YANDEX_CALLBACK_URL',
+  CookieDomain = 'COOKIE_DOMAIN',
 }

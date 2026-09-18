@@ -287,24 +287,24 @@ export class AuthService {
 
   private setAuthCookies(
     res: Response,
-    tokens: {
-      accessToken: string;
-      refreshToken: string;
-    },
+    tokens: { accessToken: string; refreshToken: string },
   ) {
     const isProduction = this.configService.nodeEnv === nodeEnvValue.Production;
 
-    res.cookie('accessToken', tokens.accessToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
+      domain: isProduction ? this.configService.cookieDomain : undefined,
+    };
+
+    res.cookie('accessToken', tokens.accessToken, {
+      ...cookieOptions,
       maxAge: ms(this.configService.jwtAccessExpiresIn as StringValue),
     });
 
     res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      ...cookieOptions,
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
   }
