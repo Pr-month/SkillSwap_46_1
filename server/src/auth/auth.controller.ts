@@ -1,4 +1,5 @@
 import { ResetPasswordDto } from '@/auth/dto/reset-password.dto';
+import { RegisterOAuthDto } from '@/auth/oauth/dto/register-oauth.dto';
 import {
   Body,
   Controller,
@@ -35,6 +36,16 @@ export class AuthController {
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
     return await this.authService.register(registerDto, res);
+  }
+
+  @Post('register/oauth')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Завершение регистрации через OAuth' })
+  async registerWithOAuth(
+    @Body() registerOAuthDto: RegisterOAuthDto,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    return await this.authService.registerWithOAuth(registerOAuthDto, res);
   }
 
   @UseGuards(LocalAuthGuard)

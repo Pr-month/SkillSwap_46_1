@@ -3,13 +3,15 @@ import type { LoginUIProps } from "./types";
 import styles from "./login.module.css";
 import lightBulb from "../../../assets/images/light-bulb.svg";
 import googleLogo from "../../../assets/images/Google.svg";
+import yandexLogo from "../../../assets/images/Yandex_icon.svg";
 import divider from "../../../assets/images/Divider.svg";
 import { Button } from "../button";
 import { Link } from "react-router-dom";
 import { BasicInput } from "../input/basic-input";
 import { AuthLayout } from "../auth-layout";
 import { PasswordInput } from "../input/password-input";
-import { Icon } from "../icon";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const LoginUI: FC<LoginUIProps> = ({
   email,
@@ -30,14 +32,20 @@ export const LoginUI: FC<LoginUIProps> = ({
   >
     <div className={styles.login__form}>
       <div className={styles.accounts}>
-        <div className={styles.account__google}>
+        <a
+          href={`${API_URL}/api/auth/oauth/google`}
+          className={styles.account__google}
+        >
           <img src={googleLogo} alt="Логотип Google" />
           <span>Продолжить с Google</span>
-        </div>
-        <div className={styles.account__apple}>
-          <Icon name="apple" size={24} color="currentColor" />
-          <span>Продолжить с Apple</span>
-        </div>
+        </a>
+        <a
+          href={`${API_URL}/api/auth/oauth/yandex`}
+          className={styles.account__yandex}
+        >
+          <img src={yandexLogo} alt="Логотип Яндекс" />
+          <span>Продолжить с Яндекс</span>
+        </a>
       </div>
       <div className={styles.divider}>
         <img src={divider} alt="Разделитель" />

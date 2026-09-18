@@ -1,3 +1,4 @@
+import { OAuthModule } from '@/auth/oauth/oauth.module';
 import { CitiesModule } from '@/cities/cities.module';
 import { HttpLoggerMiddleware } from '@/common/middleware/http-logger.middleware';
 import { TokenBlacklistModule } from '@/common/services/token-blacklist.module';
@@ -82,6 +83,7 @@ import { UsersModule } from './users/users.module';
     MailModule,
     RedisModule,
     TokenBlacklistModule,
+    OAuthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,3 +1,4 @@
+import { OAuthPendingModule } from '@/auth/oauth/oauth-pending.module';
 import { ConfigurationModule } from '@/module/configuration/configuration.module';
 import { SkillsModule } from '@/skills/skills.module';
 import { UsersModule } from '@/users/users.module';
@@ -11,8 +12,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
-  imports: [UsersModule, SkillsModule, PassportModule, ConfigurationModule],
+  imports: [
+    UsersModule,
+    SkillsModule,
+    PassportModule,
+    ConfigurationModule,
+    OAuthPendingModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -27,4 +27,10 @@ export enum EnvKey {
   MailFrom = 'MAIL_FROM',
   RedisHost = 'REDIS_HOST',
   RedisPort = 'REDIS_PORT',
+  GoogleClientId = 'GOOGLE_CLIENT_ID',
+  GoogleClientSecret = 'GOOGLE_CLIENT_SECRET',
+  GoogleCallbackUrl = 'GOOGLE_CALLBACK_URL',
+  YandexClientId = 'YANDEX_CLIENT_ID',
+  YandexClientSecret = 'YANDEX_CLIENT_SECRET',
+  YandexCallbackUrl = 'YANDEX_CALLBACK_URL',
 }

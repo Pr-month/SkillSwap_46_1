@@ -1,3 +1,5 @@
+import { RegisterOAuthDto } from '@/auth/oauth/dto/register-oauth.dto';
+import { OAuthPendingService } from '@/auth/oauth/oauth-pending.service';
 import { Category } from '@/categories/entities/category.entity';
 import { Subcategory } from '@/categories/entities/subcategory.entity';
 import { TokenType } from '@/common/enums/token-type.enum';
@@ -33,6 +35,7 @@ export class AuthService {
     private readonly configService: ConfigurationService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly tokenBlacklistService: TokenBlacklistService,
+    private readonly oauthPendingService: OAuthPendingService,
   ) {}
 
   async register(registerDto: RegisterDto, res: Response) {
@@ -98,17 +101,15 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(
-    email: string,
-    password: string,
-  ): Promise<{ id: string; email: string } | null> {
+  async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return {
-        id: user.id,
-        email: user.email,
-      };
+    if (!user || !user.password) {
+      return null;
+    }
+
+    if (await bcrypt.compare(password, user.password)) {
+      return { id: user.id, email: user.email };
     }
 
     return null;
@@ -306,5 +307,64 @@ export class AuthService {
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: ms(this.configService.jwtRefreshExpiresIn as StringValue),
     });
+  }
+
+  async registerWithOAuth(dto: RegisterOAuthDto, res: Response) {
+    const profile = await this.oauthPendingService.consume(dto.pendingId);
+
+    const existing = await this.usersService.findByEmail(profile.email);
+    if (existing) {
+      throw new BusinessException(
+        exceptionCodes.users.alreadyExists,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const randomPassword = await bcrypt.hash(
+      `${profile.provider}:${profile.providerId}:${Date.now()}`,
+      this.configService.hashSalt,
+    );
+
+    const wantToLearn = (dto.wantToLearn ?? []).map(
+      (id) => ({ id }) as Category,
+    );
+    const selectedSubcategoryIds =
+      dto.interestedSkillsSubcategoriesIds ?? dto.skills ?? [];
+    const wantToLearnSubcategories = selectedSubcategoryIds.map(
+      (id) => ({ id }) as Subcategory,
+    );
+
+    const createUserData: CreateUserData = {
+      email: profile.email,
+      password: randomPassword,
+      name: dto.name ?? profile.name,
+      birthdate: new Date(dto.birthdate),
+      gender: dto.gender ?? UserGender.OTHER,
+      cityId: dto.cityId,
+      avatar: dto.avatar ?? profile.avatar ?? null,
+      role: UserRole.USER,
+      about: dto.about ?? null,
+      wantToLearn,
+      wantToLearnSubcategories,
+    };
+
+    const user = await this.usersService.create(createUserData);
+    await this.usersService.confirmEmail(user.id);
+
+    const skillSubcategoryId = dto.skills?.[0] ?? selectedSubcategoryIds[0];
+    if (skillSubcategoryId) {
+      await this.skillsService.createForRegistration(user.id, {
+        title: dto.title,
+        description: dto.description,
+        subcategoryId: skillSubcategoryId,
+        images: dto.images,
+      });
+    }
+
+    const tokens = await this.generateTokens(user.id, user.email);
+    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+    this.setAuthCookies(res, tokens);
+
+    return user;
   }
 }

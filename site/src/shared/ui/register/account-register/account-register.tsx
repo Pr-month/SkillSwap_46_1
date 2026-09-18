@@ -3,6 +3,7 @@ import type { AccountRegisterProps } from "./types";
 import styles from "./account-register.module.css";
 import lightBulb from "../../../../assets/images/light-bulb.svg";
 import googleLogo from "../../../../assets/images/Google.svg";
+import yandexLogo from "../../../../assets/images/Yandex_icon.svg";
 import divider from "../../../../assets/images/Divider.svg";
 import { Button } from "../../button";
 import { BasicInput } from "../../input/basic-input";
@@ -13,7 +14,6 @@ import { useDispatch } from "../../../../services/store";
 import { fetchCheckUser } from "../../../../services/auth/actions";
 import { USE_TOAST } from "../../../../config/apiConfig";
 import { Link } from "react-router-dom";
-import { Icon } from "../../icon";
 
 export const AccountRegister: FC<AccountRegisterProps> = ({
   email,
@@ -80,6 +80,8 @@ export const AccountRegister: FC<AccountRegisterProps> = ({
   const isDisabled =
     !email.trim() || !password.trim() || !!errors.email || !!errors.password;
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   return (
     <AuthLayout
       type="register"
@@ -89,14 +91,26 @@ export const AccountRegister: FC<AccountRegisterProps> = ({
     >
       <div className={styles.registration__form}>
         <div className={styles.accounts}>
-          <div className={styles.account__google}>
+          {/*
+            Важно: это обычные <a>, а не fetch.
+            Браузер должен полностью уйти на бэк, а тот — редиректнуть на Google/Yandex.
+            fetch здесь не сработает: провайдер не покажет свою страницу логина,
+            и куки не поставятся.
+          */}
+          <a
+            href={`${API_URL}/api/auth/oauth/google`}
+            className={styles.account__google}
+          >
             <img src={googleLogo} alt="Логотип Google" />
             <span>Продолжить с Google</span>
-          </div>
-          <div className={styles.account__apple}>
-            <Icon name="apple" size={24} color="currentColor" />
-            <span>Продолжить с Apple</span>
-          </div>
+          </a>
+          <a
+            href={`${API_URL}/api/auth/oauth/yandex`}
+            className={styles.account__yandex}
+          >
+            <img src={yandexLogo} alt="Логотип Яндекс" />
+            <span>Продолжить с Яндекс</span>
+          </a>
         </div>
         <div className={styles.divider}>
           <img src={divider} alt="Разделитель" />

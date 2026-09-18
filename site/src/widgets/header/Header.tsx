@@ -162,6 +162,7 @@ export function Header() {
               onProfileClick={handleProfileClick}
               onLogoutClick={handleLogoutClick}
               onConfirmEmailClick={handleConfirmEmailClick}
+              onProfileClick={() => navigate("/profile")}
               onClosePopover={close}
             />
           )}

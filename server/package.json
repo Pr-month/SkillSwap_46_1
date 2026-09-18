@@ -111,8 +111,68 @@
       "^@/(.*)$": "<rootDir>/$1"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!**/*.dto.ts",
+      "!**/*.entity.ts",
+      "!**/*.response.ts",
+      "!**/*.interface.ts",
+      "!**/*.types.ts",
+      "!**/*.constants.ts",
+      "!**/*.enum.ts",
+      "!**/*.decorator.ts",
+      "!**/index.ts",
+      "!main.ts",
+      "!**/migrations/**",
+      "!**/scripts/**",
+      "!**/data-source.ts",
+      "!**/config/**",
+      "!**/*.config.ts",
+      "!**/*.controller.ts",
+      "!**/*.strategy.ts",
+      "!**/*.guard.ts",
+      "!**/*.middleware.ts",
+      "!**/*.filter.ts",
+      "!**/gateway/**",
+      "!**/environment-variables.model.ts",
+      "!**/env.validation.ts",
+      "!**/is-ip-or-localhost.ts",
+      "!**/configuration.service.ts",
+      "!**/configuration.common.ts",
+      "!**/get-base-url.ts"
     ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 50,
+        "branches": 45,
+        "functions": 45,
+        "lines": 50
+      },
+      "src/auth/oauth/**/*.ts": {
+        "statements": 90,
+        "branches": 80,
+        "functions": 90,
+        "lines": 90
+      },
+      "src/auth/**/*.service.ts": {
+        "statements": 75,
+        "branches": 65,
+        "functions": 75,
+        "lines": 75
+      },
+      "src/users/**/*.service.ts": {
+        "statements": 75,
+        "branches": 65,
+        "functions": 75,
+        "lines": 75
+      },
+      "src/skills/**/*.service.ts": {
+        "statements": 70,
+        "branches": 60,
+        "functions": 70,
+        "lines": 70
+      }
+    },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "setupFiles": ["reflect-metadata"]

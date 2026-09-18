@@ -86,17 +86,19 @@ export class SkillsService {
       .take(query.limit);
 
     if (query.search) {
-      builder.andWhere(
-        new Brackets((where) => {
-          where
-            .where('LOWER(skill.title) LIKE :search')
-            .orWhere('LOWER(category.name) LIKE :search')
-            .orWhere('LOWER(subcategory.name) LIKE :search');
-        }),
-        { search: `%${query.search.toLowerCase()}%` },
-      );
+      const search = query.search.trim().toLowerCase();
+      if (search) {
+        builder.andWhere(
+          new Brackets((where) => {
+            where
+              .where('LOWER(skill.title) LIKE :search')
+              .orWhere('LOWER(category.name) LIKE :search')
+              .orWhere('LOWER(subcategory.name) LIKE :search');
+          }),
+          { search: `%${search}%` },
+        );
+      }
     }
-
     if (query.category) {
       builder.andWhere(
         new Brackets((where) => {

@@ -134,4 +134,28 @@ export class EnvironmentVariables {
   @Min(1)
   @Max(65535)
   [EnvKey.RedisPort]: number;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleClientId]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleClientSecret]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.GoogleCallbackUrl]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexClientId]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexClientSecret]: string;
+
+  @IsString()
+  @IsNotEmpty()
+  [EnvKey.YandexCallbackUrl]: string;
 }

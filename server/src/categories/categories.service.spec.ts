@@ -1,28 +1,40 @@
+import { CACHE_KEYS } from '@/common/constants/cache-keys.constants';
+import { CACHE_TTL } from '@/common/constants/cache-ttl.constants';
+import { exceptionCodes } from '@/common/errors/error-codes';
+import { REDIS_CLIENT } from '@/redis/redis.module';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { BusinessException } from '../common/errors/business.exception';
-import { exceptionCodes } from '../common/errors/error-codes';
-import { REDIS_CLIENT } from '../redis/redis.module';
 import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 
-const mockCategoryRepo = {
-  find: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  findOne: jest.fn(),
-  remove: jest.fn(),
-};
-
-const mockRedis = {
-  get: jest.fn(),
-  set: jest.fn(),
-  del: jest.fn(),
-};
-
 describe('CategoriesService', () => {
   let service: CategoriesService;
+
+  const mockCategoryRepo = {
+    find: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  const mockRedis = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
+  const categoryId = 'cat-uuid-1';
+
+  const createCategory = (
+    overrides: Partial<Category> = {},
+  ): Partial<Category> => ({
+    id: categoryId,
+    name: 'Бизнес и карьера',
+    subcategories: [],
+    ...overrides,
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,9 +52,7 @@ describe('CategoriesService', () => {
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
-  });
 
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -51,84 +61,99 @@ describe('CategoriesService', () => {
   });
 
   describe('findAll', () => {
-    it('должен возвращать список категорий c подкатегориями из кеша', async () => {
-      const mockResult = [
-        { id: 'cat-1', name: 'Бизнес и карьера', subcategories: [] },
-      ];
+    it('должен возвращать категории из кеша, не дергая БД', async () => {
+      const cached = [createCategory()];
 
-      mockRedis.get.mockResolvedValue(JSON.stringify(mockResult));
+      mockRedis.get.mockResolvedValue(JSON.stringify(cached));
 
       const result = await service.findAll();
 
-      expect(result).toEqual(mockResult);
-      expect(mockRedis.get).toHaveBeenCalledWith('cache:categories');
+      expect(result).toEqual(cached);
+      expect(mockRedis.get).toHaveBeenCalledWith(CACHE_KEYS.CATEGORIES);
       expect(mockCategoryRepo.find).not.toHaveBeenCalled();
+      expect(mockRedis.set).not.toHaveBeenCalled();
     });
 
-    it('должен брать из БД и класть в кеш, если кеша нет', async () => {
-      const mockResult = [
-        { id: 'cat-1', name: 'Бизнес и карьера', subcategories: [] },
-      ];
+    it('должен брать из БД и класть в кеш с TTL, если кеша нет', async () => {
+      const fromDb = [createCategory()];
 
       mockRedis.get.mockResolvedValue(null);
-      mockCategoryRepo.find.mockResolvedValue(mockResult);
+      mockCategoryRepo.find.mockResolvedValue(fromDb);
+      mockRedis.set.mockResolvedValue('OK');
 
       const result = await service.findAll();
 
-      expect(result).toEqual(mockResult);
+      expect(result).toEqual(fromDb);
       expect(mockCategoryRepo.find).toHaveBeenCalledWith({
         relations: { subcategories: true },
       });
-      expect(mockRedis.set).toHaveBeenCalled();
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        CACHE_KEYS.CATEGORIES,
+        JSON.stringify(fromDb),
+        'EX',
+        CACHE_TTL.ONE_DAY,
+      );
+    });
+
+    it('должен пробрасывать ошибку при битом JSON в кеше', async () => {
+      mockRedis.get.mockResolvedValue('not-a-json');
+
+      await expect(service.findAll()).rejects.toThrow(SyntaxError);
+
+      expect(mockCategoryRepo.find).not.toHaveBeenCalled();
     });
   });
 
   describe('create', () => {
     it('должен создавать категорию и инвалидировать кеш', async () => {
       const dto = { name: 'Новая категория' };
-      const createdEntity = { ...dto };
-      const savedEntity = { id: 'cat-1', ...dto };
+      const createdEntity = { ...dto } as Category;
+      const savedEntity = { id: categoryId, ...dto } as Category;
 
       mockCategoryRepo.create.mockReturnValue(createdEntity);
       mockCategoryRepo.save.mockResolvedValue(savedEntity);
-      mockRedis.del.mockResolvedValue(undefined);
+      mockRedis.del.mockResolvedValue(1);
 
       const result = await service.create(dto);
 
       expect(mockCategoryRepo.create).toHaveBeenCalledWith(dto);
       expect(mockCategoryRepo.save).toHaveBeenCalledWith(createdEntity);
-      expect(mockRedis.del).toHaveBeenCalledWith('cache:categories');
+      expect(mockRedis.del).toHaveBeenCalledWith(CACHE_KEYS.CATEGORIES);
       expect(result).toEqual(savedEntity);
     });
   });
 
   describe('update', () => {
     it('должен обновлять существующую категорию и инвалидировать кеш', async () => {
-      const existing = { id: 'cat-1', name: 'Старое имя' };
+      const existing = createCategory({ name: 'Старое имя' }) as Category;
       const dto = { name: 'Новое имя' };
+      const saved = { ...existing, ...dto } as Category;
 
       mockCategoryRepo.findOne.mockResolvedValue(existing);
-      mockCategoryRepo.save.mockResolvedValue({ ...existing, ...dto });
-      mockRedis.del.mockResolvedValue(undefined);
+      mockCategoryRepo.save.mockResolvedValue(saved);
+      mockRedis.del.mockResolvedValue(1);
 
-      const result = await service.update('cat-1', dto);
+      const result = await service.update(categoryId, dto);
 
       expect(mockCategoryRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 'cat-1' },
+        where: { id: categoryId },
       });
-      expect(mockRedis.del).toHaveBeenCalledWith('cache:categories');
+      expect(mockCategoryRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: categoryId, name: 'Новое имя' }),
+      );
+      expect(mockRedis.del).toHaveBeenCalledWith(CACHE_KEYS.CATEGORIES);
       expect(result.name).toBe('Новое имя');
     });
 
     it('должен бросать BusinessException, если категория не найдена', async () => {
       mockCategoryRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.update('missing-id', { name: 'X' })).rejects.toThrow(
-        BusinessException,
-      );
-      await expect(service.update('missing-id', { name: 'X' })).rejects.toThrow(
-        new BusinessException(exceptionCodes.categories.notFound, 404),
-      );
+      await expect(
+        service.update('missing-id', { name: 'X' }),
+      ).rejects.toMatchObject({
+        code: exceptionCodes.categories.notFound,
+        status: 404,
+      });
 
       expect(mockCategoryRepo.save).not.toHaveBeenCalled();
       expect(mockRedis.del).not.toHaveBeenCalled();
@@ -137,23 +162,29 @@ describe('CategoriesService', () => {
 
   describe('remove', () => {
     it('должен удалять существующую категорию и инвалидировать кеш', async () => {
-      const existing = { id: 'cat-1', name: 'Категория' };
+      const existing = createCategory() as Category;
+
       mockCategoryRepo.findOne.mockResolvedValue(existing);
-      mockCategoryRepo.remove.mockResolvedValue(undefined);
-      mockRedis.del.mockResolvedValue(undefined);
+      mockCategoryRepo.remove.mockResolvedValue(existing);
+      mockRedis.del.mockResolvedValue(1);
 
-      await service.remove('cat-1');
+      await service.remove(categoryId);
 
+      expect(mockCategoryRepo.findOne).toHaveBeenCalledWith({
+        where: { id: categoryId },
+      });
       expect(mockCategoryRepo.remove).toHaveBeenCalledWith(existing);
-      expect(mockRedis.del).toHaveBeenCalledWith('cache:categories');
+      expect(mockRedis.del).toHaveBeenCalledWith(CACHE_KEYS.CATEGORIES);
     });
 
     it('должен бросать BusinessException, если категория для удаления не найдена', async () => {
       mockCategoryRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('missing-id')).rejects.toThrow(
-        BusinessException,
-      );
+      await expect(service.remove('missing-id')).rejects.toMatchObject({
+        code: exceptionCodes.categories.notFound,
+        status: 404,
+      });
+
       expect(mockCategoryRepo.remove).not.toHaveBeenCalled();
       expect(mockRedis.del).not.toHaveBeenCalled();
     });

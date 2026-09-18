@@ -206,6 +206,22 @@ export interface IMyRequests {
   received: ISkillExchange[];
 }
 
+/** ДАННЫЕ ДЛЯ ЗАВЕРШЕНИЯ OAuth-РЕГИСТРАЦИИ (POST /auth/register/oauth) */
+export type IRegisterOAuthData = Omit<
+  IRegisterUserData,
+  "email" | "password"
+> & {
+  /** id временной OAuth-сессии, выданный бэком после callback */
+  pendingId: string;
+};
+
+export type TOAuthPendingProfile = {
+  email: string;
+  name: string;
+  avatar: string | null;
+  provider: string;
+};
+
 //* === ИЗБРАННОЕ ===
 
 /** ВЛАДЕЛЕЦ НАВЫКА В ИЗБРАННОМ */

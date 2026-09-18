@@ -65,13 +65,7 @@ export class RegisterDto {
     example: 'https://example.com/avatar.jpg',
     description: 'URL аватара',
   })
-  @IsUrl({
-    require_protocol: true,
-    require_valid_protocol: true,
-    protocols: ['http', 'https'],
-    require_host: true,
-    require_tld: false,
-  })
+  @IsString()
   avatar: string;
 
   @ApiPropertyOptional({
