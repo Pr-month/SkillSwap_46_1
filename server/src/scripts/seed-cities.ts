@@ -2,7 +2,6 @@ import { City } from '@/cities/entities/city.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { nodeEnvValue } from '../module/configuration/const';
 import { getAppDataSource } from '../scripts/data-source';
 
 interface CityJsonItem {
@@ -17,13 +16,6 @@ interface CityJsonItem {
 }
 
 async function seedCities() {
-  if (process.env.NODE_ENV !== nodeEnvValue.Development) {
-    console.log(
-      `Сидинг городов доступен только в среде "${nodeEnvValue.Development}"`,
-    );
-    return;
-  }
-
   const AppDataSource = await getAppDataSource();
   await AppDataSource.initialize();
 
