@@ -33,7 +33,5 @@ export const dbConfig = (
     migrationsTableName: 'migrations',
   };
 
-  console.log('DEBUG LIVE SERVER DB CONFIG:', options);
-
   return options;
 };

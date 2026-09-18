@@ -25,8 +25,6 @@ async function createDataSource(): Promise<DataSource> {
   const configurationService = context.get(ConfigurationService);
   const options = dbConfig(configurationService);
 
-  console.log('DEBUG DB CONNECTION OPTIONS:', options);
-
   await context.close();
 
   return new DataSource(options);
