@@ -101,6 +101,18 @@ jobs:
       COOKIE_DOMAIN: .localhost
       THROTTLE_TTL: 60
       THROTTLE_LIMIT: 100
+      APP_PORT: 4567
+      MAIL_HOST: smtp.test.local
+      MAIL_PORT: 587
+      MAIL_USER: test@test.local
+      MAIL_PASSWORD: test-password
+      MAIL_FROM: noreply@test.local
+      GOOGLE_CLIENT_ID: test-google-client-id
+      GOOGLE_CLIENT_SECRET: test-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:4567/api/auth/oauth/google/callback
+      YANDEX_CLIENT_ID: test-yandex-client-id
+      YANDEX_CLIENT_SECRET: test-yandex-client-secret
+      YANDEX_CALLBACK_URL: http://localhost:4567/api/auth/oauth/yandex/callback
 
     steps:
       - uses: actions/checkout@v4
